@@ -37,8 +37,6 @@ private:
   // method
   std::map<std::string,TH1F*> histContainer_; 
   std::vector<TH1F*> h_ptJetsCorrected;
-  // plot number of towers per jet
-  //TH1F* jetTowers_;
 
   // input tags  
   edm::InputTag photonSrc_;
@@ -46,8 +44,6 @@ private:
   edm::InputTag muonSrc_;
   edm::InputTag tauSrc_;
   edm::InputTag jetSrc_;
-  /// correction level for pat jet
-  //std::string corrLevel_;
   edm::InputTag metSrc_;
 
   /// correction levels for pat jet
@@ -67,12 +63,11 @@ private:
 PatBasicAnalyzer::PatBasicAnalyzer(const edm::ParameterSet& iConfig):
   histContainer_(),
   //photonSrc_(iConfig.getUntrackedParameter<edm::InputTag>("photonSrc")),
+  //tauSrc_(iConfig.getUntrackedParameter<edm::InputTag>("tauSrc" )),
+  //metSrc_(iConfig.getUntrackedParameter<edm::InputTag>("metSrc" )),                 // TO BE FIXED
   elecSrc_(iConfig.getUntrackedParameter<edm::InputTag>("electronSrc")),
   muonSrc_(iConfig.getUntrackedParameter<edm::InputTag>("muonSrc")),
-  //tauSrc_(iConfig.getUntrackedParameter<edm::InputTag>("tauSrc" )),
   jetSrc_(iConfig.getUntrackedParameter<edm::InputTag>("jetSrc" ))
-  //corrLevel_(iConfig.getParameter<std::string>("corrLevel"))
-  //metSrc_(iConfig.getUntrackedParameter<edm::InputTag>("metSrc" ))
 {
   // read and parse corrLevels
   std::vector<std::string> str_corrLevels = iConfig.getParameter<std::vector<std::string> >("corrLevels");
@@ -98,14 +93,14 @@ PatBasicAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   edm::Handle<edm::View<pat::Muon> > muons;
   iEvent.getByLabel(muonSrc_,muons);
 
-  // get tau collection  
-  // edm::Handle<edm::View<pat::Tau> > taus;
-  //iEvent.getByLabel(tauSrc_,taus);
-
   // get jet collection
   edm::Handle<edm::View<pat::Jet> > jets;
   iEvent.getByLabel(jetSrc_,jets);
 
+  // get tau collection  
+  // edm::Handle<edm::View<pat::Tau> > taus;
+  //iEvent.getByLabel(tauSrc_,taus);
+  
   // get met collection  
   //edm::Handle<edm::View<pat::MET> > mets;
   //iEvent.getByLabel(metSrc_,mets);
@@ -113,8 +108,14 @@ PatBasicAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   // get photon collection  
   //edm::Handle<edm::View<pat::Photon> > photons;
   //iEvent.getByLabel(photonSrc_,photons);
-
+  
   //std::cout<<"before muon plots"<<std::endl;
+
+//      __  __                      _     _      
+//     |  \/  |_  _ ___ _ _    _ __| |___| |_ ___
+//     | |\/| | || / _ \ ' \  | '_ \ / _ \  _(_-<
+//     |_|  |_|\_,_\___/_||_| | .__/_\___/\__/__/
+//                            |_|                
 
   // loop over muons
   for (edm::View<pat::Muon>::const_iterator muon = muons->begin();  muon != muons->end(); ++muon){
@@ -146,7 +147,7 @@ PatBasicAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   reco::Candidate::LorentzVector p1,p2,sum;
 
   //Fill histogram AllDiMuMass
-  if(muons->size()>2){
+  if(muons->size()>1){
     
     for (muon1 = muons->begin(); muon1 != muons->end(); muon1++){
       for (muon2 = muon1+1; muon2 != muons->end(); muon2++) {
@@ -169,7 +170,7 @@ PatBasicAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   }
   
   //Fill histogram PreselMuMass
-  if(muons->size()>2){
+  if(muons->size()>1){
     
     for (muon1 = muons->begin(); muon1 != muons->end(); muon1++){
       
@@ -210,6 +211,12 @@ PatBasicAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
  
   //std::cout<<"after muon mass plots"<<std::endl;
 
+//      _     _          _     _      
+//   _ | |___| |_   _ __| |___| |_ ___
+//  | || / -_)  _| | '_ \ / _ \  _(_-<
+//   \__/\___|\__| | .__/_\___/\__/__/
+//                 |_|                
+
   // loop over jets
   size_t nJets=0;
   for(edm::View<pat::Jet>::const_iterator jet=jets->begin(); jet!=jets->end(); ++jet){
@@ -230,35 +237,48 @@ PatBasicAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
     fill("jet_discrSSVHE", discrSSVHE);
     fill("jet_discrCSV", discrCSV);
   
+    // multiplicity of pt>15 jets
     if(jet->pt()>15){ 
       ++nJets;
     } 
   }
-  histContainer_["jets"]->Fill(nJets);
-  
-  // fill basic kinematics for leading jets
-  fill( "leadingjet_pt" , (*jets)[0].pt());
-  fill( "leadingjet_eta", (*jets)[0].eta());
-  fill( "leadingjet_phi", (*jets)[0].phi());
-  
-  // fill basic kinematics for sub-leading jets (if any)
-  if(jets->size()>1){
-    fill( "di_jet_mass", ((*jets)[0].p4()+(*jets)[1].p4()).mass());  
-    fill( "subleadingjet_pt" , (*jets)[1].pt());
-    fill( "subleadingjet_eta", (*jets)[1].eta());
-    fill( "subleadingjet_phi", (*jets)[1].phi());
+
+  //std::cout<<"after jet loop"<<std::endl;
+
+  if(jets->size()>0){
+    // fill basic kinematics for leading jets
+    fill( "leadingjet_pt" , (*jets)[0].pt());
+    fill( "leadingjet_eta", (*jets)[0].eta());
+    fill( "leadingjet_phi", (*jets)[0].phi());
+    
+    //std::cout<<"after leading jet plots"<<std::endl;
+    
+    // fill basic kinematics for sub-leading jets (if any)
+    if(jets->size()>1){
+      fill( "di_jet_mass", ((*jets)[0].p4()+(*jets)[1].p4()).mass());  
+      fill( "subleadingjet_pt" , (*jets)[1].pt());
+      fill( "subleadingjet_eta", (*jets)[1].eta());
+      fill( "subleadingjet_phi", (*jets)[1].phi());
+    }
   }
   
   //std::cout<<"after jet plots"<<std::endl;
 
   // do something similar for the other candidates
   //histContainer_["photons"]->Fill(photons->size() );
+  //histContainer_["taus" ]->Fill(taus->size()  );
+  //histContainer_["met"  ]->Fill(mets->empty() ? 0 : (*mets)[0].et());             // TO BE FIXED!!!
+  histContainer_["jets"]->Fill(nJets);
   histContainer_["elecs" ]->Fill(electrons->size());
   histContainer_["muons"]->Fill(muons->size() );
-  //histContainer_["taus" ]->Fill(taus->size()  );
-  //histContainer_["met"  ]->Fill(mets->empty() ? 0 : (*mets)[0].et());
 
   //std::cout<<"after collection plots"<<std::endl;
+
+//   ___ _        _                       _     _      
+//  | __| |___ __| |_ _ _ ___ _ _    _ __| |___| |_ ___
+//  | _|| / -_) _|  _| '_/ _ \ ' \  | '_ \ / _ \  _(_-<
+//  |___|_\___\__|\__|_| \___/_||_| | .__/_\___/\__/__/
+//                                  |_|                
 
   // loop over electrons
   for(edm::View<pat::Electron>::const_iterator elec=electrons->begin(); elec !=electrons->end(); ++elec){
@@ -286,7 +306,7 @@ PatBasicAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   reco::Candidate::LorentzVector ep1,ep2,esum;
 
   //Fill histogram AllDiEleMass
-  if(electrons->size()>2){
+  if(electrons->size()>1){
     
     for (electron1 = electrons->begin(); electron1 != electrons->end(); electron1++){
       for (electron2 = electron1+1; electron2 != electrons->end(); electron2++) {
@@ -309,7 +329,7 @@ PatBasicAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   }
   
   //Fill histogram PreselEleMass
-  if(electrons->size()>2){
+  if(electrons->size()>1){
     
     for (electron1 = electrons->begin(); electron1 != electrons->end(); electron1++){
       
@@ -349,16 +369,14 @@ PatBasicAnalyzer::beginJob()
   edm::Service<TFileService> fs;
   
   // book histograms:
-  // uncomment the following line to book the jetTowers_ histogram
-  //jetTowers_= fs->make<TH1F>("jetTowers", "towers per jet",   90, 0,  90); 
 
   // General Object Multiplicity
   // histContainer_["photons"]=fs->make<TH1F>("photons", "photon multiplicity",   10, 0,  10);
+  // histContainer_["taus"]=fs->make<TH1F>("taus",    "tau multiplicity",      10, 0,  10);
+  // histContainer_["met"]=fs->make<TH1F>("met",     "missing E_{T}",         20, 0, 100);                             // TO BE FIXED!!!!
   histContainer_["elecs"  ]=fs->make<TH1F>("n_elecs",   "electron multiplicity; n_{electrons}", 10, -0.5,  9.5);
   histContainer_["muons"  ]=fs->make<TH1F>("n_muons",   "muon multiplicity; n_{muons}",     10, -0.5,  9.5);
-  // histContainer_["taus"]=fs->make<TH1F>("taus",    "tau multiplicity",      10, 0,  10);
   histContainer_["jets"]=fs->make<TH1F>("n_jets",    "jet multiplicity; n_{jets}",      10, -0.5,  9.5);
-  //histContainer_["met"]=fs->make<TH1F>("met",     "missing E_{T}",         20, 0, 100);
   
   // electron variables (for all electrons)
   histContainer_["electron_pt"  ]=fs->make<TH1F>("electron_pt"   , "electron pt; p_{T} [GeV]",150,0.,150.);
