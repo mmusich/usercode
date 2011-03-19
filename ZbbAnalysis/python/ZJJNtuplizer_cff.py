@@ -144,16 +144,60 @@ zmm = (
     
     ## Trigger Matching
     
+#     cms.PSet(
+#     tag = cms.untracked.string("TriggerMatchDau1"),
+#     quantity = cms.untracked.string("? !daughter(0).masterClone.triggerObjectMatchesByPath('HLT_Mu9').empty || !daughter(0).masterClone.triggerObjectMatchesByPath('HLT_Mu11').empty || !daughter(0).masterClone.triggerObjectMatchesByPath('HLT_Mu15_v1').empty?1:0")
+#     ),
+    
+#     cms.PSet(
+#     tag = cms.untracked.string("TriggerMatchDau2"),
+#     quantity = cms.untracked.string("? !daughter(1).masterClone.triggerObjectMatchesByPath('HLT_Mu9').empty || !daughter(1).masterClone.triggerObjectMatchesByPath('HLT_Mu11').empty || !daughter(1).masterClone.triggerObjectMatchesByPath('HLT_Mu15_v1').empty?1:0")
+#     ),
+    
+#     cms.PSet(
+#     tag = cms.untracked.string("TriggerMatchDau1"),
+#     quantity = cms.untracked.string("? !daughter(0).masterClone.triggerObjectMatchesByFilter('hltSingleMu9L3Filtered9').empty || !daughter(0).masterClone.triggerObjectMatchesByFilter('hltSingleMu11L3Filtered11').empty || !daughter(0).masterClone.triggerObjectMatchesByFilter('hltSingleMu15L3Filtered15').empty?1:0")
+#     ),
+    
+#     cms.PSet(
+#     tag = cms.untracked.string("TriggerMatchDau2"),
+#     quantity = cms.untracked.string("? !daughter(1).masterClone.triggerObjectMatchesByFilter('hltSingleMu9L3Filtered9').empty || !daughter(1).masterClone.triggerObjectMatchesByFilter('hltSingleMu11L3Filtered11').empty || !daughter(1).masterClone.triggerObjectMatchesByFilter('hltSingleMu15L3Filtered15').empty?1:0")
+#     ),
+
+    ## Trigger Matching (key by key)
+    
     cms.PSet(
-    tag = cms.untracked.string("TriggerMatchDau1"),
-    quantity = cms.untracked.string("? !daughter(0).masterClone.triggerObjectMatchesByPath('HLT_Mu9').empty || !daughter(0).masterClone.triggerObjectMatchesByPath('HLT_Mu11').empty || !daughter(0).masterClone.triggerObjectMatchesByPath('HLT_Mu15_v1').empty?1:0")
+    tag = cms.untracked.string("TriggerMatchDau1HLTMu9"),
+    quantity = cms.untracked.string("? !daughter(0).masterClone.triggerObjectMatchesByPath('HLT_Mu9').empty?1:0")
     ),
     
     cms.PSet(
-    tag = cms.untracked.string("TriggerMatchDau2"),
-    quantity = cms.untracked.string("? !daughter(1).masterClone.triggerObjectMatchesByPath('HLT_Mu9').empty || !daughter(1).masterClone.triggerObjectMatchesByPath('HLT_Mu11').empty || !daughter(1).masterClone.triggerObjectMatchesByPath('HLT_Mu15_v1').empty?1:0")
+    tag = cms.untracked.string("TriggerMatchDau2HLTMu9"),
+    quantity = cms.untracked.string("? !daughter(1).masterClone.triggerObjectMatchesByPath('HLT_Mu9').empty?1:0")
     ),
-        
+
+    cms.PSet(
+    tag = cms.untracked.string("TriggerMatchDau1HLTMu11"),
+    quantity = cms.untracked.string("? !daughter(0).masterClone.triggerObjectMatchesByPath('HLT_Mu11').empty?1:0")
+    ),
+    
+    cms.PSet(
+    tag = cms.untracked.string("TriggerMatchDau2HLTMu11"),
+    quantity = cms.untracked.string("? !daughter(1).masterClone.triggerObjectMatchesByPath('HLT_Mu11').empty?1:0")
+    ),
+
+    cms.PSet(
+    tag = cms.untracked.string("TriggerMatchDau1HLTMu15_v1"),
+    quantity = cms.untracked.string("? !daughter(0).masterClone.triggerObjectMatchesByPath('HLT_Mu15_v1').empty?1:0")
+    ),
+    
+    cms.PSet(
+    tag = cms.untracked.string("TriggerMatchDau2HLTMu15_v1"),
+    quantity = cms.untracked.string("? !daughter(1).masterClone.triggerObjectMatchesByPath('HLT_Mu15_v1').empty?1:0")
+    ),
+
+    ## Muons stuff
+    
     cms.PSet(
     tag = cms.untracked.string("LeptDau1GlobalMuonBit"),
     quantity = cms.untracked.string("daughter(0).isGlobalMuon")
@@ -341,6 +385,48 @@ zee =(
     quantity = cms.untracked.string("daughter(1).pz")
     ),
 
+    ## Trigger matching (key by key)
+
+    cms.PSet(
+    tag = cms.untracked.string("TriggerMatchDau1HLT_Ele10_LW_L1R "),
+    quantity = cms.untracked.string("? !daughter(0).masterClone.triggerObjectMatchesByPath('HLT_Ele10_LW_L1R ').empty?1:0")
+    ),
+    
+    cms.PSet(
+    tag = cms.untracked.string("TriggerMatchDau2HLT_Ele10_LW_L1R"),
+    quantity = cms.untracked.string("? !daughter(1).masterClone.triggerObjectMatchesByPath('HLT_Ele10_LW_L1R').empty?1:0")
+    ),
+
+    cms.PSet(
+    tag = cms.untracked.string("TriggerMatchDau1HLT_Ele10_SW_L1R"),
+    quantity = cms.untracked.string("? !daughter(0).masterClone.triggerObjectMatchesByPath('HLT_Ele10_SW_L1R').empty?1:0")
+    ),
+    
+    cms.PSet(
+    tag = cms.untracked.string("TriggerMatchDau2HLT_Ele10_SW_L1R"),
+    quantity = cms.untracked.string("? !daughter(1).masterClone.triggerObjectMatchesByPath('HLT_Ele10_SW_L1R').empty?1:0")
+    ),
+
+    cms.PSet(
+    tag = cms.untracked.string("TriggerMatchDau1HLT_Ele15_LW_L1R"),
+    quantity = cms.untracked.string("? !daughter(0).masterClone.triggerObjectMatchesByPath('HLT_Ele15_LW_L1R').empty?1:0")
+    ),
+    
+    cms.PSet(
+    tag = cms.untracked.string("TriggerMatchDau2HLT_Ele15_LW_L1R"),
+    quantity = cms.untracked.string("? !daughter(1).masterClone.triggerObjectMatchesByPath('HLT_Ele15_LW_L1R').empty?1:0")
+    ),
+
+    cms.PSet(
+    tag = cms.untracked.string("TriggerMatchDau1HLT_Ele15_SW_L1R"),
+    quantity = cms.untracked.string("? !daughter(0).masterClone.triggerObjectMatchesByPath('HLT_Ele15_SW_L1R').empty?1:0")
+    ),
+    
+    cms.PSet(
+    tag = cms.untracked.string("TriggerMatchDau2HLT_Ele15_SW_L1R"),
+    quantity = cms.untracked.string("? !daughter(1).masterClone.triggerObjectMatchesByPath('HLT_Ele15_SW_L1R').empty?1:0")
+    ),
+    
     ## Electron variables
     
     cms.PSet(
@@ -423,9 +509,6 @@ zee =(
     tag = cms.untracked.string("LeptDau2hoe"),
     quantity = cms.untracked.string("daughter(1).masterClone.hcalOverEcal")
     ),
-
-    #    FIXME!!!! To be added Electron ID and Trigger Match for Electrons
-    
     #     cms.PSet(
     #     tag = cms.untracked.string("EleDau1VBTF80CombID"),
     #     quantity = cms.untracked.string("daughter(0).masterClone.electronID(\"eidVBTFCom80\")")
