@@ -162,8 +162,8 @@ PatBasicAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 
 	  double deltaR = ROOT::Math::VectorUtil::DeltaR(muon1->momentum(),muon2->momentum());
 	  double deltaPhi = ROOT::Math::VectorUtil::DeltaPhi(muon1->momentum(),muon2->momentum());
-	  fill("AllDiMuDeltaPhi",deltaR);
-	  fill("AllDiMuDeltaR",deltaPhi);
+	  fill("AllDiMuDeltaPhi",deltaPhi);
+	  fill("AllDiMuDeltaR",deltaR);
 	}
       }						 
     }
@@ -200,8 +200,8 @@ PatBasicAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 	    // (Delta_R^2 = Delta_Eta^2 + Delta_Phi^2)
 	    double deltaR = ROOT::Math::VectorUtil::DeltaR(muon1->momentum(),muon2->momentum());
 	    double deltaPhi = ROOT::Math::VectorUtil::DeltaPhi(muon1->momentum(),muon2->momentum());
-	    fill("PreselDiMuDeltaPhi",deltaR);
-	    fill("PreselDiMuDeltaR",deltaPhi);
+	    fill("PreselDiMuDeltaPhi",deltaPhi);
+	    fill("PreselDiMuDeltaR",deltaR);
 	  }
 	}
       }
@@ -321,8 +321,8 @@ PatBasicAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 
 	  double deltaR = ROOT::Math::VectorUtil::DeltaR(electron1->momentum(),electron2->momentum());
 	  double deltaPhi = ROOT::Math::VectorUtil::DeltaPhi(electron1->momentum(),electron2->momentum());
-	  fill("AllDiEleDeltaPhi",deltaR);
-	  fill("AllDiEleDeltaR",deltaPhi);
+	  fill("AllDiEleDeltaPhi",deltaPhi);
+	  fill("AllDiEleDeltaR",deltaR);
 	}
       }						 
     }
@@ -349,8 +349,8 @@ PatBasicAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 
 	      double deltaR = ROOT::Math::VectorUtil::DeltaR(electron1->momentum(),electron2->momentum());
 	      double deltaPhi = ROOT::Math::VectorUtil::DeltaPhi(electron1->momentum(),electron2->momentum());
-	      fill("PreselDiEleDeltaPhi",deltaR);
-	      fill("PreselDiEleDeltaR",deltaPhi);
+	      fill("PreselDiEleDeltaPhi",deltaPhi);
+	      fill("PreselDiEleDeltaR",deltaR);
 	    }
 	  }
 	}
@@ -390,19 +390,19 @@ PatBasicAnalyzer::beginJob()
   histContainer_["AllDiElePt"] = fs->make<TH1F>("AllDiElePt","p_{T} of all di-electrons; p_{T}(e^{+}e^{-}) [GeV]",30,0,150);
   histContainer_["AllDiEleEta"] = fs->make<TH1F>("AllDiEleEta","#eta of all di-electrons; #eta(e^{+}e^{-})",50,-5,5);
   histContainer_["AllDiElePhi"] = fs->make<TH1F>("AllDiElePhi","#phi of all di-electrons; #phi(e^{+}e^{-}) [rad]",30,-TMath::Pi(),TMath::Pi());  
-  histContainer_["AllDiEleDeltaPhi"] = fs->make<TH1F>("AllDiEleDeltaPhi","#Delta #phi of all di-electrons; #Delta#phi(e^{+}e^{-}) [rad]",60,0,6.28);  
+  histContainer_["AllDiEleDeltaPhi"] = fs->make<TH1F>("AllDiEleDeltaPhi","#Delta #phi of all di-electrons; #Delta#phi(e^{+}e^{-}) [rad]",60,0.,TMath::Pi());  
   histContainer_["AllDiEleDeltaR"] = fs->make<TH1F>("AllDiEleDeltaR","#Delta R of all di-electrons; #DeltaR(e^{+}e^{-}) [rad]",100,0,10); 
   histContainer_["PreselEleMass"] = fs->make<TH1F>("PreselEleMass","Invariant mass spectrum of Presel di-electrons; M(e^{+}e^{-}) [GeV]",100,0,120);
   histContainer_["PreselDiElePt"] = fs->make<TH1F>("PreselDiElePt","p_{T} of Presel di-electrons; p_{T}(e^{+}e^{-}) [GeV]",30,0,150);
   histContainer_["PreselDiEleEta"] = fs->make<TH1F>("PreselDiEleEta","#eta of Presel di-electrons; #eta(e^{+}e^{-})",50,-5,5);
   histContainer_["PreselDiElePhi"] = fs->make<TH1F>("PreselDiElePhi","#phi of Presel di-electrons; #phi(e^{+}e^{-}) [rad]",30,-TMath::Pi(),TMath::Pi());  
-  histContainer_["PreselDiEleDeltaPhi"] = fs->make<TH1F>("PreselDiEleDeltaPhi","#Delta #phi of Presel di-electrons; #Delta#phi(e^{+}e^{-}) [rad]",60,0,6.28);  
+  histContainer_["PreselDiEleDeltaPhi"] = fs->make<TH1F>("PreselDiEleDeltaPhi","#Delta #phi of Presel di-electrons; #Delta#phi(e^{+}e^{-}) [rad]",60,0.,TMath::Pi());  
   histContainer_["PreselDiEleDeltaR"] = fs->make<TH1F>("PreselDiEleDeltaR","#Delta R of Presel di-electrons; #DeltaR(e^{+}e^{-}) [rad]",100,0,10);  
 
   // jet variables (for all jets)
   histContainer_["jet_pt"]=fs->make<TH1F>("alljet_pt","p_{T}(Jet) all jets;p_{T}(Jet) [GeV]",60,0.,300.);
   histContainer_["jet_eta"]=fs->make<TH1F>("alljet_eta","#eta (Jet) all jets;#eta (Jet)",60,-3.,3.);
-  histContainer_["jet_phi"]=fs->make<TH1F>("alljet_phi","#phi (Jet) all jets;#phi (Jet)",60,-TMath::Phi(),TMath::Phi());
+  histContainer_["jet_phi"]=fs->make<TH1F>("alljet_phi","#phi (Jet) all jets;#phi (Jet)",60,-TMath::Pi(),TMath::Pi());
   histContainer_["jet_emf"]= fs->make<TH1F>("emf","emf;jet EM fraction",40,0.,1.);
  
   // jet pt corrected
@@ -414,11 +414,11 @@ PatBasicAnalyzer::beginJob()
   // leading jet variables 
   histContainer_["leadingjet_pt"]=fs->make<TH1F>("leadingjet_pt","p_{T}(Jet);p_{T}(Leading Jet) [GeV]",60,0.,300.);
   histContainer_["leadingjet_eta"]=fs->make<TH1F>("leadingjet_eta","#eta (Jet);#eta (Leading Jet)",60,-3.,3.);
-  histContainer_["leadingjet_phi"]=fs->make<TH1F>("leadingjet_phi","#phi (Jet);#phi (Leading Jet)",60,-TMath::Phi(),TMath::Phi());
+  histContainer_["leadingjet_phi"]=fs->make<TH1F>("leadingjet_phi","#phi (Jet);#phi (Leading Jet)",60,-TMath::Pi(),TMath::Pi());
   // leading jet variables (if any)
   histContainer_["subleadingjet_pt"]=fs->make<TH1F>("subleadingjet_pt","p_{T}(Jet);p_{T}(Subleading Jet) [GeV]",60,0.,300.);
   histContainer_["subleadingjet_eta"]=fs->make<TH1F>("subleadingjet_eta","#eta (Jet);#eta (Subleading Jet)",60,-3.,3.);
-  histContainer_["subleadingjet_phi"]=fs->make<TH1F>("subleadingjet_phi","#phi (Jet);#phi (Subleading Jet)",60,-TMath::Phi(),TMath::Phi());
+  histContainer_["subleadingjet_phi"]=fs->make<TH1F>("subleadingjet_phi","#phi (Jet);#phi (Subleading Jet)",60,-TMath::Pi(),TMath::Pi());
   histContainer_["jet_discrTC"]=fs->make<TH1F>("jet_discrTC", "TC discriminant;TC discriminant",100,0.,20.); 
   histContainer_["jet_discrSSVHP"]=fs->make<TH1F>("jet_discrSSVHP","SSVHP discriminant; SSVHP discriminant",100,-2.,10.);
   histContainer_["jet_discrSSVHE"]=fs->make<TH1F>("jet_discrSSVHE","SSVHE discriminant;SSVHE discriminant",100,-2.,10.);
@@ -445,13 +445,13 @@ PatBasicAnalyzer::beginJob()
   histContainer_["AllDiMuPt"] = fs->make<TH1F>("AllDiMuPt","p_{T} of all di-muons; p_{T}(#mu^{+}#mu^{-}) [GeV]",30,0,150);
   histContainer_["AllDiMuEta"] = fs->make<TH1F>("AllDiMuEta","#eta of all di-muons; #eta(#mu^{+}#mu^{-})",50,-5,5);
   histContainer_["AllDiMuPhi"] = fs->make<TH1F>("AllDiMuPhi","#phi of all di-muons; #phi(#mu^{+}#mu^{-}) [rad]",30,-TMath::Pi(),TMath::Pi());
-  histContainer_["AllDiMuDeltaPhi"] = fs->make<TH1F>("AllDiMuDeltaPhi","#Delta #phi of all di-muons; #Delta#phi(#mu^{+}#mu^{-}) [rad]",60,0,6.28);  
+  histContainer_["AllDiMuDeltaPhi"] = fs->make<TH1F>("AllDiMuDeltaPhi","#Delta #phi of all di-muons; #Delta#phi(#mu^{+}#mu^{-}) [rad]",60,0.,TMath::Pi());  
   histContainer_["AllDiMuDeltaR"] = fs->make<TH1F>("AllDiMuDeltaR","#Delta R of all di-muons; #DeltaR(#mu^{+}#mu^{-}) [rad]",100,0,10); 
   histContainer_["PreselMuMass"] = fs->make<TH1F>("PreselMuMass","Invariant mass spectrum of Presel dimuons; M(#mu^{+}#mu^{-}) [GeV]",100,0,120);
   histContainer_["PreselDiMuPt"] = fs->make<TH1F>("PreselDiMuPt","p_{T} of Presel di-muons; p_{T}(#mu^{+}#mu^{-}) [GeV]",30,0,150);
   histContainer_["PreselDiMuEta"] = fs->make<TH1F>("PreselDiMuEta","#eta of Presel di-muons; #eta(#mu^{+}#mu^{-})",50,-5,5);
   histContainer_["PreselDiMuPhi"] = fs->make<TH1F>("PreselDiMuPhi","#phi of Presel di-muons; #phi(#mu^{+}#mu^{-}) [rad]",30,-TMath::Pi(),TMath::Pi()); 
-  histContainer_["PreselDiMuDeltaPhi"] = fs->make<TH1F>("PreselDiMuDeltaPhi","#Delta #phi of Presel di-muons; #Delta#phi(#mu^{+}#mu^{-}) [rad]",60,0,6.28);  
+  histContainer_["PreselDiMuDeltaPhi"] = fs->make<TH1F>("PreselDiMuDeltaPhi","#Delta #phi of Presel di-muons; #Delta#phi(#mu^{+}#mu^{-}) [rad]",60,0.,TMath::Pi());  
   histContainer_["PreselDiMuDeltaR"] = fs->make<TH1F>("PreselDiMuDeltaR","#Delta R of Presel di-muons; #DeltaR(#mu^{+}#mu^{-}) [rad]",100,0,10);  
 
 }
