@@ -111,6 +111,7 @@ class MultiPVValidation : public edm::EDAnalyzer {
   int nTracks_;
   int nTracksPerClus_;
   int nClus_;
+  int nOfflineVertices_;
   unsigned int RunNumber_;
   unsigned int LuminosityBlockNumber_;
   double  xOfflineVertex_;

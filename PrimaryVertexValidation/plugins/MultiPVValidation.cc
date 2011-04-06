@@ -154,6 +154,8 @@ MultiPVValidation::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
     zOfflineVertex_ = (*vertices)[0].z();
   }
 
+  nOfflineVertices_ = vertices.product()->size();
+ 
   //=======================================================
   // Retrieve Beamspot information
   //=======================================================
@@ -459,6 +461,8 @@ void MultiPVValidation::beginJob()
   rootTree_->Branch("nTracks",&nTracks_,"nTracks/I");
   rootTree_->Branch("nTracksPerClus",&nTracksPerClus_,"nTracksPerClus/I");
   rootTree_->Branch("nClus",&nClus_,"nClus/I");
+  rootTree_->Branch("nOfflineVertices",&nOfflineVertices_,"nOfflineVertices/I");
+  rootTree_->Branch("nTracksPerOfflineVertex",&nTracksPerOfflineVertex_,"nTracksPerOfflineVertex/I");
   rootTree_->Branch("RunNumber",&RunNumber_,"RunNumber/i");
   rootTree_->Branch("LuminosityBlockNumber",&LuminosityBlockNumber_,"LuminosityBlockNumber/i");
   rootTree_->Branch("xOfflineVertex",&xOfflineVertex_,"xOfflineVertex/D");
@@ -529,6 +533,7 @@ void MultiPVValidation::SetVarToZero() {
   
   nTracks_ = 0;
   nClus_ = 0;
+  nOfflineVertices_=0;
   RunNumber_ =0;
   LuminosityBlockNumber_=0;
   xOfflineVertex_ =-999.;
