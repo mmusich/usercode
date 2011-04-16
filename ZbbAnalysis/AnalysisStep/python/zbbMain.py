@@ -2,13 +2,27 @@
 
 # generic  python modules
 from optparse import OptionParser
+import inspect
   
 # CMSSW modules
 from DataFormats.FWLite import Events, Lumis
+from PhysicsTools.PythonAnalysis import *
+from ROOT import *
+
+# prepare the FWLite autoloading mechanism
+gSystem.Load("libFWCoreFWLite.so")
+AutoLibraryLoader.enable()
+
+# enable support for files > 2 GB
+#gSystem.Load("libIOPoolTFileAdaptor")
+#ui = TFileAdaptorUI()
 
 # local modules
 from fileList_Muon2010 import input_files
 from zbbPlots import zbbPlots
+
+# load analyzer module
+ROOT.gSystem.Load('libZbbAnalysisAnalysisStep.so')
 
 def main():
 #########################
@@ -22,6 +36,11 @@ def main():
     zbb_plots = zbbPlots(opts.isMC)
     zbb_plots.beginJob()
     
+    patsimpleanalyzer = ROOT.patba.PatSimpleAnalyzer()
+    
+    #print inspect.getmembers(patsimpleanalyzer)
+    patsimpleanalyzer.beginJob()
+    
     events     = Events(input_files)
     # loop over events
     for i, event in enumerate(events):
@@ -30,6 +49,7 @@ def main():
             print "runNumber: ", event.eventAuxiliary().run()
      
         zbb_plots.analyzeEvent(event)
+        patsimpleanalyzer.analyzeEventOnly(event.object())
 
     lumiBlocks = Lumis(input_files)
     # loop over lumi blocks
@@ -37,8 +57,8 @@ def main():
         if i%100==0: print "zbbMain processing lumi block ", i
         zbb_plots.analyzeLumiBlock(lumi)
 
+    patsimpleanalyzer.endJob()
     zbb_plots.endJob()        
-    
 
 if __name__ == "__main__":
     main()
