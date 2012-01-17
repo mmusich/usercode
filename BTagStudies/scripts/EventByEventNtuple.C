@@ -6,7 +6,7 @@
 * ex is the run number
 * ey is the event number
 *
-* N.Kypreos
+* Based on an original script by N.Kypreos
 *
 *******************************************************************************/
 #include <iostream>
@@ -50,14 +50,14 @@ void EventByEventNtuple(const TString& filename_and_label1 = "RunRangeIdeal-1653
 {
 
   TObjArray *name_and_label_pair1 = filename_and_label1.Tokenize("=");
-  TFile *file1 = new TFile(name_and_label_pair1->At(0)->GetName(), "open");
+  TFile *file1 = new TFile(name_and_label_pair1->At(0)->GetName(), "READ");
   TTree *tree1 = (TTree*)file1->Get("t");
 
   TObjArray *name_and_label_pair2 = filename_and_label2.Tokenize("=");
-  TFile *file2 = new TFile(name_and_label_pair2->At(0)->GetName(), "open");
+  TFile *file2 = new TFile(name_and_label_pair2->At(0)->GetName(), "READ");
   TTree *tree2 = (TTree*)file2->Get("t");
 
-  TFile *outFile = new TFile("MatrixOfMatches.root", "recreate");
+  TFile *outFile = new TFile("MatrixOfMatches.root", "RECREATE");
 
   if (file1->IsZombie() || file2->IsZombie() || outFile->IsZombie()) return;
 
