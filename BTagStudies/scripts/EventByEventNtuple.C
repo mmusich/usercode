@@ -50,11 +50,11 @@ void EventByEventNtuple(const TString& filename_and_label1 = "RunRangeIdeal-1653
 {
 
   TObjArray *name_and_label_pair1 = filename_and_label1.Tokenize("=");
-  TFile *file1 = new TFile(name_and_label_pair1->At(0)->GetName(), "READ");
+  TFile *file1 = TFile::Open(name_and_label_pair1->At(0)->GetName());
   TTree *tree1 = (TTree*)file1->Get("t");
 
   TObjArray *name_and_label_pair2 = filename_and_label2.Tokenize("=");
-  TFile *file2 = new TFile(name_and_label_pair2->At(0)->GetName(), "READ");
+  TFile *file2 = TFile::Open(name_and_label_pair2->At(0)->GetName());
   TTree *tree2 = (TTree*)file2->Get("t");
 
   TFile *outFile = new TFile("MatrixOfMatches.root", "RECREATE");
@@ -86,7 +86,7 @@ void EventByEventNtuple(const TString& filename_and_label1 = "RunRangeIdeal-1653
 			
       if (run1 == run2 && lumi1==lumi2 && event1 == event2) {
 
-	//	cout<<"match! run1:"<<run1<<" run2:"<<run2<<" event1:"<<event1<<" event2:"<<event2<<" lumi1:"<<lumi1<<" lumi2:"<<lumi2<<"entry1: "<<val1<<"entry2: "<<val2<<endl;
+	// cout<<"match! run1:"<<run1<<" run2:"<<run2<<" event1:"<<event1<<" event2:"<<event2<<" lumi1:"<<lumi1<<" lumi2:"<<lumi2<<"entry1: "<<val1<<"entry2: "<<val2<<endl;
 
 	Int_t ipop = i2 - list2.begin();
 	
