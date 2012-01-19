@@ -1,0 +1,25 @@
+#!/bin/tcsh
+
+setenv JobName RootJob
+
+echo  "Job started at "
+\date;
+
+setenv LXBATCH_DIR `pwd`
+setenv CMSSW_DIR ${CMSSW_BASE}/src/BTagging/BTagStudies/scripts
+
+cd $CMSSW_DIR
+eval `scramv1 runtime -csh`
+
+cd $LXBATCH_DIR
+
+cp -pr $CMSSW_DIR/runAll.C .
+cp -pr $CMSSW_DIR/EventByEventNtuple.C .
+cp -pr $CMSSW_DIR/MatchTheTree.C .
+
+root -b -q runAll.C
+ 
+cp MatrixOfMatches.root $CMSSW_DIR 
+cp JetByJetComparison.root $CMSSW_DIR
+
+exit 0
