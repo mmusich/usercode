@@ -14,14 +14,15 @@
 using namespace std;
 
 Int_t GetJetID(Double_t nhf, Double_t nEF, Double_t nconstituents, Double_t chf, Double_t nch, Double_t cef){  
- /*
-  Double_t nhf = ( jet.neutralHadronEnergy() + jet.HFHadronEnergy() ) / jet.energy();  [NB: in the ntuple HFHadronEnergy is absent!]
-  Double_t nEF = jet.neutralEmEnergyFraction();
-  Double_t nconstituents = jet.numberOfDaughters();
-  Double_t chf = jet.chargedHadronEnergyFraction();
-  Double_t nch = jet.chargedMultiplicity();
-  Double_t cef = jet.chargedEmEnergyFraction();
- */
+
+  /*
+    Double_t nhf = ( jet.neutralHadronEnergy() + jet.HFHadronEnergy() ) / jet.energy();  [NB: in the ntuple HFHadronEnergy is absent!]
+    Double_t nEF = jet.neutralEmEnergyFraction();
+    Double_t nconstituents = jet.numberOfDaughters();
+    Double_t chf = jet.chargedHadronEnergyFraction();
+    Double_t nch = jet.chargedMultiplicity();
+    Double_t cef = jet.chargedEmEnergyFraction();
+  */
   
   Int_t goodjetID;
   if(nhf<0.90 && nEF<0.90 && nconstituents>1 && chf>0 && nch>0 && cef<0.99) {
@@ -51,14 +52,13 @@ void MatchTheTree(const TString& matrix_filename = "MatrixOfMatches.root"){
   TObjString *tos_label2=(TObjString*)file_of_matches->Get("label2");
 
   // keep it for debug
-  cout << tos_label1->GetString() << endl;
-  cout << tos_label2->GetString() << endl;
+  cout <<"first input file:"<< tos_label1->GetString() << endl;
+  cout <<"second input file:"<< tos_label2->GetString() << endl;
 
-
-  TFile *file_in1 = new TFile(tos_file_in1->GetString(), "READ");
+  TFile *file_in1 = TFile::Open(tos_file_in1->GetString());
   TTree *tree1 = (TTree*)file_in1->Get("t");
 
-  TFile *file_in2 = new TFile(tos_file_in2->GetString(), "READ");
+  TFile *file_in2 = TFile::Open(tos_file_in2->GetString());
   TTree *tree2 = (TTree*)file_in2->Get("t");
  
   const int nMaxjets_ = 50;
@@ -77,43 +77,78 @@ void MatchTheTree(const TString& matrix_filename = "MatrixOfMatches.root"){
   Float_t         m_pthat2, m_mcweight2;
   Bool_t          m_isBGluonSplitting2, m_isCGluonSplitting2;
 
-  // Jet infos: general
-  Int_t   MCTrueFlavor1[nMaxjets_], MCTrueFlavor2[nMaxjets_];
-  Float_t pt1[nMaxjets_],           pt2[nMaxjets_];
-  Float_t eta1[nMaxjets_],          eta2[nMaxjets_];
-  Float_t phi1[nMaxjets_],          phi2[nMaxjets_];
+  // Event infos [vertexing]
+  Float_t         m_PVx1, m_PVx2, m_PVy1, m_PVy2, m_PVz1, m_PVz2;
+  Float_t         m_PVChiSq1, m_PVChiSq2, m_PVndof1, m_PVndof2, m_PVNormChiSq1, m_PVNormChiSq2; 
 
+  // Jet infos: general
+  Int_t   MCTrueFlavor1[nMaxjets_],   MCTrueFlavor2[nMaxjets_];
+  Int_t   nTracks1[nMaxjets_],        nTracks2[nMaxjets_];
+  Float_t pt1[nMaxjets_],             pt2[nMaxjets_];
+  Float_t eta1[nMaxjets_],            eta2[nMaxjets_];
+  Float_t phi1[nMaxjets_],            phi2[nMaxjets_];
+
+  // Infos on the most significant track
+  Float_t IP3dFirst1[nMaxjets_],                   IP3dFirst2[nMaxjets_];
+  Float_t IP3dErrorFirst1[nMaxjets_],              IP3dErrorFirst2[nMaxjets_];
+  Float_t IP3dDecayLengthFirst1[nMaxjets_],        IP3dDecayLengthFirst2[nMaxjets_];
+  Float_t IP3dTransverseMomentumFirst1[nMaxjets_], IP3dTransverseMomentumFirst2[nMaxjets_];
+  Float_t IP3dEtaFirst1[nMaxjets_],                IP3dEtaFirst2[nMaxjets_];
+  Float_t IP3dPhiFirst1[nMaxjets_],                IP3dPhiFirst2[nMaxjets_];
+  
+  // Infos on the most significant track
+  Float_t IP3dSecond1[nMaxjets_],                  IP3dSecond2[nMaxjets_];
+  Float_t IP3dErrorSecond1[nMaxjets_],             IP3dErrorSecond2[nMaxjets_];
+  Float_t IP3dDecayLengthSecond1[nMaxjets_],       IP3dDecayLengthSecond2[nMaxjets_];
+  Float_t IP3dTransverseMomentumSecond1[nMaxjets_],IP3dTransverseMomentumSecond2[nMaxjets_];
+  Float_t IP3dEtaSecond1[nMaxjets_],               IP3dEtaSecond2[nMaxjets_];
+  Float_t IP3dPhiSecond1[nMaxjets_],               IP3dPhiSecond2[nMaxjets_];
+
+  // Infos on the most significant track
+  Float_t IP3dThird1[nMaxjets_],                   IP3dThird2[nMaxjets_];
+  Float_t IP3dErrorThird1[nMaxjets_],              IP3dErrorThird2[nMaxjets_];
+  Float_t IP3dDecayLengthThird1[nMaxjets_],        IP3dDecayLengthThird2[nMaxjets_];
+  Float_t IP3dTransverseMomentumThird1[nMaxjets_], IP3dTransverseMomentumThird2[nMaxjets_];
+  Float_t IP3dEtaThird1[nMaxjets_],                IP3dEtaThird2[nMaxjets_];
+  Float_t IP3dPhiThird1[nMaxjets_],                IP3dPhiThird2[nMaxjets_];
+
+  // Infos on the most significant track
+  Float_t IP3dFourth1[nMaxjets_],                  IP3dFourth2[nMaxjets_];
+  Float_t IP3dErrorFourth1[nMaxjets_],             IP3dErrorFourth2[nMaxjets_];
+  Float_t IP3dDecayLengthFourth1[nMaxjets_],       IP3dDecayLengthFourth2[nMaxjets_];
+  Float_t IP3dTransverseMomentumFourth1[nMaxjets_],IP3dTransverseMomentumFourth2[nMaxjets_];
+  Float_t IP3dEtaFourth1[nMaxjets_],               IP3dEtaFourth2[nMaxjets_];
+  Float_t IP3dPhiFourth1[nMaxjets_],               IP3dPhiFourth2[nMaxjets_];
 
   // Jet-id
-  Float_t  jetNeutralHadronEnergyFraction1[nMaxjets_],jetNeutralHadronEnergyFraction2[nMaxjets_];    // nhf
-  Float_t  jetNeutralEmEnergyFraction1[nMaxjets_],    jetNeutralEmEnergyFraction2[nMaxjets_];        // nEF
-  Int_t    jetnConstituents1[nMaxjets_],              jetnConstituents2[nMaxjets_];                  // nconstituents
-  Float_t  jetChargedMultiplicity1[nMaxjets_],        jetChargedMultiplicity2[nMaxjets_];            // nch
-  Float_t  jetChargedHadronEnergyFraction1[nMaxjets_],jetChargedHadronEnergyFraction2[nMaxjets_];    // chf
-  Float_t  jetChargedEmEnergyFraction1[nMaxjets_],    jetChargedEmEnergyFraction2[nMaxjets_];        // cef            
-
+  Float_t jetNeutralHadronEnergyFraction1[nMaxjets_],jetNeutralHadronEnergyFraction2[nMaxjets_];    // nhf
+  Float_t jetNeutralEmEnergyFraction1[nMaxjets_],    jetNeutralEmEnergyFraction2[nMaxjets_];        // nEF
+  Int_t   jetnConstituents1[nMaxjets_],              jetnConstituents2[nMaxjets_];                  // nconstituents
+  Float_t jetChargedMultiplicity1[nMaxjets_],        jetChargedMultiplicity2[nMaxjets_];            // nch
+  Float_t jetChargedHadronEnergyFraction1[nMaxjets_],jetChargedHadronEnergyFraction2[nMaxjets_];    // chf
+  Float_t jetChargedEmEnergyFraction1[nMaxjets_],    jetChargedEmEnergyFraction2[nMaxjets_];        // cef            
 
   // Jet infos: SV
   // TODO: add some text to describe the variables
-  Float_t         SV3dDistance1[nMaxjets_],      SV3dDistance2[nMaxjets_];   
-  Float_t         SV3dDistanceError1[nMaxjets_], SV3dDistanceError2[nMaxjets_];
-  Float_t         SV2dDistance1[nMaxjets_],      SV2dDistance2[nMaxjets_];   
-  Float_t         SV2dDistanceError1[nMaxjets_], SV2dDistanceError2[nMaxjets_];
-  Float_t         SVChi21[nMaxjets_],            SVChi22[nMaxjets_];
-  Float_t         SVDegreesOfFreedom1[nMaxjets_],SVDegreesOfFreedom2[nMaxjets_];   
-  Float_t         SVNormChi21[nMaxjets_],        SVNormChi22[nMaxjets_];  
-  Float_t         SVMass1[nMaxjets_],            SVMass2[nMaxjets_];  
-  Int_t           SVtotCharge1[nMaxjets_],       SVtotCharge2[nMaxjets_]; 
-  Int_t           SVnVertices1[nMaxjets_],       SVnVertices2[nMaxjets_];
-  Int_t           SVnVertexTracks1[nMaxjets_],   SVnVertexTracks2[nMaxjets_];
-  Int_t           SVnVertexTracksAll1[nMaxjets_],SVnVertexTracksAll2[nMaxjets_];
+  Float_t SV3dDistance1[nMaxjets_],      SV3dDistance2[nMaxjets_];   
+  Float_t SV3dDistanceError1[nMaxjets_], SV3dDistanceError2[nMaxjets_];
+  Float_t SV2dDistance1[nMaxjets_],      SV2dDistance2[nMaxjets_];   
+  Float_t SV2dDistanceError1[nMaxjets_], SV2dDistanceError2[nMaxjets_];
+  Float_t SVChi21[nMaxjets_],            SVChi22[nMaxjets_];
+  Float_t SVDegreesOfFreedom1[nMaxjets_],SVDegreesOfFreedom2[nMaxjets_];   
+  Float_t SVNormChi21[nMaxjets_],        SVNormChi22[nMaxjets_];  
+  Float_t SVMass1[nMaxjets_],            SVMass2[nMaxjets_];  
+  Int_t   SVtotCharge1[nMaxjets_],       SVtotCharge2[nMaxjets_]; 
+  Int_t   SVnVertices1[nMaxjets_],       SVnVertices2[nMaxjets_];
+  Int_t   SVnVertexTracks1[nMaxjets_],   SVnVertexTracks2[nMaxjets_];
+  Int_t   SVnVertexTracksAll1[nMaxjets_],SVnVertexTracksAll2[nMaxjets_];
 
   // Jet infos: b-tag discriminators
-  Float_t discrcsvglobal1[nMaxjets_], discrcsvglobal2[nMaxjets_];
-  Float_t discrjpglobal1[nMaxjets_], discrjpglobal2[nMaxjets_];
-  Float_t discrjbpglobal1[nMaxjets_], discrjbpglobal2[nMaxjets_];
-  Float_t discrssvheglobal1[nMaxjets_], discrssvheglobal2[nMaxjets_];
-  Float_t discrssvhpglobal1[nMaxjets_], discrssvhpglobal2[nMaxjets_];
+  Float_t discrcsvglobal1[nMaxjets_],  discrcsvglobal2[nMaxjets_];
+  Float_t discrjpglobal1[nMaxjets_],   discrjpglobal2[nMaxjets_];
+  Float_t discrjbpglobal1[nMaxjets_],  discrjbpglobal2[nMaxjets_];
+  Float_t discrssvheglobal1[nMaxjets_],discrssvheglobal2[nMaxjets_];
+  Float_t discrssvhpglobal1[nMaxjets_],discrssvhpglobal2[nMaxjets_];
   Float_t discrtcheglobal1[nMaxjets_], discrtcheglobal2[nMaxjets_];
   Float_t discrtchpglobal1[nMaxjets_], discrtchpglobal2[nMaxjets_];
  
@@ -126,11 +161,19 @@ void MatchTheTree(const TString& matrix_filename = "MatrixOfMatches.root"){
   tree1->SetBranchAddress("mcweight",&m_mcweight1);
   tree1->SetBranchAddress("isBGluonSplitting",&m_isBGluonSplitting1);
   tree1->SetBranchAddress("isCGluonSplitting",&m_isCGluonSplitting1);  
+  
+  tree1->SetBranchAddress("PVx",&m_PVx1);
+  tree1->SetBranchAddress("PVy",&m_PVy1);
+  tree1->SetBranchAddress("PVz",&m_PVz1);
+  tree1->SetBranchAddress("PVChi2",&m_PVChiSq1);
+  tree1->SetBranchAddress("PVndof",&m_PVndof1);
+  tree1->SetBranchAddress("PVNormalizedChi2",&m_PVNormChiSq1);
 
   tree1->SetBranchAddress("jetPt",&pt1);
   tree1->SetBranchAddress("jetPhi",&phi1);
   tree1->SetBranchAddress("jetEta",&eta1);
   tree1->SetBranchAddress("nJets",&njet1);
+  tree1->SetBranchAddress("jetnTracks",&nTracks1);
   tree1->SetBranchAddress("MCTrueFlavor",&MCTrueFlavor1);
 
   tree1->SetBranchAddress("jetNeutralHadronEnergyFraction",&jetNeutralHadronEnergyFraction1);    
@@ -153,6 +196,34 @@ void MatchTheTree(const TString& matrix_filename = "MatrixOfMatches.root"){
   tree1->SetBranchAddress("SVnVertexTracks",&SVnVertexTracks1);
   tree1->SetBranchAddress("SVnVertexTracksAll",&SVnVertexTracksAll1);
 
+  tree1->SetBranchAddress("IP3d1",&IP3dFirst1);		     
+  tree1->SetBranchAddress("IP3dError1",&IP3dErrorFirst1);		     
+  tree1->SetBranchAddress("IP3dDecayLength1",&IP3dDecayLengthFirst1);	     
+  tree1->SetBranchAddress("IP3dTransverseMomentum1",&IP3dTransverseMomentumFirst1); 
+  tree1->SetBranchAddress("IP3dEta1",&IP3dEtaFirst1);		     
+  tree1->SetBranchAddress("IP3dPhi1",&IP3dPhiFirst1);		     
+			   			  		    							     
+  tree1->SetBranchAddress("IP3d2",&IP3dSecond1);		     
+  tree1->SetBranchAddress("IP3dError2",&IP3dErrorSecond1);	     
+  tree1->SetBranchAddress("IP3dDecayLength2",&IP3dDecayLengthSecond1);	     
+  tree1->SetBranchAddress("IP3dTransverseMomentum2",&IP3dTransverseMomentumSecond1);
+  tree1->SetBranchAddress("IP3dEta2",&IP3dEtaSecond1);               
+  tree1->SetBranchAddress("IP3dPhi2",&IP3dPhiSecond1);               
+			   			  	   	       				     
+  tree1->SetBranchAddress("IP3d3",&IP3dThird1);		     		                     
+  tree1->SetBranchAddress("IP3dError3",&IP3dErrorThird1);              
+  tree1->SetBranchAddress("IP3dDecayLength3",&IP3dDecayLengthThird1);        
+  tree1->SetBranchAddress("IP3dTransverseMomentum3",&IP3dTransverseMomentumThird1); 
+  tree1->SetBranchAddress("IP3dEta3",&IP3dEtaThird1);                
+  tree1->SetBranchAddress("IP3dPhi3",&IP3dPhiThird1);                
+			   	   			   			  		     				     
+  tree1->SetBranchAddress("IP3d4",&IP3dFourth1);                  
+  tree1->SetBranchAddress("IP3dError4",&IP3dErrorFourth1);             
+  tree1->SetBranchAddress("IP3dDecayLength4",&IP3dDecayLengthFourth1);       
+  tree1->SetBranchAddress("IP3dTransverseMomentum4",&IP3dTransverseMomentumFourth1);
+  tree1->SetBranchAddress("IP3dEta4",&IP3dEtaFourth1);               
+  tree1->SetBranchAddress("IP3dPhi4",&IP3dPhiFourth1);               
+
   tree1->SetBranchAddress("standardCombinedSecondaryVertexPFBJetTags",&discrcsvglobal1);
   tree1->SetBranchAddress("standardJetProbabilityPFBJetTags",&discrjpglobal1);
   tree1->SetBranchAddress("standardJetBProbabilityPFBJetTags",&discrjbpglobal1);
@@ -160,7 +231,6 @@ void MatchTheTree(const TString& matrix_filename = "MatrixOfMatches.root"){
   tree1->SetBranchAddress("standardSimpleSecondaryVertexHighPurPFBJetTags",&discrssvhpglobal1);
   tree1->SetBranchAddress("standardTrackCountingHighEffPFBJetTags",&discrtcheglobal1);
   tree1->SetBranchAddress("standardTrackCountingHighPurPFBJetTags",&discrtchpglobal1);
-
 
   // TTree #2
   tree2->SetBranchAddress("runNumber",&m_runNumber2);
@@ -172,10 +242,18 @@ void MatchTheTree(const TString& matrix_filename = "MatrixOfMatches.root"){
   tree2->SetBranchAddress("isBGluonSplitting",&m_isBGluonSplitting2);
   tree2->SetBranchAddress("isCGluonSplitting",&m_isCGluonSplitting2);
   
+  tree2->SetBranchAddress("PVx",&m_PVx2);
+  tree2->SetBranchAddress("PVy",&m_PVy2);
+  tree2->SetBranchAddress("PVz",&m_PVz2);
+  tree2->SetBranchAddress("PVChi2",&m_PVChiSq2);
+  tree2->SetBranchAddress("PVndof",&m_PVndof2);
+  tree2->SetBranchAddress("PVNormalizedChi2",&m_PVNormChiSq2);
+
   tree2->SetBranchAddress("jetPt",&pt2);
   tree2->SetBranchAddress("jetPhi",&phi2);
   tree2->SetBranchAddress("jetEta",&eta2);
   tree2->SetBranchAddress("nJets",&njet2);
+  tree1->SetBranchAddress("jetnTracks",&nTracks2);
   tree2->SetBranchAddress("MCTrueFlavor",&MCTrueFlavor2);
 
   tree2->SetBranchAddress("jetNeutralHadronEnergyFraction",&jetNeutralHadronEnergyFraction2);    
@@ -198,6 +276,34 @@ void MatchTheTree(const TString& matrix_filename = "MatrixOfMatches.root"){
   tree2->SetBranchAddress("SVnVertexTracks",&SVnVertexTracks2);
   tree2->SetBranchAddress("SVnVertexTracksAll",&SVnVertexTracksAll2);
 
+  tree2->SetBranchAddress("IP3d1",&IP3dFirst2);		     
+  tree2->SetBranchAddress("IP3dError1",&IP3dErrorFirst2);		     
+  tree2->SetBranchAddress("IP3dDecayLength1",&IP3dDecayLengthFirst2);	     
+  tree2->SetBranchAddress("IP3dTransverseMomentum1",&IP3dTransverseMomentumFirst2); 
+  tree2->SetBranchAddress("IP3dEta1",&IP3dEtaFirst2);		     
+  tree2->SetBranchAddress("IP3dPhi1",&IP3dPhiFirst2);		     
+			   			  		    							     
+  tree2->SetBranchAddress("IP3d2",&IP3dSecond2);		     
+  tree2->SetBranchAddress("IP3dError2",&IP3dErrorSecond2);	     
+  tree2->SetBranchAddress("IP3dDecayLength2",&IP3dDecayLengthSecond2);	     
+  tree2->SetBranchAddress("IP3dTransverseMomentum2",&IP3dTransverseMomentumSecond2);
+  tree2->SetBranchAddress("IP3dEta2",&IP3dEtaSecond2);               
+  tree2->SetBranchAddress("IP3dPhi2",&IP3dPhiSecond2);               
+			   			  	   	       				     
+  tree2->SetBranchAddress("IP3d3",&IP3dThird2);		     		                     
+  tree2->SetBranchAddress("IP3dError3",&IP3dErrorThird2);              
+  tree2->SetBranchAddress("IP3dDecayLength3",&IP3dDecayLengthThird2);        
+  tree2->SetBranchAddress("IP3dTransverseMomentum3",&IP3dTransverseMomentumThird2); 
+  tree2->SetBranchAddress("IP3dEta3",&IP3dEtaThird2);                
+  tree2->SetBranchAddress("IP3dPhi3",&IP3dPhiThird2);                
+			   	   			   			  		     				     
+  tree2->SetBranchAddress("IP3d4",&IP3dFourth2);                  
+  tree2->SetBranchAddress("IP3dError4",&IP3dErrorFourth2);             
+  tree2->SetBranchAddress("IP3dDecayLength4",&IP3dDecayLengthFourth2);       
+  tree2->SetBranchAddress("IP3dTransverseMomentum4",&IP3dTransverseMomentumFourth2);
+  tree2->SetBranchAddress("IP3dEta4",&IP3dEtaFourth2);               
+  tree2->SetBranchAddress("IP3dPhi4",&IP3dPhiFourth2);
+
   tree2->SetBranchAddress("standardSimpleSecondaryVertexHighPurPFBJetTags",&discrssvhpglobal2);
   tree2->SetBranchAddress("standardJetProbabilityPFBJetTags",&discrjpglobal2);
   tree2->SetBranchAddress("standardCombinedSecondaryVertexPFBJetTags",&discrcsvglobal2);
@@ -209,18 +315,20 @@ void MatchTheTree(const TString& matrix_filename = "MatrixOfMatches.root"){
 
 
   // output 
-  TFile *file_out=new TFile("JetByJetComparison.root","RECREATE");  
+  TString append = "JetByJetComparison_"+tos_label1->GetString()+"Vs"+tos_label2->GetString()+".root";
+
+  TFile *file_out=new TFile(append,"RECREATE");  
   file_out->cd();
 
-  TH1F *hDeltapt = new TH1F("hDeltapt","#Delta p_{T};#Delta p_{T} [GeV];jets",1000,-50,50);
-  TH1F *hDeltaR =  new TH1F("hDeltaR","#Delta R;#sqrt{(#Delta #eta)^{2}  + (#Delta #phi)^{2}};jets",1000,0.,0.01);
-  TH1F* hDeltaDiscrTCHE = new TH1F("hDeltaDiscrTCHE","#Delta DiscrTCHE ;#Delta DiscrTCHE;jets",1000,-1,1);
-  TH1F* hDeltaDiscrTCHP = new TH1F("hDeltaDiscrTCHP","#Delta DiscrTCHP ;#Delta DiscrTCHP ;jets",1000,-1,1);
+  TH1F *hDeltapt         = new TH1F("hDeltapt","#Delta p_{T};#Delta p_{T} [GeV];jets",1000,-50,50);
+  TH1F *hDeltaR          = new TH1F("hDeltaR","#Delta R;#sqrt{(#Delta #eta)^{2}  + (#Delta #phi)^{2}};jets",1000,0.,0.01);
+  TH1F* hDeltaDiscrTCHE  = new TH1F("hDeltaDiscrTCHE","#Delta DiscrTCHE ;#Delta DiscrTCHE;jets",1000,-1,1);
+  TH1F* hDeltaDiscrTCHP  = new TH1F("hDeltaDiscrTCHP","#Delta DiscrTCHP ;#Delta DiscrTCHP ;jets",1000,-1,1);
   TH1F* hDeltaDiscrSSVHE = new TH1F("hDeltaDiscrSSVHE","#Delta DiscrSSVHE ;#Delta DiscrSSVHE ;jets",1000,-1,1);
   TH1F* hDeltaDiscrSSVHP = new TH1F("hDeltaDiscrSSVHP","#Delta DiscrSSVHP ;#Delta DiscrSSVHP ;jets",1000,-1,1);
-  TH1F* hDeltaDiscrCSV = new TH1F("hDeltaDiscrCSV","#Delta DiscrCSV ;#Delta DiscrCSV ;jets",1000,-1,1);
-  TH1F* hDeltaDiscrJP = new TH1F("hDeltaDiscrJP","#Delta DiscrJP ;#Delta DiscrJP ;jets",1000,-1,1);
-  TH1F* hDeltaDiscrJBP = new TH1F("hDeltaDiscrJBP","#Delta DiscrJBP ;#Delta DiscrJBP ;jets",1000,-1,1);
+  TH1F* hDeltaDiscrCSV   = new TH1F("hDeltaDiscrCSV","#Delta DiscrCSV ;#Delta DiscrCSV ;jets",1000,-1,1);
+  TH1F* hDeltaDiscrJP    = new TH1F("hDeltaDiscrJP","#Delta DiscrJP ;#Delta DiscrJP ;jets",1000,-1,1);
+  TH1F* hDeltaDiscrJBP   = new TH1F("hDeltaDiscrJBP","#Delta DiscrJBP ;#Delta DiscrJBP ;jets",1000,-1,1);
 
   // output TTree: event infos
   Int_t   Trun, Tlumi, Tevent;
@@ -228,30 +336,48 @@ void MatchTheTree(const TString& matrix_filename = "MatrixOfMatches.root"){
   Bool_t  TisBGluonSplitting, TisCGluonSplitting;
 
   // output TTree: jet infos
+  Float_t TPVx[2],TPVy[2],TPVz[2];
+  Float_t TPVChiSq[2], TPVndof[2], TPVNormChiSq[2]; 
+  Int_t   TnTracks[2];
+
   Float_t Tpt[2], Teta[2], Tphi[2];
-  Int_t TMCTrueFlavor[2];
-  Int_t TjetId[2];
+  Int_t   TMCTrueFlavor[2];
+  Int_t   TjetId[2];
   Float_t Ttche[2], Ttchp[2], Tssvhe[2], Tssvhp[2], Tcsv[2], Tjp[2], Tjbp[2];
 
-  Float_t  TSV3dDistance[2], TSV3dDistanceError[2], TSV2dDistance[2], TSV2dDistanceError[2], TSVChi2[2], TSVDegreesOfFreedom[2], TSVNormChi2[2], TSVMass[2];
-  Int_t  TSVtotCharge[2], TSVnVertices[2], TSVnVertexTracks[2], TSVnVertexTracksAll[2];
+  Float_t TSV3dDistance[2], TSV3dDistanceError[2], TSV2dDistance[2], TSV2dDistanceError[2], TSVChi2[2], TSVDegreesOfFreedom[2], TSVNormChi2[2], TSVMass[2];
+  Int_t   TSVtotCharge[2], TSVnVertices[2], TSVnVertexTracks[2], TSVnVertexTracksAll[2];
 
-
+  Float_t TIP3dFirst[2],TIP3dErrorFirst[2],TIP3dDecayLengthFirst[2],TIP3dTransverseMomentumFirst[2],TIP3dEtaFirst[2],TIP3dPhiFirst[2];                	   
+  Float_t TIP3dSecond[2],TIP3dErrorSecond[2],TIP3dDecayLengthSecond[2],TIP3dTransverseMomentumSecond[2],TIP3dEtaSecond[2],TIP3dPhiSecond[2];               
+  Float_t TIP3dThird[2],TIP3dErrorThird[2],TIP3dDecayLengthThird[2],TIP3dTransverseMomentumThird[2],TIP3dEtaThird[2],TIP3dPhiThird[2];                
+  Float_t TIP3dFourth[2],TIP3dErrorFourth[2],TIP3dDecayLengthFourth[2],TIP3dTransverseMomentumFourth[2],TIP3dEtaFourth[2],TIP3dPhiFourth[2];               
+  
   TTree *tout = new TTree("JetByJetComparison","file1 vs file2");
 
   tout->Branch("run",   &Trun,   "Trun/I");
   tout->Branch("lumi",  &Tlumi,  "Tlumi/I");
   tout->Branch("evt",   &Tevent, "Tevent/I");
 
-  tout->Branch("pthat",            &Tpthat,            "Tpthat/F");		  
-  tout->Branch("mcweight",         &Tmcweight,	       "Tmcweight/F");	  
+ 
+  tout->Branch("pthat",            &Tpthat,   "Tpthat/F");		  
+  tout->Branch("mcweight",         &Tmcweight,"Tmcweight/F");	  
+  tout->Branch("PVx",              &TPVx,     "TPVx/F");	 
+  tout->Branch("PVy",              &TPVy,     "TPVy/F");
+  tout->Branch("PVz",              &TPVz,     "TPVz/F");
+  tout->Branch("PVChi2",           &TPVx,     "TPVx/F");	 
+  tout->Branch("PVndof",           &TPVy,     "TPVy/F");
+  tout->Branch("PVNormalizedChi2", &TPVz,     "TPVz/F"); 
+
   tout->Branch("isBGluonSplitting",&TisBGluonSplitting,"TisBGluonSplitting/B");
+  tout->Branch("isCGluonSplitting",&TisCGluonSplitting,"TisCGluonSplitting/B");
   tout->Branch("isCGluonSplitting",&TisCGluonSplitting,"TisCGluonSplitting/B");
 
   tout->Branch("pt",    &Tpt,    "Tpt[2]/F");
   tout->Branch("eta",   &Teta,   "Teta[2]/F");
   tout->Branch("phi",   &Tphi,   "Tphi[2]/F");
   tout->Branch("jetId", &TjetId, "TjetId[2]/I");
+  tout->Branch("jetnTracks",&TnTracks, "TnTracks[2]/I");
   tout->Branch("MCTrueFlavor",&TMCTrueFlavor,"TMCTrueFlavor[2]/I");
 
   tout->Branch("SV3dDistance",      &TSV3dDistance,      "TSV3dDistance[2]/F");
@@ -266,7 +392,35 @@ void MatchTheTree(const TString& matrix_filename = "MatrixOfMatches.root"){
   tout->Branch("SVnVertices",       &TSVnVertices,       "TSVnVertices[2]/I");
   tout->Branch("SVnVertexTracks",   &TSVnVertexTracks,   "TSVnVertexTracks[2]/I");
   tout->Branch("SVnVertexTracksAll",&TSVnVertexTracksAll,"TSVnVertexTracksAll[2]/I");
-  
+
+  tout->Branch("IP3d1",                  &TIP3dFirst		       ,"TIP3dFirst[2]/F");		     	      
+  tout->Branch("IP3dError1",             &TIP3dErrorFirst	       ,"TIP3dErrorFirst[2]/F");		   	     
+  tout->Branch("IP3dDecayLength1",       &TIP3dDecayLengthFirst	       ,"TIP3dDecayLengthFirst[2]/F");	     	   
+  tout->Branch("IP3dTransverseMomentum1",&TIP3dTransverseMomentumFirst ,"TIP3dTransverseMomentumFirst[2]/F"); 	   
+  tout->Branch("IP3dEta1",               &TIP3dEtaFirst		       ,"TIP3dEtaFirst[2]/F");		     	   
+  tout->Branch("IP3dPhi1",               &TIP3dPhiFirst		       ,"TIP3dPhiFirst[2]/F");		     	   
+			   			  		       	  		    	   							     
+  tout->Branch("IP3d2",                  &TIP3dSecond		       ,"TIP3dSecond[2]/F");		     	   
+  tout->Branch("IP3dError2",             &TIP3dErrorSecond	       ,"TIP3dErrorSecond[2]/F");	     	   
+  tout->Branch("IP3dDecayLength2",       &TIP3dDecayLengthSecond       ,"TIP3dDecayLengthSecond[2]/F");	   	     
+  tout->Branch("IP3dTransverseMomentum2",&TIP3dTransverseMomentumSecond,"TIP3dTransverseMomentumSecond[2]/F");	   
+  tout->Branch("IP3dEta2",               &TIP3dEtaSecond               ,"TIP3dEtaSecond[2]/F");               	   
+  tout->Branch("IP3dPhi2",               &TIP3dPhiSecond               ,"TIP3dPhiSecond[2]/F");               	   
+			   			  	   	       	  	   	       	   				     
+  tout->Branch("IP3d3",                  &TIP3dThird		       ,"TIP3dThird[2]/F");		     	   		                     
+  tout->Branch("IP3dError3",             &TIP3dErrorThird              ,"TIP3dErrorThird[2]/F");              	   
+  tout->Branch("IP3dDecayLength3",       &TIP3dDecayLengthThird        ,"TIP3dDecayLengthThird[2]/F");            
+  tout->Branch("IP3dTransverseMomentum3",&TIP3dTransverseMomentumThird ,"TIP3dTransverseMomentumThird[2]/F"); 	   
+  tout->Branch("IP3dEta3",               &TIP3dEtaThird                ,"TIP3dEtaThird[2]/F");                    
+  tout->Branch("IP3dPhi3",               &TIP3dPhiThird                ,"TIP3dPhiThird[2]/F");                	   
+			   	   			   	       		   		   		  		     				     
+  tout->Branch("IP3d4",                  &TIP3dFourth                  ,"TIP3dFourth[2]/F");                  	   
+  tout->Branch("IP3dError4",             &TIP3dErrorFourth             ,"TIP3dErrorFourth[2]/F");                 
+  tout->Branch("IP3dDecayLength4",       &TIP3dDecayLengthFourth       ,"TIP3dDecayLengthFourth[2]/F");       	   
+  tout->Branch("IP3dTransverseMomentum4",&TIP3dTransverseMomentumFourth,"TIP3dTransverseMomentumFourth[2]/F");
+  tout->Branch("IP3dEta4",               &TIP3dEtaFourth               ,"TIP3dEtaFourth[2]/F");               	   
+  tout->Branch("IP3dPhi4",               &TIP3dPhiFourth               ,"TIP3dPhiFourth[2]/F");                        
+
   tout->Branch("tche", &Ttche, "Ttche[2]/F");
   tout->Branch("tchp", &Ttchp, "Ttchp[2]/F");
   tout->Branch("ssvhe",&Tssvhe,"Tssvhe[2]/F");
@@ -329,11 +483,26 @@ void MatchTheTree(const TString& matrix_filename = "MatrixOfMatches.root"){
 	TisBGluonSplitting=m_isBGluonSplitting1;
 	TisCGluonSplitting=m_isCGluonSplitting1;
 
+	TPVx[0] = m_PVx1;		  
+	TPVy[0] = m_PVy1;		  
+	TPVz[0] = m_PVz1;		  
+	TPVChiSq[0] = m_PVChiSq1;	  
+	TPVndof[0] = m_PVndof1;		  
+	TPVNormChiSq[0] = m_PVNormChiSq1; 
+	
+	TPVx[1] = m_PVx2;		  
+	TPVy[1] = m_PVy2;		  
+	TPVz[1] = m_PVz2;		  
+	TPVChiSq[1] = m_PVChiSq2;	  
+	TPVndof[1] = m_PVndof2;		  
+	TPVNormChiSq[1] = m_PVNormChiSq2; 
+
 	// matched jet infos from tree #1
 	Tpt[0]    =pt1[j1];
 	Teta[0]   =eta1[j1];
 	Tphi[0]   =phi1[j1];
-
+	TnTracks[0] = nTracks1[j1];
+	
 	TjetId[0] = GetJetID(
 			     jetNeutralHadronEnergyFraction1[j1], // nhf	       
 			     jetNeutralEmEnergyFraction1[j1],     // nEF	       
@@ -356,6 +525,34 @@ void MatchTheTree(const TString& matrix_filename = "MatrixOfMatches.root"){
  	TSVnVertexTracks[0]   =SVnVertexTracks1[j1];
  	TSVnVertexTracksAll[0]=SVnVertexTracksAll1[j1];
 
+	TIP3dFirst[0]		     	     =IP3dFirst1[j1];                  
+	TIP3dErrorFirst[0]		     =IP3dErrorFirst1[j1];             
+	TIP3dDecayLengthFirst[0]	     =IP3dDecayLengthFirst1[j1];       	
+	TIP3dTransverseMomentumFirst[0]      =IP3dTransverseMomentumFirst1[j1];	
+	TIP3dEtaFirst[0]		     =IP3dEtaFirst1[j1];               	
+	TIP3dPhiFirst[0]		     =IP3dPhiFirst1[j1];               	
+	 		    	   	     						
+	TIP3dSecond[0]		     	     =IP3dSecond1[j1];                 
+	TIP3dErrorSecond[0]	     	     =IP3dErrorSecond1[j1];            
+	TIP3dDecayLengthSecond[0]	     =IP3dDecayLengthSecond1[j1];      	
+	TIP3dTransverseMomentumSecond[0]     =IP3dTransverseMomentumSecond1[j1];	
+	TIP3dEtaSecond[0]                    =IP3dEtaSecond1[j1];              	
+	TIP3dPhiSecond[0]                    =IP3dPhiSecond1[j1];              	
+	 	   	       	   	     						
+	TIP3dThird[0]		     	     =IP3dThird1[j1];                  
+	TIP3dErrorThird[0]                   =IP3dErrorThird1[j1];             	
+	TIP3dDecayLengthThird[0]             =IP3dDecayLengthThird1[j1];       
+	TIP3dTransverseMomentumThird[0]      =IP3dTransverseMomentumThird1[j1];	
+	TIP3dEtaThird[0]                     =IP3dEtaThird1[j1];               
+	TIP3dPhiThird[0]                     =IP3dPhiThird1[j1];               	
+		   		   	     						
+	TIP3dFourth[0]                       =IP3dFourth1[j1];                 	
+	TIP3dErrorFourth[0]                  =IP3dErrorFourth1[j1];            
+	TIP3dDecayLengthFourth[0]            =IP3dDecayLengthFourth1[j1];      	
+	TIP3dTransverseMomentumFourth[0]     =IP3dTransverseMomentumFourth1[j1];	
+	TIP3dEtaFourth[0]                    =IP3dEtaFourth1[j1];              	
+	TIP3dPhiFourth[0]                    =IP3dPhiFourth1[j1];              
+
  	Ttche[0] =discrtcheglobal1[j1];	    
  	Ttchp[0] =discrtchpglobal1[j1];	    
  	Tssvhe[0]=discrssvheglobal1[j1];    
@@ -366,10 +563,12 @@ void MatchTheTree(const TString& matrix_filename = "MatrixOfMatches.root"){
 
 	TMCTrueFlavor[0] = MCTrueFlavor1[j1];
 
+	// -------------------------------------------------------------------------------------------------------------------------------
 	// matched jet infos from tree #2
 	Tpt[1]    =pt2[j2min];
 	Teta[1]   =eta2[j2min];
 	Tphi[1]   =phi2[j2min];
+	TnTracks[1] = nTracks2[j2min];
 
 	TjetId[1] = GetJetID(
 			     jetNeutralHadronEnergyFraction2[j2min], // nhf	       
@@ -392,6 +591,34 @@ void MatchTheTree(const TString& matrix_filename = "MatrixOfMatches.root"){
  	TSVnVertices[1]       =SVnVertices2[j2min];
  	TSVnVertexTracks[1]   =SVnVertexTracks2[j2min];
  	TSVnVertexTracksAll[1]=SVnVertexTracksAll2[j2min];
+	
+	TIP3dFirst[1]		     	     =IP3dFirst2[j2min];                  
+	TIP3dErrorFirst[1]		     =IP3dErrorFirst2[j2min];             
+	TIP3dDecayLengthFirst[1]	     =IP3dDecayLengthFirst2[j2min];       	
+	TIP3dTransverseMomentumFirst[1]      =IP3dTransverseMomentumFirst2[j2min];	
+	TIP3dEtaFirst[1]		     =IP3dEtaFirst2[j2min];               	
+	TIP3dPhiFirst[1]		     =IP3dPhiFirst2[j2min];               	
+	 		    	   	     						
+	TIP3dSecond[1]		     	     =IP3dSecond2[j2min];                 
+	TIP3dErrorSecond[1]	     	     =IP3dErrorSecond2[j2min];            
+	TIP3dDecayLengthSecond[1]	     =IP3dDecayLengthSecond2[j2min];      	
+	TIP3dTransverseMomentumSecond[1]     =IP3dTransverseMomentumSecond2[j2min];	
+	TIP3dEtaSecond[1]                    =IP3dEtaSecond2[j2min];              	
+	TIP3dPhiSecond[1]                    =IP3dPhiSecond2[j2min];              	
+	 	   	       	   	     						
+	TIP3dThird[1]		     	     =IP3dThird2[j2min];                  
+	TIP3dErrorThird[1]                   =IP3dErrorThird2[j2min];             	
+	TIP3dDecayLengthThird[1]             =IP3dDecayLengthThird2[j2min];       
+	TIP3dTransverseMomentumThird[1]      =IP3dTransverseMomentumThird2[j2min];	
+	TIP3dEtaThird[1]                     =IP3dEtaThird2[j2min];               
+	TIP3dPhiThird[1]                     =IP3dPhiThird2[j2min];               	
+		   		   	     						
+	TIP3dFourth[1]                       =IP3dFourth2[j2min];                 	
+	TIP3dErrorFourth[1]                  =IP3dErrorFourth2[j2min];            
+	TIP3dDecayLengthFourth[1]            =IP3dDecayLengthFourth2[j2min];      	
+	TIP3dTransverseMomentumFourth[1]     =IP3dTransverseMomentumFourth2[j2min];	
+	TIP3dEtaFourth[1]                    =IP3dEtaFourth2[j2min];              	
+	TIP3dPhiFourth[1]                    =IP3dPhiFourth2[j2min];              
 
  	Ttche[1] =discrtcheglobal2[j2min];	    
  	Ttchp[1] =discrtchpglobal2[j2min];	    
@@ -424,4 +651,30 @@ void MatchTheTree(const TString& matrix_filename = "MatrixOfMatches.root"){
   file_out->Close();
 
 }
+
+
+
+
+
+
+
+	  
+
+
+
+
+
+
+	  
+
+
+
+
+
+
+	  
+
+
+
+
 
