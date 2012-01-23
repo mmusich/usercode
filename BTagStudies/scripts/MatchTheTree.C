@@ -360,14 +360,14 @@ void MatchTheTree(const TString& matrix_filename = "MatrixOfMatches.root"){
   tout->Branch("evt",   &Tevent, "Tevent/I");
 
  
-  tout->Branch("pthat",            &Tpthat,   "Tpthat/F");		  
-  tout->Branch("mcweight",         &Tmcweight,"Tmcweight/F");	  
-  tout->Branch("PVx",              &TPVx,     "TPVx/F");	 
-  tout->Branch("PVy",              &TPVy,     "TPVy/F");
-  tout->Branch("PVz",              &TPVz,     "TPVz/F");
-  tout->Branch("PVChi2",           &TPVx,     "TPVx/F");	 
-  tout->Branch("PVndof",           &TPVy,     "TPVy/F");
-  tout->Branch("PVNormalizedChi2", &TPVz,     "TPVz/F"); 
+  tout->Branch("pthat",            &Tpthat,      "Tpthat/F");		  
+  tout->Branch("mcweight",         &Tmcweight,   "Tmcweight/F");	  
+  tout->Branch("PVx",              &TPVx,        "TPVx[2]/F");	 
+  tout->Branch("PVy",              &TPVy,        "TPVy[2]/F");
+  tout->Branch("PVz",              &TPVz,        "TPVz[2]/F");
+  tout->Branch("PVChi2",           &TPVChiSq,    "TPVChisq[2]/F");	 
+  tout->Branch("PVndof",           &TPVndof,     "TPVndof[2]/F");
+  tout->Branch("PVNormalizedChi2", &TPVNormChiSq,"TPVNormChiSq[2]/F"); 
 
   tout->Branch("isBGluonSplitting",&TisBGluonSplitting,"TisBGluonSplitting/B");
   tout->Branch("isCGluonSplitting",&TisCGluonSplitting,"TisCGluonSplitting/B");
