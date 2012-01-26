@@ -17,8 +17,10 @@ endif
 set inputsource=$1
 set options=$2
 
+#setenv STAGE_SVCCLASS cmscaf 
+source /afs/cern.ch/cms/caf/setup.csh
 
-setenv CMSSW_VER 4_1_2
+setenv CMSSW_VER 4_2_3
 setenv CMSSW_DIR ${CMSSW_BASE}/src/Alignment/OfflineValidation/test
 setenv LXBATCH_DIR `pwd`
 
@@ -26,29 +28,44 @@ cd $CMSSW_DIR
 eval `scramv1 runtime -csh`
 cd $LXBATCH_DIR
 
-cp ${CMSSW_DIR}/${inputsource} .
+cp ${inputsource} .
 
-set jobname=`tail ${inputsource} | grep jobname | awk '{print $2}'`
-set datasetpath=`tail ${inputsource} | grep datasetpath | awk '{print $2}'`
-set globaltag=`tail ${inputsource} | grep globaltag | awk '{print $2}'`
-set alignobj=`tail ${inputsource} | grep alignobj | awk '{print $2}'`
-set taggeom=`tail ${inputsource} | grep taggeom | awk '{print $2}'`
-set apeobj=`tail ${inputsource} | grep apeobj | awk '{print $2}'`
-set tagape=`tail ${inputsource} | grep tagape | awk '{print $2}'`
-set validationtype=`tail ${inputsource} | grep validationtype | awk '{print $2}'`
-set tracktype=`tail ${inputsource} | grep tracktype | awk '{print $2}'`
-set outfile=`tail ${inputsource} | grep outfile | awk '{print $2}'`
+set jobname=`more ${inputsource} | grep jobname | awk '{print $2}'`
+set isda=`more ${inputsource} | grep isda | awk '{print $2}'`
+set applybows=`more ${inputsource} | grep applybows | awk '{print $2}'`
+set datasetpath=`more ${inputsource} | grep datasetpath | awk '{print $2}'`
+set maxevents=`more ${inputsource} | grep maxevents | awk '{print $2}'`
+set globaltag=`more ${inputsource} | grep globaltag | awk '{print $2}'`
+set alignobj=`more ${inputsource} | grep alignobj | awk '{print $2}'`
+set taggeom=`more ${inputsource} | grep taggeom | awk '{print $2}'`
+set apeobj=`more ${inputsource} | grep apeobj | awk '{print $2}'`
+set tagape=`more ${inputsource} | grep tagape | awk '{print $2}'`
+set bowsobj=`more ${inputsource} | grep bowsobj | awk '{print $2}'`
+set tagbows=`more ${inputsource} | grep tagbows | awk '{print $2}'`
+set validationtype=`more ${inputsource} | grep validationtype | awk '{print $2}'`
+set tracktype=`more ${inputsource} | grep tracktype | awk '{print $2}'`
+set outfile=`more ${inputsource} | grep outfile | awk '{print $2}'`
 
 echo ${validationtype}
 
 if(${validationtype} == "PrimaryVertexValidation") then
    echo "1 Vertex Validation"
    cp ${CMSSW_DIR}/PVValidation_TEMPL_cfg.py .
-   cat PVValidation_TEMPL_cfg.py | sed "s?DATASETTEMPLATE?${datasetpath}?g" | sed "s?GLOBALTAGTEMPLATE?${globaltag}?g" | sed "s?ALIGNOBJTEMPLATE?${alignobj}?g" | sed "s?GEOMTAGTEMPLATE?${taggeom}?g" | sed "s?APEOBJTEMPLATE?${apeobj}?g" | sed "s?ERRORTAGTEMPLATE?${tagape}?g"  | sed "s?VALIDATIONMODULETEMPLATE?${validationtype}?g" |  sed "s?TRACKTYPETEMPLATE?${tracktype}?g" | sed "s?OUTFILETEMPLATE?${outfile}?g" >! ${jobname}_cfg.py
+   cat PVValidation_TEMPL_cfg.py | sed "s?APPLYBOWSTEMPLATE?${applybows}?g" | sed "s?DATASETTEMPLATE?${datasetpath}?g" | sed "s?MAXEVENTSTEMPLATE?${maxevents}?g" | sed "s?GLOBALTAGTEMPLATE?${globaltag}?g" | sed "s?ALIGNOBJTEMPLATE?${alignobj}?g" | sed "s?GEOMTAGTEMPLATE?${taggeom}?g" | sed "s?APEOBJTEMPLATE?${apeobj}?g" | sed "s?ERRORTAGTEMPLATE?${tagape}?g"  | sed "s?VALIDATIONMODULETEMPLATE?${validationtype}?g" |  sed "s?TRACKTYPETEMPLATE?${tracktype}?g" | sed "s?OUTFILETEMPLATE?${outfile}?g" >! ${jobname}_cfg
+    if(${applybows} == "True") then
+	cat ${jobname}_cfg | sed "s?BOWSOBJECTTEMPLATE?${bowsobj}?g" | sed "s?BOWSTAGTEMPLATE?${tagbows}?g"  >! ${jobname}_cfg.py
+    else 
+	mv ${jobname}_cfg ${jobname}_cfg.py
+    endif
 else
    echo "Multi Vertex Validation"
    cp ${CMSSW_DIR}/MultiPVValidation_TEMPL_cfg.py .
-   cat MultiPVValidation_TEMPL_cfg.py | sed "s?DATASETTEMPLATE?${datasetpath}?g" | sed "s?GLOBALTAGTEMPLATE?${globaltag}?g" | sed "s?ALIGNOBJTEMPLATE?${alignobj}?g" | sed "s?GEOMTAGTEMPLATE?${taggeom}?g" | sed "s?APEOBJTEMPLATE?${apeobj}?g" | sed "s?ERRORTAGTEMPLATE?${tagape}?g"  | sed "s?VALIDATIONMODULETEMPLATE?${validationtype}?g" |  sed "s?TRACKTYPETEMPLATE?${tracktype}?g" | sed "s?OUTFILETEMPLATE?${outfile}?g" >! ${jobname}_cfg.py
+   cat MultiPVValidation_TEMPL_cfg.py | sed "s?ISDATEMPLATE?${isda}?g" | sed "s?APPLYBOWSTEMPLATE?${applybows}?g" | sed "s?DATASETTEMPLATE?${datasetpath}?g" | sed "s?MAXEVENTSTEMPLATE?${maxevents}?g" | sed "s?GLOBALTAGTEMPLATE?${globaltag}?g" | sed "s?ALIGNOBJTEMPLATE?${alignobj}?g" | sed "s?GEOMTAGTEMPLATE?${taggeom}?g" | sed "s?APEOBJTEMPLATE?${apeobj}?g" | sed "s?ERRORTAGTEMPLATE?${tagape}?g"  | sed "s?VALIDATIONMODULETEMPLATE?${validationtype}?g" |  sed "s?TRACKTYPETEMPLATE?${tracktype}?g" | sed "s?OUTFILETEMPLATE?${outfile}?g" >! ${jobname}_cfg
+   if(${applybows} == "True") then
+	cat ${jobname}_cfg | sed "s?BOWSOBJECTTEMPLATE?${bowsobj}?g" | sed "s?BOWSTAGTEMPLATE?${tagbows}?g"  >! ${jobname}_cfg.py
+   else 
+	mv ${jobname}_cfg ${jobname}_cfg.py
+   endif 
 endif
 
 cp ${CMSSW_DIR}/PVValidation_TEMPL.lsf .

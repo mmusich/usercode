@@ -93,7 +93,8 @@ class PrimaryVertexValidation : public edm::EDAnalyzer {
   TrackFilterForPVFinding theTrackFilter_;
 
   // Output
-  std::string filename_;     
+  bool lightNtupleSwitch_;   // switch to keep only info for daily validation
+  std::string filename_;     // output file name 
   TFile* rootFile_;
   TTree* rootTree_;
   
@@ -103,6 +104,18 @@ class PrimaryVertexValidation : public edm::EDAnalyzer {
 
   static const int nMaxtracks_ = 1000;
   int nTracks_;
+  int nOfflineVertices_;
+  double xOfflineVertex_;
+  double yOfflineVertex_;
+  double zOfflineVertex_;
+  double BSx0_;
+  double BSy0_;
+  double BSz0_;
+  double Beamsigmaz_;
+  double Beamdxdz_;   
+  double BeamWidthX_;
+  double BeamWidthY_;
+
   double pt_[nMaxtracks_];   
   double p_[nMaxtracks_];    
   int nhits_[nMaxtracks_];
@@ -122,6 +135,8 @@ class PrimaryVertexValidation : public edm::EDAnalyzer {
   double qoverp_[nMaxtracks_];
   double dz_[nMaxtracks_];
   double dxy_[nMaxtracks_];
+  double dxyBs_[nMaxtracks_]; 
+  double dzBs_[nMaxtracks_];
   double xPCA_[nMaxtracks_];
   double yPCA_[nMaxtracks_];
   double zPCA_[nMaxtracks_];

@@ -69,15 +69,21 @@
 // Constructor
 
 MultiPVValidation::MultiPVValidation(const edm::ParameterSet& iConfig)
-  : theConfig(iConfig), 
-    theTrackFilter_(iConfig.getParameter<edm::ParameterSet>("TkFilterParameters"))
+  : theConfig(iConfig)
+				    //old version
+				    //   theTrackFilter_(iConfig.getParameter<edm::ParameterSet>("TkFilterParameters"))
 {
   //now do what ever initialization is needed
-  debug_    = iConfig.getParameter<bool>       ("Debug");  
-  TrackCollectionTag_      = iConfig.getParameter<edm::InputTag>("TrackCollectionTag");  
-  filename_ = iConfig.getParameter<std::string>("OutputFileName"); 
-  // theTrackClusterizer_ = new GapClusterizerInZ(iConfig.getParameter<edm::ParameterSet>("TkClusParameters").getParameter<edm::ParameterSet>("TkGapClusParameters"));
+  lightNtupleSwitch_  = iConfig.getParameter<bool>("isLightNtuple"); 
+  debug_              = iConfig.getParameter<bool>("Debug");  
+  TrackCollectionTag_ = iConfig.getParameter<edm::InputTag>("TrackCollectionTag");  
+  filename_           = iConfig.getParameter<std::string>("OutputFileName");
   
+  // old version
+  // theTrackClusterizer_ = new GapClusterizerInZ(iConfig.getParameter<edm::ParameterSet>("TkClusParameters").getParameter<edm::ParameterSet>("TkGapClusParameters"));
+
+  // select and configure the track filter 
+  theTrackFilter_= new TrackFilterForPVFinding(iConfig.getParameter<edm::ParameterSet>("TkFilterParameters") );
   // select and configure the track clusterizer  
   std::string clusteringAlgorithm=iConfig.getParameter<edm::ParameterSet>("TkClusParameters").getParameter<std::string>("algorithm");
   if (clusteringAlgorithm=="gap"){
@@ -154,7 +160,15 @@ MultiPVValidation::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
     zOfflineVertex_ = (*vertices)[0].z();
   }
 
-  nOfflineVertices_ = vertices.product()->size();
+  unsigned int vertexCollectionSize = vertices.product()->size();
+  int nvvertex = 0;
+  
+  for (unsigned int i=0; i<vertexCollectionSize; i++) {
+    const reco::Vertex& vertex = vertices->at(i);
+    if (vertex.isValid()) nvvertex++;
+  }
+
+  nOfflineVertices_ = nvvertex;
  
   //=======================================================
   // Retrieve Beamspot information
@@ -218,12 +232,18 @@ MultiPVValidation::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
   if(debug_) {cout << "PrimaryVertexValidation"
 		  << "Found: " << t_tks.size() << " reconstructed tracks" << "\n";
   }
+  
+  //======================================================
+  // select the tracks
+  //======================================================
 
+  std::vector<reco::TransientTrack> seltks = theTrackFilter_->select(t_tks);
+    
   //======================================================
   // clusterize tracks in Z
   //======================================================
 
-  vector< vector<reco::TransientTrack> > clusters = theTrackClusterizer_->clusterize(t_tks);
+  vector< vector<reco::TransientTrack> > clusters = theTrackClusterizer_->clusterize(seltks);
   
   if (debug_){
     cout <<  " clustering returned  "<< clusters.size() << " clusters  from " << t_tks.size() << " selected tracks" <<endl;
@@ -313,7 +333,8 @@ MultiPVValidation::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 
 	bool hasTheProbeFirstPixelLayerHit = false;
 	hasTheProbeFirstPixelLayerHit = this->hasFirstLayerPixelHits((*theTrack));
-	if (theTrackFilter_((*theTrack))&&hasTheProbeFirstPixelLayerHit){
+	//if (theTrackFilter_((*theTrack))&&hasTheProbeFirstPixelLayerHit){
+	if (hasTheProbeFirstPixelLayerHit){
 	  isGoodTrack_[nTracks_]=1;
 	}
       
@@ -327,7 +348,7 @@ MultiPVValidation::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 	for(vector<reco::TransientTrack>::const_iterator tk = iclus->begin(); tk!= iclus->end(); ++tk){
 	  
 	  hasTheProbeFirstPixelLayerHit = this->hasFirstLayerPixelHits((*tk));
-	  if (theTrackFilter_((*tk))&&hasTheProbeFirstPixelLayerHit){
+	  if (hasTheProbeFirstPixelLayerHit){
 	    if( tk == theTrack ) continue;
 	    else {
 	      theFinalTracks.push_back((*tk));
@@ -372,10 +393,13 @@ MultiPVValidation::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 		std::cout<<"MultiPVValidation::analyze() : zPCA -myVertex.z() = "<<(theTrack->track().vertex().z() -myVertex.z() )<<std::endl; 
 	      }// ends if debug_
 	    } // ends if the fitted vertex is Valid
-	    
+
+	    delete fitter;
+
 	  }  catch ( cms::Exception& er ) {
 	    LogTrace("MultiPVValidation::analyze RECO")<<"caught std::exception "<<er.what()<<std::endl;
 	  }
+		
 	} //ends if theFinalTracks.size() > 2
 	
 	else {
@@ -458,61 +482,77 @@ void MultiPVValidation::beginJob()
   rootTree_ = new TTree("tree","PV Validation tree");
   
   // Track Paramters 
-  rootTree_->Branch("nTracks",&nTracks_,"nTracks/I");
-  rootTree_->Branch("nTracksPerClus",&nTracksPerClus_,"nTracksPerClus/I");
-  rootTree_->Branch("nClus",&nClus_,"nClus/I");
-  rootTree_->Branch("nOfflineVertices",&nOfflineVertices_,"nOfflineVertices/I");
-  rootTree_->Branch("nTracksPerOfflineVertex",&nTracksPerOfflineVertex_,"nTracksPerOfflineVertex/I");
-  rootTree_->Branch("RunNumber",&RunNumber_,"RunNumber/i");
-  rootTree_->Branch("LuminosityBlockNumber",&LuminosityBlockNumber_,"LuminosityBlockNumber/i");
-  rootTree_->Branch("xOfflineVertex",&xOfflineVertex_,"xOfflineVertex/D");
-  rootTree_->Branch("yOfflineVertex",&yOfflineVertex_,"yOfflineVertex/D");
-  rootTree_->Branch("zOfflineVertex",&zOfflineVertex_,"zOfflineVertex/D");
-  rootTree_->Branch("BSx0",&BSx0_,"BSx0/D");
-  rootTree_->Branch("BSy0",&BSy0_,"BSy0/D");
-  rootTree_->Branch("BSz0",&BSz0_,"BSz0/D");
-  rootTree_->Branch("Beamsigmaz",&Beamsigmaz_,"Beamsigmaz/D");
-  rootTree_->Branch("Beamdxdz",&Beamdxdz_,"Beamdxdz/D");
-  rootTree_->Branch("BeamWidthX",&BeamWidthX_,"BeamWidthX/D");
-  rootTree_->Branch("BeamWidthY",&BeamWidthY_,"BeamWidthY/D");
-  rootTree_->Branch("pt",&pt_,"pt[nTracks]/D");
-  rootTree_->Branch("p",&p_,"p[nTracks]/D");
-  rootTree_->Branch("nhits",&nhits_,"nhits[nTracks]/I");
-  rootTree_->Branch("nhits1D",&nhits1D_,"nhits1D[nTracks]/I");
-  rootTree_->Branch("nhits2D",&nhits2D_,"nhits2D[nTracks]/I");
-  rootTree_->Branch("nhitsBPIX",&nhitsBPIX_,"nhitsBPIX[nTracks]/I");
-  rootTree_->Branch("nhitsFPIX",&nhitsFPIX_,"nhitsFPIX[nTracks]/I");
-  rootTree_->Branch("nhitsTIB",&nhitsTIB_,"nhitsTIB[nTracks]/I");
-  rootTree_->Branch("nhitsTID",&nhitsTID_,"nhitsTID[nTracks]/I");
-  rootTree_->Branch("nhitsTOB",&nhitsTOB_,"nhitsTOB[nTracks]/I");
-  rootTree_->Branch("nhitsTEC",&nhitsTEC_,"nhitsTEC[nTracks]/I");
-  rootTree_->Branch("eta",&eta_,"eta[nTracks]/D");
-  rootTree_->Branch("theta",&theta_,"theta[nTracks]/D");
-  rootTree_->Branch("phi",&phi_,"phi[nTracks]/D");
-  rootTree_->Branch("chi2",&chi2_,"chi2[nTracks]/D");
-  rootTree_->Branch("chi2ndof",&chi2ndof_,"chi2ndof[nTracks]/D");
-  rootTree_->Branch("charge",&charge_,"charge[nTracks]/I");
-  rootTree_->Branch("qoverp",&qoverp_,"qoverp[nTracks]/D");
-  rootTree_->Branch("dz",&dz_,"dz[nTracks]/D");
-  rootTree_->Branch("dxy",&dxy_,"dxy[nTracks]/D");
-  rootTree_->Branch("dzBs",&dzBs_,"dzBs[nTracks]/D");
-  rootTree_->Branch("dxyBs",&dxyBs_,"dxyBs[nTracks]/D");
-  rootTree_->Branch("xPCA",&xPCA_,"xPCA[nTracks]/D");
-  rootTree_->Branch("yPCA",&yPCA_,"yPCA[nTracks]/D");
-  rootTree_->Branch("zPCA",&zPCA_,"zPCA[nTracks]/D");
-  rootTree_->Branch("xUnbiasedVertex",&xUnbiasedVertex_,"xUnbiasedVertex[nTracks]/D");
-  rootTree_->Branch("yUnbiasedVertex",&yUnbiasedVertex_,"yUnbiasedVertex[nTracks]/D");
-  rootTree_->Branch("zUnbiasedVertex",&zUnbiasedVertex_,"zUnbiasedVertex[nTracks]/D");
-  rootTree_->Branch("chi2normUnbiasedVertex",&chi2normUnbiasedVertex_,"chi2normUnbiasedVertex[nTracks]/F");
-  rootTree_->Branch("chi2UnbiasedVertex",&chi2UnbiasedVertex_,"chi2UnbiasedVertex[nTracks]/F");
-  rootTree_->Branch("DOFUnbiasedVertex",&DOFUnbiasedVertex_," DOFUnbiasedVertex[nTracks]/F");
-  rootTree_->Branch("sumOfWeightsUnbiasedVertex",&sumOfWeightsUnbiasedVertex_,"sumOfWeightsUnbiasedVertex[nTracks]/F");
-  rootTree_->Branch("tracksUsedForVertexing",&tracksUsedForVertexing_,"tracksUsedForVertexing[nTracks]/I");
-  rootTree_->Branch("dxyFromMyVertex",&dxyFromMyVertex_,"dxyFromMyVertex[nTracks]/D");
-  rootTree_->Branch("dzFromMyVertex",&dzFromMyVertex_,"dzFromMyVertex[nTracks]/D");
-  rootTree_->Branch("dszFromMyVertex",&dszFromMyVertex_,"dszFromMyVertex[nTracks]/D");
-  rootTree_->Branch("hasRecVertex",&hasRecVertex_,"hasRecVertex[nTracks]/I");
-  rootTree_->Branch("isGoodTrack",&isGoodTrack_,"isGoodTrack[nTracks]/I");
+
+  if(lightNtupleSwitch_){ 
+
+    rootTree_->Branch("nTracks",&nTracks_,"nTracks/I");
+    rootTree_->Branch("phi",&phi_,"phi[nTracks]/D");
+    rootTree_->Branch("eta",&eta_,"eta[nTracks]/D");	
+    rootTree_->Branch("dxyFromMyVertex",&dxyFromMyVertex_,"dxyFromMyVertex[nTracks]/D");
+    rootTree_->Branch("dzFromMyVertex",&dzFromMyVertex_,"dzFromMyVertex[nTracks]/D");
+    rootTree_->Branch("dzBs",&dzBs_,"dzBs[nTracks]/D");
+    rootTree_->Branch("dxyBs",&dxyBs_,"dxyBs[nTracks]/D");
+    rootTree_->Branch("hasRecVertex",&hasRecVertex_,"hasRecVertex[nTracks]/I");
+    rootTree_->Branch("isGoodTrack",&isGoodTrack_,"isGoodTrack[nTracks]/I");
+    
+  } else {
+    
+    rootTree_->Branch("nTracks",&nTracks_,"nTracks/I");
+    rootTree_->Branch("nTracksPerClus",&nTracksPerClus_,"nTracksPerClus/I");
+    rootTree_->Branch("nClus",&nClus_,"nClus/I");
+    rootTree_->Branch("nOfflineVertices",&nOfflineVertices_,"nOfflineVertices/I");
+    rootTree_->Branch("RunNumber",&RunNumber_,"RunNumber/i");
+    rootTree_->Branch("LuminosityBlockNumber",&LuminosityBlockNumber_,"LuminosityBlockNumber/i");
+    rootTree_->Branch("xOfflineVertex",&xOfflineVertex_,"xOfflineVertex/D");
+    rootTree_->Branch("yOfflineVertex",&yOfflineVertex_,"yOfflineVertex/D");
+    rootTree_->Branch("zOfflineVertex",&zOfflineVertex_,"zOfflineVertex/D");
+    rootTree_->Branch("BSx0",&BSx0_,"BSx0/D");
+    rootTree_->Branch("BSy0",&BSy0_,"BSy0/D");
+    rootTree_->Branch("BSz0",&BSz0_,"BSz0/D");
+    rootTree_->Branch("Beamsigmaz",&Beamsigmaz_,"Beamsigmaz/D");
+    rootTree_->Branch("Beamdxdz",&Beamdxdz_,"Beamdxdz/D");
+    rootTree_->Branch("BeamWidthX",&BeamWidthX_,"BeamWidthX/D");
+    rootTree_->Branch("BeamWidthY",&BeamWidthY_,"BeamWidthY/D");
+    rootTree_->Branch("pt",&pt_,"pt[nTracks]/D");
+    rootTree_->Branch("p",&p_,"p[nTracks]/D");
+    rootTree_->Branch("nhits",&nhits_,"nhits[nTracks]/I");
+    rootTree_->Branch("nhits1D",&nhits1D_,"nhits1D[nTracks]/I");
+    rootTree_->Branch("nhits2D",&nhits2D_,"nhits2D[nTracks]/I");
+    rootTree_->Branch("nhitsBPIX",&nhitsBPIX_,"nhitsBPIX[nTracks]/I");
+    rootTree_->Branch("nhitsFPIX",&nhitsFPIX_,"nhitsFPIX[nTracks]/I");
+    rootTree_->Branch("nhitsTIB",&nhitsTIB_,"nhitsTIB[nTracks]/I");
+    rootTree_->Branch("nhitsTID",&nhitsTID_,"nhitsTID[nTracks]/I");
+    rootTree_->Branch("nhitsTOB",&nhitsTOB_,"nhitsTOB[nTracks]/I");
+    rootTree_->Branch("nhitsTEC",&nhitsTEC_,"nhitsTEC[nTracks]/I");
+    rootTree_->Branch("eta",&eta_,"eta[nTracks]/D");
+    rootTree_->Branch("theta",&theta_,"theta[nTracks]/D");
+    rootTree_->Branch("phi",&phi_,"phi[nTracks]/D");
+    rootTree_->Branch("chi2",&chi2_,"chi2[nTracks]/D");
+    rootTree_->Branch("chi2ndof",&chi2ndof_,"chi2ndof[nTracks]/D");
+    rootTree_->Branch("charge",&charge_,"charge[nTracks]/I");
+    rootTree_->Branch("qoverp",&qoverp_,"qoverp[nTracks]/D");
+    rootTree_->Branch("dz",&dz_,"dz[nTracks]/D");
+    rootTree_->Branch("dxy",&dxy_,"dxy[nTracks]/D");
+    rootTree_->Branch("dzBs",&dzBs_,"dzBs[nTracks]/D");
+    rootTree_->Branch("dxyBs",&dxyBs_,"dxyBs[nTracks]/D");
+    rootTree_->Branch("xPCA",&xPCA_,"xPCA[nTracks]/D");
+    rootTree_->Branch("yPCA",&yPCA_,"yPCA[nTracks]/D");
+    rootTree_->Branch("zPCA",&zPCA_,"zPCA[nTracks]/D");
+    rootTree_->Branch("xUnbiasedVertex",&xUnbiasedVertex_,"xUnbiasedVertex[nTracks]/D");
+    rootTree_->Branch("yUnbiasedVertex",&yUnbiasedVertex_,"yUnbiasedVertex[nTracks]/D");
+    rootTree_->Branch("zUnbiasedVertex",&zUnbiasedVertex_,"zUnbiasedVertex[nTracks]/D");
+    rootTree_->Branch("chi2normUnbiasedVertex",&chi2normUnbiasedVertex_,"chi2normUnbiasedVertex[nTracks]/F");
+    rootTree_->Branch("chi2UnbiasedVertex",&chi2UnbiasedVertex_,"chi2UnbiasedVertex[nTracks]/F");
+    rootTree_->Branch("DOFUnbiasedVertex",&DOFUnbiasedVertex_," DOFUnbiasedVertex[nTracks]/F");
+    rootTree_->Branch("sumOfWeightsUnbiasedVertex",&sumOfWeightsUnbiasedVertex_,"sumOfWeightsUnbiasedVertex[nTracks]/F");
+    rootTree_->Branch("tracksUsedForVertexing",&tracksUsedForVertexing_,"tracksUsedForVertexing[nTracks]/I");
+    rootTree_->Branch("dxyFromMyVertex",&dxyFromMyVertex_,"dxyFromMyVertex[nTracks]/D");
+    rootTree_->Branch("dzFromMyVertex",&dzFromMyVertex_,"dzFromMyVertex[nTracks]/D");
+    rootTree_->Branch("dszFromMyVertex",&dszFromMyVertex_,"dszFromMyVertex[nTracks]/D");
+    rootTree_->Branch("hasRecVertex",&hasRecVertex_,"hasRecVertex[nTracks]/I");
+    rootTree_->Branch("isGoodTrack",&isGoodTrack_,"isGoodTrack[nTracks]/I");
+    
+  }
 }
 
 // ------------ method called once each job just after ending the event loop  ------------
@@ -553,14 +593,14 @@ void MultiPVValidation::SetVarToZero() {
     nhits_[i]     = 0;
     nhits1D_[i]   = 0;
     nhits2D_[i]   = 0;
-    nhitsBPIX_[i]  = 0;
-    nhitsFPIX_[i]  = 0;
-    nhitsTIB_[i]   = 0;
-    nhitsTID_[i]   = 0;
-    nhitsTOB_[i]   = 0;
-    nhitsTEC_[i]   = 0;
+    nhitsBPIX_[i] = 0;
+    nhitsFPIX_[i] = 0;
+    nhitsTIB_[i]  = 0;
+    nhitsTID_[i]  = 0;
+    nhitsTOB_[i]  = 0;
+    nhitsTEC_[i]  = 0;
     eta_[i]       = 0;
-    theta_[i]       = 0;
+    theta_[i]     = 0;
     phi_[i]       = 0;
     chi2_[i]      = 0;
     chi2ndof_[i]  = 0;

@@ -58,6 +58,7 @@
 #include "RecoVertex/VertexPrimitives/interface/VertexFitter.h"
 #include "RecoVertex/AdaptiveVertexFit/interface/AdaptiveVertexFitter.h"
 
+#include "RecoVertex/PrimaryVertexProducer/interface/TrackFilterForPVFindingBase.h"
 #include "RecoVertex/PrimaryVertexProducer/interface/TrackFilterForPVFinding.h"
 #include "RecoVertex/PrimaryVertexProducer/interface/TrackClusterizerInZ.h"
 #include "RecoVertex/PrimaryVertexProducer/interface/PrimaryVertexProducerAlgorithm.h"
@@ -93,12 +94,14 @@ class MultiPVValidation : public edm::EDAnalyzer {
   edm::InputTag  TrackCollectionTag_;
   bool debug_;
   int Nevt_;
-  TrackFilterForPVFinding theTrackFilter_;
+  //  TrackFilterForPVFinding theTrackFilter_;
+  TrackFilterForPVFindingBase* theTrackFilter_; 
   TrackClusterizerInZ* theTrackClusterizer_;
 
   // Output
-  std::string filename_;     
-  TFile* rootFile_;
+  bool lightNtupleSwitch_;   // switch to keep only info for daily validation
+  std::string filename_;     // output file name 
+  TFile* rootFile_;          
   TTree* rootTree_;
   
   // Root-Tuple variables :
