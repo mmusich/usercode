@@ -1,0 +1,15 @@
+jobname TestPVValNewMCScenario_MinBias_SafeAPE_QCD_42X_DA
+isda True
+applybows True
+datasetpath ALCARECO_MinBias_QCD_42X_cff
+maxevents 50000
+globaltag START42_V15B::All
+alignobj sqlite_file:/afs/cern.ch/cms/CAF/CMSALCA/ALCA_TRACKERALIGN/PayLoads/MC11/mp0912_IDEALplus_05Delta_TPBCentred.db
+taggeom Alignments
+bowsobj sqlite_file:/afs/cern.ch/cms/CAF/CMSALCA/ALCA_TRACKERALIGN/PayLoads/Summer2011/TrackerSurfaceDeformations_v1_offline.db
+tagbows TrackerSurfaceDeformations_v1_offline
+apeobj sqlite_file:/afs/cern.ch/user/m/musich/public/moduleDepenentAPE/SafeAPEforFirstCollisions.db
+tagape AlignmentErrors
+validationtype MultiPVValidation
+tracktype ALCARECOTkAlMinBias
+outfile PVValidation_NewMCScenario_MinBias_SafeAPE_QCD_42X_DA.root
