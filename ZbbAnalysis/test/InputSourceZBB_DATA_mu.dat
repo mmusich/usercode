@@ -1,5 +1,0 @@
-jobname ZBBAnalysis_DATA_mu
-globaltag GR_R_39X_V5::All
-infile rfio:/castor/cern.ch/cms/store/user/emiglior/zbb/ZbbSkimDec22ReReco_PAT397_17Mar11/Mu/MergedOutputFile_1_2_Ala.root
-plotoutfile DATA_MU_2010_Plots_FromPAT.root
-outfile ZbbAnalysisCandNtuples_Mu.root
