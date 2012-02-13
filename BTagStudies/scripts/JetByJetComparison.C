@@ -567,7 +567,7 @@ void JetByJetComparison::AddHisto(vector<TH1F*> &Histo1DB, string name, string t
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 void JetByJetComparison::AddHisto2D(vector<TH2F*> &Histo2DB, string name, string title,TString firstCond,TString secondCond ,const int& nbins, const Float_t& min, const Float_t& max, const int& nbinsy, const Float_t& miny, const Float_t& maxy)  {
         
-  char titlehisto[80];
+  char titlehisto[200];
   sprintf(titlehisto,"%s %s vs %s;%s - %s; %s -  %s",title.c_str(),firstCond.Data(),secondCond.Data(),title.c_str(),firstCond.Data(),title.c_str(),secondCond.Data());
 
   TH2F* h2 = new TH2F(name.c_str(),titlehisto,nbins,min,max,nbinsy,miny,maxy);
