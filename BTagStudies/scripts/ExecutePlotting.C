@@ -1,6 +1,7 @@
 {
   
   gSystem->mkdir("figures_jetbyjet");
+  gROOT->LoadMacro("./JetInfo.cxx++g");
   gROOT->LoadMacro("./JetByJetComparison.C++g");
   JetByJetComparison t("JetByJetComparison_origVsnewgeom.root");
   t.Loop(); 

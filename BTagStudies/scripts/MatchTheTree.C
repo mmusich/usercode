@@ -10,6 +10,10 @@
 #include "TString.h"
 #include "TH1F.h"
 #include "TObjString.h"
+#include "JetInfo.h" 
+
+#include "TSystem.h"
+#include "TROOT.h"
 
 using namespace std;
 
@@ -37,8 +41,7 @@ Int_t GetJetID(Double_t nhf, Double_t nEF, Double_t nconstituents, Double_t chf,
   return goodjetID; 
 }
 
-void MatchTheTree(const TString& matrix_filename = "MatrixOfMatches.root"){
-  
+void MatchTheTree(bool doTree, const TString& matrix_filename = "MatrixOfMatches.root"){
   // input 
   TFile *file_of_matches = new TFile(matrix_filename,"READ");  
   cout << matrix_filename << " open" << endl;
@@ -335,103 +338,121 @@ void MatchTheTree(const TString& matrix_filename = "MatrixOfMatches.root"){
   Float_t Tpthat, Tmcweight;
   Bool_t  TisBGluonSplitting, TisCGluonSplitting;
 
-  // output TTree: jet infos
+  // TTree
+  TTree *tree_out = 0;
+  JetInfo *TJetInfoA=0;
+  JetInfo *TJetInfoB=0;
+
+  // ntuple
+  TTree *ntuple_out = 0;
   Float_t TPVx[2],TPVy[2],TPVz[2];
   Float_t TPVChiSq[2], TPVndof[2], TPVNormChiSq[2]; 
   Int_t   TnTracks[2];
-
+  
   Float_t Tpt[2], Teta[2], Tphi[2];
-  Int_t   TMCTrueFlavor[2];
+  Int_t   TMCTrueFlavor[2];    
   Int_t   TjetId[2];
   Float_t Ttche[2], Ttchp[2], Tssvhe[2], Tssvhp[2], Tcsv[2], Tjp[2], Tjbp[2];
-
-  Float_t TSV3dDistance[2], TSV3dDistanceError[2], TSV2dDistance[2], TSV2dDistanceError[2], TSVChi2[2], TSVDegreesOfFreedom[2], TSVNormChi2[2], TSVMass[2];
+  
+  Float_t TSV3dDistance[2], TSV3dDistanceError[2], TSV2dDistance[2], TSV2dDistanceError[2], TSVChi2[2], TSVDegreesOfFreedom[2], TSVNormChi2[2], TSVMass[2];    
   Int_t   TSVtotCharge[2], TSVnVertices[2], TSVnVertexTracks[2], TSVnVertexTracksAll[2];
-
+  
   Float_t TIP3dFirst[2],TIP3dErrorFirst[2],TIP3dDecayLengthFirst[2],TIP3dTransverseMomentumFirst[2],TIP3dEtaFirst[2],TIP3dPhiFirst[2];                	   
   Float_t TIP3dSecond[2],TIP3dErrorSecond[2],TIP3dDecayLengthSecond[2],TIP3dTransverseMomentumSecond[2],TIP3dEtaSecond[2],TIP3dPhiSecond[2];               
-  Float_t TIP3dThird[2],TIP3dErrorThird[2],TIP3dDecayLengthThird[2],TIP3dTransverseMomentumThird[2],TIP3dEtaThird[2],TIP3dPhiThird[2];                
-  Float_t TIP3dFourth[2],TIP3dErrorFourth[2],TIP3dDecayLengthFourth[2],TIP3dTransverseMomentumFourth[2],TIP3dEtaFourth[2],TIP3dPhiFourth[2];               
-  
-  TTree *tout = new TTree("JetByJetComparison","file1 vs file2");
+  Float_t TIP3dThird[2],TIP3dErrorThird[2],TIP3dDecayLengthThird[2],TIP3dTransverseMomentumThird[2],TIP3dEtaThird[2],TIP3dPhiThird[2];                	
+  Float_t TIP3dFourth[2],TIP3dErrorFourth[2],TIP3dDecayLengthFourth[2],TIP3dTransverseMomentumFourth[2],TIP3dEtaFourth[2],TIP3dPhiFourth[2];                   
 
-  tout->Branch("run",   &Trun,   "Trun/I");
-  tout->Branch("lumi",  &Tlumi,  "Tlumi/I");
-  tout->Branch("evt",   &Tevent, "Tevent/I");
 
- 
-  tout->Branch("pthat",            &Tpthat,      "Tpthat/F");		  
-  tout->Branch("mcweight",         &Tmcweight,   "Tmcweight/F");	  
-  tout->Branch("PVx",              &TPVx,        "TPVx[2]/F");	 
-  tout->Branch("PVy",              &TPVy,        "TPVy[2]/F");
-  tout->Branch("PVz",              &TPVz,        "TPVz[2]/F");
-  tout->Branch("PVChi2",           &TPVChiSq,    "TPVChisq[2]/F");	 
-  tout->Branch("PVndof",           &TPVndof,     "TPVndof[2]/F");
-  tout->Branch("PVNormalizedChi2", &TPVNormChiSq,"TPVNormChiSq[2]/F"); 
+  if ( doTree ) {
+    tree_out = new TTree("JetByJetComparisonTree","tree file1 vs file2");
+    tree_out->Branch("run",   &Trun,   "Trun/I");
+    tree_out->Branch("lumi",  &Tlumi,  "Tlumi/I");
+    tree_out->Branch("evt",   &Tevent, "Tevent/I"); 
+    tree_out->Branch("pthat",            &Tpthat,      "Tpthat/F");		  
+    tree_out->Branch("mcweight",         &Tmcweight,   "Tmcweight/F");	  
+    tree_out->Branch("isBGluonSplitting",&TisBGluonSplitting,"TisBGluonSplitting/B");
+    tree_out->Branch("isCGluonSplitting",&TisCGluonSplitting,"TisCGluonSplitting/B");
+    
+    // output TTree: jet infos 
+    TJetInfoA = new JetInfo();
+    TJetInfoB = new JetInfo();
+    tree_out->Branch("JetInfoA","JetInfo",&TJetInfoA);
+    tree_out->Branch("JetInfoB","JetInfo",&TJetInfoB);
+  } else {
 
-  tout->Branch("isBGluonSplitting",&TisBGluonSplitting,"TisBGluonSplitting/B");
-  tout->Branch("isCGluonSplitting",&TisCGluonSplitting,"TisCGluonSplitting/B");
-  tout->Branch("isCGluonSplitting",&TisCGluonSplitting,"TisCGluonSplitting/B");
+    // output ntuple
+    ntuple_out = new TTree("JetByJetComparisonNtuple","ntuple file1 vs file2");
+    ntuple_out->Branch("run",   &Trun,   "Trun/I");
+    ntuple_out->Branch("lumi",  &Tlumi,  "Tlumi/I");
+    ntuple_out->Branch("evt",   &Tevent, "Tevent/I"); 
+    ntuple_out->Branch("pthat",            &Tpthat,      "Tpthat/F");		  
+    ntuple_out->Branch("mcweight",         &Tmcweight,   "Tmcweight/F");	  
+    ntuple_out->Branch("isBGluonSplitting",&TisBGluonSplitting,"TisBGluonSplitting/B");
+    ntuple_out->Branch("isCGluonSplitting",&TisCGluonSplitting,"TisCGluonSplitting/B");
+    ntuple_out->Branch("isCGluonSplitting",&TisCGluonSplitting,"TisCGluonSplitting/B");
 
-  tout->Branch("pt",    &Tpt,    "Tpt[2]/F");
-  tout->Branch("eta",   &Teta,   "Teta[2]/F");
-  tout->Branch("phi",   &Tphi,   "Tphi[2]/F");
-  tout->Branch("jetId", &TjetId, "TjetId[2]/I");
-  tout->Branch("jetnTracks",&TnTracks, "TnTracks[2]/I");
-  tout->Branch("MCTrueFlavor",&TMCTrueFlavor,"TMCTrueFlavor[2]/I");
+    ntuple_out->Branch("pt",    &Tpt,    "Tpt[2]/F");
+    ntuple_out->Branch("eta",   &Teta,   "Teta[2]/F");
+    ntuple_out->Branch("phi",   &Tphi,   "Tphi[2]/F");
+    ntuple_out->Branch("jetId", &TjetId, "TjetId[2]/I");
+    ntuple_out->Branch("jetnTracks",&TnTracks, "TnTracks[2]/I");
+    ntuple_out->Branch("MCTrueFlavor",&TMCTrueFlavor,"TMCTrueFlavor[2]/I");
 
-  tout->Branch("SV3dDistance",      &TSV3dDistance,      "TSV3dDistance[2]/F");
-  tout->Branch("SV3dDistanceError", &TSV3dDistanceError, "TSV3dDistanceError[2]/F");
-  tout->Branch("SV2dDistance",      &TSV2dDistance,      "TSV2dDistance[2]/F");
-  tout->Branch("SV2dDistanceError", &TSV2dDistanceError, "TSV2dDistanceError[2]/F");
-  tout->Branch("SVChi2",            &TSVChi2,            "TSVChi2[2]/F");
-  tout->Branch("SVDegreesOfFreedom",&TSVDegreesOfFreedom,"TSVDegreesOfFreedom[2]/F");
-  tout->Branch("SVNormChi2",        &TSVNormChi2,        "TSVNormChi2[2]/F");
-  tout->Branch("SVMass",            &TSVMass,            "TSVMass[2]/F");
-  tout->Branch("SVtotCharge",       &TSVtotCharge,       "TSVtotCharge[2]/I");
-  tout->Branch("SVnVertices",       &TSVnVertices,       "TSVnVertices[2]/I");
-  tout->Branch("SVnVertexTracks",   &TSVnVertexTracks,   "TSVnVertexTracks[2]/I");
-  tout->Branch("SVnVertexTracksAll",&TSVnVertexTracksAll,"TSVnVertexTracksAll[2]/I");
+    ntuple_out->Branch("SV3dDistance",      &TSV3dDistance,      "TSV3dDistance[2]/F");
+    ntuple_out->Branch("SV3dDistanceError", &TSV3dDistanceError, "TSV3dDistanceError[2]/F");
+    ntuple_out->Branch("SV2dDistance",      &TSV2dDistance,      "TSV2dDistance[2]/F");
+    ntuple_out->Branch("SV2dDistanceError", &TSV2dDistanceError, "TSV2dDistanceError[2]/F");
+    ntuple_out->Branch("SVChi2",            &TSVChi2,            "TSVChi2[2]/F");
+    ntuple_out->Branch("SVDegreesOfFreedom",&TSVDegreesOfFreedom,"TSVDegreesOfFreedom[2]/F");
+    ntuple_out->Branch("SVNormChi2",        &TSVNormChi2,        "TSVNormChi2[2]/F");
+    ntuple_out->Branch("SVMass",            &TSVMass,            "TSVMass[2]/F");
+    ntuple_out->Branch("SVtotCharge",       &TSVtotCharge,       "TSVtotCharge[2]/I");
+    ntuple_out->Branch("SVnVertices",       &TSVnVertices,       "TSVnVertices[2]/I");
+    ntuple_out->Branch("SVnVertexTracks",   &TSVnVertexTracks,   "TSVnVertexTracks[2]/I");
+    ntuple_out->Branch("SVnVertexTracksAll",&TSVnVertexTracksAll,"TSVnVertexTracksAll[2]/I");
 
-  tout->Branch("IP3d1",                  &TIP3dFirst		       ,"TIP3dFirst[2]/F");		     	      
-  tout->Branch("IP3dError1",             &TIP3dErrorFirst	       ,"TIP3dErrorFirst[2]/F");		   	     
-  tout->Branch("IP3dDecayLength1",       &TIP3dDecayLengthFirst	       ,"TIP3dDecayLengthFirst[2]/F");	     	   
-  tout->Branch("IP3dTransverseMomentum1",&TIP3dTransverseMomentumFirst ,"TIP3dTransverseMomentumFirst[2]/F"); 	   
-  tout->Branch("IP3dEta1",               &TIP3dEtaFirst		       ,"TIP3dEtaFirst[2]/F");		     	   
-  tout->Branch("IP3dPhi1",               &TIP3dPhiFirst		       ,"TIP3dPhiFirst[2]/F");		     	   
-			   			  		       	  		    	   							     
-  tout->Branch("IP3d2",                  &TIP3dSecond		       ,"TIP3dSecond[2]/F");		     	   
-  tout->Branch("IP3dError2",             &TIP3dErrorSecond	       ,"TIP3dErrorSecond[2]/F");	     	   
-  tout->Branch("IP3dDecayLength2",       &TIP3dDecayLengthSecond       ,"TIP3dDecayLengthSecond[2]/F");	   	     
-  tout->Branch("IP3dTransverseMomentum2",&TIP3dTransverseMomentumSecond,"TIP3dTransverseMomentumSecond[2]/F");	   
-  tout->Branch("IP3dEta2",               &TIP3dEtaSecond               ,"TIP3dEtaSecond[2]/F");               	   
-  tout->Branch("IP3dPhi2",               &TIP3dPhiSecond               ,"TIP3dPhiSecond[2]/F");               	   
-			   			  	   	       	  	   	       	   				     
-  tout->Branch("IP3d3",                  &TIP3dThird		       ,"TIP3dThird[2]/F");		     	   		                     
-  tout->Branch("IP3dError3",             &TIP3dErrorThird              ,"TIP3dErrorThird[2]/F");              	   
-  tout->Branch("IP3dDecayLength3",       &TIP3dDecayLengthThird        ,"TIP3dDecayLengthThird[2]/F");            
-  tout->Branch("IP3dTransverseMomentum3",&TIP3dTransverseMomentumThird ,"TIP3dTransverseMomentumThird[2]/F"); 	   
-  tout->Branch("IP3dEta3",               &TIP3dEtaThird                ,"TIP3dEtaThird[2]/F");                    
-  tout->Branch("IP3dPhi3",               &TIP3dPhiThird                ,"TIP3dPhiThird[2]/F");                	   
-			   	   			   	       		   		   		  		     				     
-  tout->Branch("IP3d4",                  &TIP3dFourth                  ,"TIP3dFourth[2]/F");                  	   
-  tout->Branch("IP3dError4",             &TIP3dErrorFourth             ,"TIP3dErrorFourth[2]/F");                 
-  tout->Branch("IP3dDecayLength4",       &TIP3dDecayLengthFourth       ,"TIP3dDecayLengthFourth[2]/F");       	   
-  tout->Branch("IP3dTransverseMomentum4",&TIP3dTransverseMomentumFourth,"TIP3dTransverseMomentumFourth[2]/F");
-  tout->Branch("IP3dEta4",               &TIP3dEtaFourth               ,"TIP3dEtaFourth[2]/F");               	   
-  tout->Branch("IP3dPhi4",               &TIP3dPhiFourth               ,"TIP3dPhiFourth[2]/F");                        
+    ntuple_out->Branch("IP3d1",                  &TIP3dFirst		       ,"TIP3dFirst[2]/F");		     	      
+    ntuple_out->Branch("IP3dError1",             &TIP3dErrorFirst	       ,"TIP3dErrorFirst[2]/F");		   	     
+    ntuple_out->Branch("IP3dDecayLength1",       &TIP3dDecayLengthFirst	       ,"TIP3dDecayLengthFirst[2]/F");	     	   
+    ntuple_out->Branch("IP3dTransverseMomentum1",&TIP3dTransverseMomentumFirst ,"TIP3dTransverseMomentumFirst[2]/F"); 	   
+    ntuple_out->Branch("IP3dEta1",               &TIP3dEtaFirst		       ,"TIP3dEtaFirst[2]/F");		     	   
+    ntuple_out->Branch("IP3dPhi1",               &TIP3dPhiFirst		       ,"TIP3dPhiFirst[2]/F");		     	   
+    
+    ntuple_out->Branch("IP3d2",                  &TIP3dSecond		       ,"TIP3dSecond[2]/F");		     	   
+    ntuple_out->Branch("IP3dError2",             &TIP3dErrorSecond	       ,"TIP3dErrorSecond[2]/F");	     	   
+    ntuple_out->Branch("IP3dDecayLength2",       &TIP3dDecayLengthSecond       ,"TIP3dDecayLengthSecond[2]/F");	   	     
+    ntuple_out->Branch("IP3dTransverseMomentum2",&TIP3dTransverseMomentumSecond,"TIP3dTransverseMomentumSecond[2]/F");	   
+    ntuple_out->Branch("IP3dEta2",               &TIP3dEtaSecond               ,"TIP3dEtaSecond[2]/F");               	   
+    ntuple_out->Branch("IP3dPhi2",               &TIP3dPhiSecond               ,"TIP3dPhiSecond[2]/F");               	   
 
-  tout->Branch("tche", &Ttche, "Ttche[2]/F");
-  tout->Branch("tchp", &Ttchp, "Ttchp[2]/F");
-  tout->Branch("ssvhe",&Tssvhe,"Tssvhe[2]/F");
-  tout->Branch("ssvhp",&Tssvhp,"Tssvhp[2]/F");
-  tout->Branch("csv",  &Tcsv,  "Tcsv[2]/F"); 
-  tout->Branch("jp",   &Tjp,   "Tjp[2]/F"); 
-  tout->Branch("jbp",  &Tjbp,  "Tjbp[2]/F");
+    ntuple_out->Branch("IP3d3",                  &TIP3dThird		       ,"TIP3dThird[2]/F");		     	   		                     
+    ntuple_out->Branch("IP3dError3",             &TIP3dErrorThird              ,"TIP3dErrorThird[2]/F");              	   
+    ntuple_out->Branch("IP3dDecayLength3",       &TIP3dDecayLengthThird        ,"TIP3dDecayLengthThird[2]/F");            
+    ntuple_out->Branch("IP3dTransverseMomentum3",&TIP3dTransverseMomentumThird ,"TIP3dTransverseMomentumThird[2]/F"); 	   
+    ntuple_out->Branch("IP3dEta3",               &TIP3dEtaThird                ,"TIP3dEtaThird[2]/F");                    
+    ntuple_out->Branch("IP3dPhi3",               &TIP3dPhiThird                ,"TIP3dPhiThird[2]/F");                	   
+    
+    ntuple_out->Branch("IP3d4",                  &TIP3dFourth                  ,"TIP3dFourth[2]/F");                  	   
+    ntuple_out->Branch("IP3dError4",             &TIP3dErrorFourth             ,"TIP3dErrorFourth[2]/F");                 
+    ntuple_out->Branch("IP3dDecayLength4",       &TIP3dDecayLengthFourth       ,"TIP3dDecayLengthFourth[2]/F");       	   
+    ntuple_out->Branch("IP3dTransverseMomentum4",&TIP3dTransverseMomentumFourth,"TIP3dTransverseMomentumFourth[2]/F");
+    ntuple_out->Branch("IP3dEta4",               &TIP3dEtaFourth               ,"TIP3dEtaFourth[2]/F");               	   
+    ntuple_out->Branch("IP3dPhi4",               &TIP3dPhiFourth               ,"TIP3dPhiFourth[2]/F");                        
+
+    ntuple_out->Branch("tche", &Ttche, "Ttche[2]/F");
+    ntuple_out->Branch("tchp", &Ttchp, "Ttchp[2]/F");
+    ntuple_out->Branch("ssvhe",&Tssvhe,"Tssvhe[2]/F");
+    ntuple_out->Branch("ssvhp",&Tssvhp,"Tssvhp[2]/F");
+    ntuple_out->Branch("csv",  &Tcsv,  "Tcsv[2]/F"); 
+    ntuple_out->Branch("jp",   &Tjp,   "Tjp[2]/F"); 
+    ntuple_out->Branch("jbp",  &Tjbp,  "Tjbp[2]/F");
+    
+  }
 
   const Float_t dRmatch(0.1);
 
-  for (Int_t i=0; i<matchList->GetN(); i++) {
+  //  for (Int_t i=0; i<matchList->GetN(); i++) {
+  for (Int_t i=0; i<10000; i++) {
       
     Int_t entry1 = (Int_t)matchList->GetX()[i];
     Int_t entry2 = (Int_t)matchList->GetY()[i];
@@ -483,13 +504,171 @@ void MatchTheTree(const TString& matrix_filename = "MatrixOfMatches.root"){
 	TisBGluonSplitting=m_isBGluonSplitting1;
 	TisCGluonSplitting=m_isCGluonSplitting1;
 
-	TPVx[0] = m_PVx1;		  
+	// sanity check about MC truth flavor
+	if ( MCTrueFlavor1[j1]!=MCTrueFlavor2[j2min] ) 
+	  cout << "MC True flavor mismatch: " << MCTrueFlavor1[j1] << ", " << MCTrueFlavor2[j2min] << endl;
+
+	// tree 
+	if ( doTree ) {
+	  TJetInfoA->pv.PVx = m_PVx1;		  
+	  TJetInfoA->pv.PVy = m_PVy1;		  
+	  TJetInfoA->pv.PVz = m_PVz1;		  
+	  TJetInfoA->pv.PVChiSq = m_PVChiSq1;	  
+	  TJetInfoA->pv.PVndof = m_PVndof1;		  
+	  TJetInfoA->pv.PVNormChiSq = m_PVNormChiSq1; 
+	  
+	  TJetInfoB->pv.PVx = m_PVx2;		  
+	  TJetInfoB->pv.PVy = m_PVy2;		  
+	  TJetInfoB->pv.PVz = m_PVz2;		  
+	  TJetInfoB->pv.PVChiSq = m_PVChiSq2;	  
+	  TJetInfoB->pv.PVndof = m_PVndof2;		  
+	  TJetInfoB->pv.PVNormChiSq = m_PVNormChiSq2; 
+	  
+
+	  // matched jet infos from tree #1
+	  TJetInfoA->pt    =pt1[j1];
+	  TJetInfoA->eta   =eta1[j1];
+	  TJetInfoA->phi   =phi1[j1];
+	  TJetInfoA->nTracks = nTracks1[j1];
+	
+	  TJetInfoA->jetId = GetJetID(
+				     jetNeutralHadronEnergyFraction1[j1], // nhf	       
+				     jetNeutralEmEnergyFraction1[j1],     // nEF	       
+				     jetnConstituents1[j1],               // nconstituents  
+				     jetChargedMultiplicity1[j1],         // nch	       
+				     jetChargedHadronEnergyFraction1[j1], // chf	       
+				     jetChargedEmEnergyFraction1[j1]	  // cef            
+				     );   
+
+	  TJetInfoA->sv.SV3dDistance      =SV3dDistance1[j1];
+	  TJetInfoA->sv.SV3dDistanceError =SV3dDistanceError1[j1];
+	  TJetInfoA->sv.SV2dDistance      =SV2dDistance1[j1];      
+	  TJetInfoA->sv.SV2dDistanceError =SV2dDistanceError1[j1];
+	  TJetInfoA->sv.SVChi2            =SVChi21[j1];            
+	  TJetInfoA->sv.SVDegreesOfFreedom=SVDegreesOfFreedom1[j1];
+	  TJetInfoA->sv.SVNormChi2        =SVNormChi21[j1];
+	  TJetInfoA->sv.SVMass            =SVMass1[j1];            
+	  TJetInfoA->sv.SVtotCharge       =SVtotCharge1[j1];
+	  TJetInfoA->sv.SVnVertices       =SVnVertices1[j1];
+	  TJetInfoA->sv.SVnVertexTracks   =SVnVertexTracks1[j1];
+	  TJetInfoA->sv.SVnVertexTracksAll=SVnVertexTracksAll1[j1];
+	  
+ 	  TJetInfoA->trk[0].IP3d		      =IP3dFirst1[j1];                  
+ 	  TJetInfoA->trk[0].IP3dError	      =IP3dErrorFirst1[j1];             
+ 	  TJetInfoA->trk[0].IP3dDecayLength      =IP3dDecayLengthFirst1[j1];       	
+ 	  TJetInfoA->trk[0].IP3dransverseMomentum=IP3dTransverseMomentumFirst1[j1];	
+ 	  TJetInfoA->trk[0].IP3dEta	      =IP3dEtaFirst1[j1];               	
+ 	  TJetInfoA->trk[0].IP3dPhi              =IP3dPhiFirst1[j1];               	
+	  
+ 	  TJetInfoA->trk[1].IP3d		      =IP3dSecond1[j1];                 
+ 	  TJetInfoA->trk[1].IP3dError	      =IP3dErrorSecond1[j1];            
+ 	  TJetInfoA->trk[1].IP3dDecayLength      =IP3dDecayLengthSecond1[j1];      	
+ 	  TJetInfoA->trk[1].IP3dransverseMomentum=IP3dTransverseMomentumSecond1[j1];	
+ 	  TJetInfoA->trk[1].IP3dEta	      =IP3dEtaSecond1[j1];              	
+ 	  TJetInfoA->trk[1].IP3dPhi              =IP3dPhiSecond1[j1];              	
+	
+ 	  TJetInfoA->trk[2].IP3d		      =IP3dThird1[j1];                  
+ 	  TJetInfoA->trk[2].IP3dError	      =IP3dErrorThird1[j1];             	
+ 	  TJetInfoA->trk[2].IP3dDecayLength      =IP3dDecayLengthThird1[j1];       
+ 	  TJetInfoA->trk[2].IP3dransverseMomentum=IP3dTransverseMomentumThird1[j1];	
+ 	  TJetInfoA->trk[2].IP3dEta	      =IP3dEtaThird1[j1];               
+ 	  TJetInfoA->trk[2].IP3dPhi              =IP3dPhiThird1[j1];               	
+	  
+ 	  TJetInfoA->trk[3].IP3d		      =IP3dFourth1[j1];                 	
+ 	  TJetInfoA->trk[3].IP3dError	      =IP3dErrorFourth1[j1];            
+ 	  TJetInfoA->trk[3].IP3dDecayLength      =IP3dDecayLengthFourth1[j1];      	
+ 	  TJetInfoA->trk[3].IP3dransverseMomentum=IP3dTransverseMomentumFourth1[j1];	
+ 	  TJetInfoA->trk[3].IP3dEta	      =IP3dEtaFourth1[j1];              	
+ 	  TJetInfoA->trk[3].IP3dPhi              =IP3dPhiFourth1[j1];              
+
+	  TJetInfoA->tche =discrtcheglobal1[j1];	    
+	  TJetInfoA->tchp =discrtchpglobal1[j1];	    
+	  TJetInfoA->ssvhe=discrssvheglobal1[j1];    
+	  TJetInfoA->ssvhp=discrssvhpglobal1[j1];    
+	  TJetInfoA->csv  =discrcsvglobal1[j1];	    
+	  TJetInfoA->jp   =discrjpglobal1[j1];        
+	  TJetInfoA->jbp  =discrjbpglobal1[j1];               
+	  
+	  TJetInfoA->MCTrueFlavor = MCTrueFlavor1[j1];
+
+	// -------------------------------------------------------------------------------------------------------------------------------
+	// matched jet infos from tree #2
+	  TJetInfoB->pt    =pt2[j2min];
+	  TJetInfoB->eta   =eta2[j2min];
+	  TJetInfoB->phi   =phi2[j2min];
+	  TJetInfoB->nTracks = nTracks2[j2min];
+	  
+	  TJetInfoB->jetId = GetJetID(
+				     jetNeutralHadronEnergyFraction2[j2min], // nhf	       
+				     jetNeutralEmEnergyFraction2[j2min],     // nEF	       
+				     jetnConstituents2[j2min],               // nconstituents  
+				     jetChargedMultiplicity2[j2min],         // nch	       
+				     jetChargedHadronEnergyFraction2[j2min], // chf	       
+				     jetChargedEmEnergyFraction2[j2min]	     // cef            
+				     );   
+	
+	  TJetInfoB->sv.SV3dDistance      =SV3dDistance2[j2min];
+	  TJetInfoB->sv.SV3dDistanceError =SV3dDistanceError2[j2min];
+	  TJetInfoB->sv.SV2dDistance      =SV2dDistance2[j2min];      
+	  TJetInfoB->sv.SV2dDistanceError =SV2dDistanceError2[j2min];
+	  TJetInfoB->sv.SVChi2            =SVChi22[j2min];            
+	  TJetInfoB->sv.SVDegreesOfFreedom=SVDegreesOfFreedom2[j2min];
+	  TJetInfoB->sv.SVNormChi2        =SVNormChi22[j2min];
+	  TJetInfoB->sv.SVMass            =SVMass2[j2min];            
+	  TJetInfoB->sv.SVtotCharge       =SVtotCharge2[j2min];
+	  TJetInfoB->sv.SVnVertices       =SVnVertices2[j2min];
+	  TJetInfoB->sv.SVnVertexTracks   =SVnVertexTracks2[j2min];
+	  TJetInfoB->sv.SVnVertexTracksAll=SVnVertexTracksAll2[j2min];
+	
+ 	  TJetInfoB->trk[0].IP3d		      =IP3dFirst2[j2min];                  
+ 	  TJetInfoB->trk[0].IP3dError	      =IP3dErrorFirst2[j2min];             
+ 	  TJetInfoB->trk[0].IP3dDecayLength      =IP3dDecayLengthFirst2[j2min];       	
+ 	  TJetInfoB->trk[0].IP3dransverseMomentum=IP3dTransverseMomentumFirst2[j2min];	
+ 	  TJetInfoB->trk[0].IP3dEta	      =IP3dEtaFirst2[j2min];               	
+ 	  TJetInfoB->trk[0].IP3dPhi              =IP3dPhiFirst2[j2min];               	
+	  
+ 	  TJetInfoB->trk[1].IP3d		      =IP3dSecond2[j2min];                 
+ 	  TJetInfoB->trk[1].IP3dError	      =IP3dErrorSecond2[j2min];            
+ 	  TJetInfoB->trk[1].IP3dDecayLength      =IP3dDecayLengthSecond2[j2min];      	
+ 	  TJetInfoB->trk[1].IP3dransverseMomentum=IP3dTransverseMomentumSecond2[j2min];	
+ 	  TJetInfoB->trk[1].IP3dEta	      =IP3dEtaSecond2[j2min];              	
+ 	  TJetInfoB->trk[1].IP3dPhi              =IP3dPhiSecond2[j2min];              	
+	  
+ 	  TJetInfoB->trk[2].IP3d		      =IP3dThird2[j2min];                  
+ 	  TJetInfoB->trk[2].IP3dError	      =IP3dErrorThird2[j2min];             	
+ 	  TJetInfoB->trk[2].IP3dDecayLength      =IP3dDecayLengthThird2[j2min];       
+ 	  TJetInfoB->trk[2].IP3dransverseMomentum=IP3dTransverseMomentumThird2[j2min];	
+ 	  TJetInfoB->trk[2].IP3dEta	      =IP3dEtaThird2[j2min];               
+ 	  TJetInfoB->trk[2].IP3dPhi              =IP3dPhiThird2[j2min];               	
+	
+ 	  TJetInfoB->trk[3].IP3d		      =IP3dFourth2[j2min];                 	
+ 	  TJetInfoB->trk[3].IP3dError	      =IP3dErrorFourth2[j2min];            
+ 	  TJetInfoB->trk[3].IP3dDecayLength      =IP3dDecayLengthFourth2[j2min];      	
+ 	  TJetInfoB->trk[3].IP3dransverseMomentum=IP3dTransverseMomentumFourth2[j2min];	
+ 	  TJetInfoB->trk[3].IP3dEta	      =IP3dEtaFourth2[j2min];              	
+ 	  TJetInfoB->trk[3].IP3dPhi              =IP3dPhiFourth2[j2min];              
+
+	  TJetInfoB->tche =discrtcheglobal2[j2min];	    
+	  TJetInfoB->tchp =discrtchpglobal2[j2min];	    
+	  TJetInfoB->ssvhe=discrssvheglobal2[j2min];    
+	  TJetInfoB->ssvhp=discrssvhpglobal2[j2min];    
+	  TJetInfoB->csv  =discrcsvglobal2[j2min];	    
+	  TJetInfoB->jp   =discrjpglobal2[j2min];        
+	  TJetInfoB->jbp  =discrjbpglobal2[j2min];               
+	  
+	  TJetInfoB->MCTrueFlavor = MCTrueFlavor2[j2min];
+
+	  tree_out->Fill();
+
+	} else {
+	  // Flat ntuple
+        TPVx[0] = m_PVx1;		  
 	TPVy[0] = m_PVy1;		  
 	TPVz[0] = m_PVz1;		  
 	TPVChiSq[0] = m_PVChiSq1;	  
 	TPVndof[0] = m_PVndof1;		  
 	TPVNormChiSq[0] = m_PVNormChiSq1; 
-	
+       
 	TPVx[1] = m_PVx2;		  
 	TPVy[1] = m_PVy2;		  
 	TPVz[1] = m_PVz2;		  
@@ -502,7 +681,7 @@ void MatchTheTree(const TString& matrix_filename = "MatrixOfMatches.root"){
 	Teta[0]   =eta1[j1];
 	Tphi[0]   =phi1[j1];
 	TnTracks[0] = nTracks1[j1];
-	
+       
 	TjetId[0] = GetJetID(
 			     jetNeutralHadronEnergyFraction1[j1], // nhf	       
 			     jetNeutralEmEnergyFraction1[j1],     // nEF	       
@@ -530,22 +709,22 @@ void MatchTheTree(const TString& matrix_filename = "MatrixOfMatches.root"){
 	TIP3dDecayLengthFirst[0]	     =IP3dDecayLengthFirst1[j1];       	
 	TIP3dTransverseMomentumFirst[0]      =IP3dTransverseMomentumFirst1[j1];	
 	TIP3dEtaFirst[0]		     =IP3dEtaFirst1[j1];               	
-	TIP3dPhiFirst[0]		     =IP3dPhiFirst1[j1];               	
-	 		    	   	     						
+	TIP3dPhiFirst[0]		     =IP3dPhiFirst1[j1];               		 		    	   	     						
+
 	TIP3dSecond[0]		     	     =IP3dSecond1[j1];                 
 	TIP3dErrorSecond[0]	     	     =IP3dErrorSecond1[j1];            
 	TIP3dDecayLengthSecond[0]	     =IP3dDecayLengthSecond1[j1];      	
 	TIP3dTransverseMomentumSecond[0]     =IP3dTransverseMomentumSecond1[j1];	
 	TIP3dEtaSecond[0]                    =IP3dEtaSecond1[j1];              	
 	TIP3dPhiSecond[0]                    =IP3dPhiSecond1[j1];              	
-	 	   	       	   	     						
+
 	TIP3dThird[0]		     	     =IP3dThird1[j1];                  
 	TIP3dErrorThird[0]                   =IP3dErrorThird1[j1];             	
 	TIP3dDecayLengthThird[0]             =IP3dDecayLengthThird1[j1];       
 	TIP3dTransverseMomentumThird[0]      =IP3dTransverseMomentumThird1[j1];	
 	TIP3dEtaThird[0]                     =IP3dEtaThird1[j1];               
-	TIP3dPhiThird[0]                     =IP3dPhiThird1[j1];               	
-		   		   	     						
+	TIP3dPhiThird[0]                     =IP3dPhiThird1[j1];               			   		   	     						
+
 	TIP3dFourth[0]                       =IP3dFourth1[j1];                 	
 	TIP3dErrorFourth[0]                  =IP3dErrorFourth1[j1];            
 	TIP3dDecayLengthFourth[0]            =IP3dDecayLengthFourth1[j1];      	
@@ -559,7 +738,7 @@ void MatchTheTree(const TString& matrix_filename = "MatrixOfMatches.root"){
  	Tssvhp[0]=discrssvhpglobal1[j1];    
  	Tcsv[0]  =discrcsvglobal1[j1];	    
  	Tjp[0]   =discrjpglobal1[j1];        
- 	Tjbp[0]  =discrjbpglobal1[j1];               
+ 	Tjbp[0]  =discrjbpglobal1[j1];    
 
 	TMCTrueFlavor[0] = MCTrueFlavor1[j1];
 
@@ -590,29 +769,29 @@ void MatchTheTree(const TString& matrix_filename = "MatrixOfMatches.root"){
  	TSVtotCharge[1]       =SVtotCharge2[j2min];
  	TSVnVertices[1]       =SVnVertices2[j2min];
  	TSVnVertexTracks[1]   =SVnVertexTracks2[j2min];
- 	TSVnVertexTracksAll[1]=SVnVertexTracksAll2[j2min];
-	
+ 	TSVnVertexTracksAll[1]=SVnVertexTracksAll2[j2min];	
+
 	TIP3dFirst[1]		     	     =IP3dFirst2[j2min];                  
 	TIP3dErrorFirst[1]		     =IP3dErrorFirst2[j2min];             
 	TIP3dDecayLengthFirst[1]	     =IP3dDecayLengthFirst2[j2min];       	
 	TIP3dTransverseMomentumFirst[1]      =IP3dTransverseMomentumFirst2[j2min];	
 	TIP3dEtaFirst[1]		     =IP3dEtaFirst2[j2min];               	
 	TIP3dPhiFirst[1]		     =IP3dPhiFirst2[j2min];               	
-	 		    	   	     						
-	TIP3dSecond[1]		     	     =IP3dSecond2[j2min];                 
+
+        TIP3dSecond[1]		     	     =IP3dSecond2[j2min];                 
 	TIP3dErrorSecond[1]	     	     =IP3dErrorSecond2[j2min];            
 	TIP3dDecayLengthSecond[1]	     =IP3dDecayLengthSecond2[j2min];      	
 	TIP3dTransverseMomentumSecond[1]     =IP3dTransverseMomentumSecond2[j2min];	
 	TIP3dEtaSecond[1]                    =IP3dEtaSecond2[j2min];              	
 	TIP3dPhiSecond[1]                    =IP3dPhiSecond2[j2min];              	
-	 	   	       	   	     						
+
 	TIP3dThird[1]		     	     =IP3dThird2[j2min];                  
 	TIP3dErrorThird[1]                   =IP3dErrorThird2[j2min];             	
 	TIP3dDecayLengthThird[1]             =IP3dDecayLengthThird2[j2min];       
 	TIP3dTransverseMomentumThird[1]      =IP3dTransverseMomentumThird2[j2min];	
 	TIP3dEtaThird[1]                     =IP3dEtaThird2[j2min];               
 	TIP3dPhiThird[1]                     =IP3dPhiThird2[j2min];               	
-		   		   	     						
+
 	TIP3dFourth[1]                       =IP3dFourth2[j2min];                 	
 	TIP3dErrorFourth[1]                  =IP3dErrorFourth2[j2min];            
 	TIP3dDecayLengthFourth[1]            =IP3dDecayLengthFourth2[j2min];      	
@@ -626,15 +805,14 @@ void MatchTheTree(const TString& matrix_filename = "MatrixOfMatches.root"){
  	Tssvhp[1]=discrssvhpglobal2[j2min];    
  	Tcsv[1]  =discrcsvglobal2[j2min];	    
  	Tjp[1]   =discrjpglobal2[j2min];        
- 	Tjbp[1]  =discrjbpglobal2[j2min];               
+ 	Tjbp[1]  =discrjbpglobal2[j2min];
 
 	TMCTrueFlavor[1] = MCTrueFlavor2[j2min];
 
-	// sanity check about MC truth flavor
-	if ( MCTrueFlavor1[j1]!=MCTrueFlavor2[j2min] ) 
-	  cout << "MC True flavor mismatch: " << MCTrueFlavor1[j1] << ", " << MCTrueFlavor2[j2min] << endl;
+	ntuple_out->Fill();
 
-	tout->Fill();
+	}
+
 
       } // end of if jet matched clause
     } // end of loop on the jets in tree #1
@@ -651,22 +829,6 @@ void MatchTheTree(const TString& matrix_filename = "MatrixOfMatches.root"){
   file_out->Close();
 
 }
-
-
-
-
-
-
-
-	  
-
-
-
-
-
-
-	  
-
 
 
 
