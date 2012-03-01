@@ -1,0 +1,20 @@
+##########################################
+# Instructions for CMSSW_4_2_8
+##########################################
+
+cmsrel CMSSW_4_2_8 
+cd CMSSW_4_2_8/src/
+mkdir BTagging
+cd BTagging
+cvs co -A -d BTagStudies UserCode/musich/BTagStudies
+
+###########################################
+# running the scripts
+###########################################
+# Copy in ${CMSSW_BASE}/src/BTagging/BTagStudies/data
+# the ntuples one wants to evaluate. Then edit
+# the ${CMSSW_BASE}/src/BTagging/BTagStudies/script/runAll.C
+# accordingly. Then simply 
+
+root -l
+.x runAll.C
