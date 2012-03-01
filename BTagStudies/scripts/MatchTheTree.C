@@ -41,7 +41,7 @@ Int_t GetJetID(Double_t nhf, Double_t nEF, Double_t nconstituents, Double_t chf,
   return goodjetID; 
 }
 
-void MatchTheTree(bool doTree, const TString& matrix_filename = "MatrixOfMatches.root"){
+void MatchTheTree(bool doTree, const TString& matrix_filename = "MatrixOfMatches.root",Int_t maxEvents=-1){
   // input 
   TFile *file_of_matches = new TFile(matrix_filename,"READ");  
   cout << matrix_filename << " open" << endl;
@@ -318,7 +318,11 @@ void MatchTheTree(bool doTree, const TString& matrix_filename = "MatrixOfMatches
 
 
   // output 
-  TString append = "JetByJetComparison_"+tos_label1->GetString()+"Vs"+tos_label2->GetString()+".root";
+  TString tupleType_;
+  if (doTree) tupleType_= "Tree";
+  else tupleType_= "Ntuple";
+		
+  TString append = "JetByJetComparison"+tupleType_+"_"+tos_label1->GetString()+"Vs"+tos_label2->GetString()+".root";
 
   TFile *file_out=new TFile(append,"RECREATE");  
   file_out->cd();
@@ -450,9 +454,11 @@ void MatchTheTree(bool doTree, const TString& matrix_filename = "MatrixOfMatches
   }
 
   const Float_t dRmatch(0.1);
-
-  //  for (Int_t i=0; i<matchList->GetN(); i++) {
-  for (Int_t i=0; i<10000; i++) {
+  
+  Int_t nMaxEvents_(matchList->GetN());
+  if(maxEvents!=-1) nMaxEvents_ = maxEvents; 
+  
+  for (Int_t i=0; i<nMaxEvents_; i++) {
       
     Int_t entry1 = (Int_t)matchList->GetX()[i];
     Int_t entry2 = (Int_t)matchList->GetY()[i];

@@ -1,9 +1,8 @@
 {
   
   gROOT->LoadMacro("./EventByEventNtuple.C+");
-  EventByEventNtuple("../data/standardPFNtuple_ttbar_orig.root=orig","../data/standardPFNtuple_ttbar_newgeom.root=newgeom");
-
-
+  EventByEventNtuple("./standardPFNtuple_ttbar_orig.root=orig","./standardPFNtuple_ttbar_newgeom.root=newgeom");
+  
   /* list of available files
      
      => DATA:
@@ -25,13 +24,14 @@
   */
 
   gROOT->LoadMacro("./JetInfo.cxx+");
+ 
   gROOT->LoadMacro("./MatchTheTree.C+");
+  MatchTheTree(true,"MatrixOfMatches.root",-1);
 
-  MatchTheTree(true,"MatrixOfMatches.root");
-
+  // this will work only for TTree and not for flat Ntuple
   gROOT->LoadMacro("./JetByJetComparisonHistos.cxx++g");
   gROOT->LoadMacro("./JetByJetComparison.C++g");
-  JetByJetComparison t("JetByJetComparison_origVsnewgeom.root");
+  JetByJetComparison t("JetByJetComparisonTree_origVsnewgeom.root");
   t.Loop(); 
   
   // TString processline = Form(".! mv *.png figures_jetbyjet") ;

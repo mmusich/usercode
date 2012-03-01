@@ -42,19 +42,19 @@ void JetByJetComparisonHistos::addAllHistos() {
   addHisto("hDeltaDiscrCSV",  "#Delta DiscrCSV ;#Delta DiscrCSV;jets",    1000,-5.,5.    );
  
   //Histograms 2D (scatter plot for differences)  
-  addHisto2D("h2ScatDeltaDiscrTCHEvsIP3d2","#Delta discr TCHE vs IP3d2",200,-5.,5.,200,-200.,200.);
-  addHisto2D("h2ScatDeltaDiscrTCHPvsIP3d3"," #Delta discr TCHP vs IP3d3",200,-5.,5.,200,-200.,200.);
-  addHisto2D("h2ScatDeltaDiscrTCHEvsIP3d2Error","#Delta discr TCHE vs IP3d2Error",200,-0.5,0.5,200,-200.,200.);
-  addHisto2D("h2ScatDeltaDiscrTCHPvsIP3d3Error"," #Delta discr TCHP vs IP3d3Error",200,-200.,200.,200,-200.,200.);
-  addHisto2D("h2ScatDeltaDiscrTCHEvsIP3d2/Error","#Delta discr TCHE vs IP3d2/Error",200,-200.,200.,200,-200.,200.);
-  addHisto2D("h2ScatDeltaDiscrTCHPvsIP3d3/Error"," #Delta discr TCHP vs IP3d3/Error",200,-200.,200.,200,-200.,200.);
+  addHisto2D("h2ScatDeltaDiscrTCHEvsIP3d2",      "#Delta discr TCHE vs IP3d2",       200,-5.  ,5.  ,200,-200.,200.);
+  addHisto2D("h2ScatDeltaDiscrTCHPvsIP3d3",      "#Delta discr TCHP vs IP3d3",       200,-5.  ,5.  ,200,-200.,200.);
+  addHisto2D("h2ScatDeltaDiscrTCHEvsIP3d2Error", "#Delta discr TCHE vs IP3d2Error",  200,-0.5 ,0.5 ,200,-200.,200.);
+  addHisto2D("h2ScatDeltaDiscrTCHPvsIP3d3Error", "#Delta discr TCHP vs IP3d3Error",  200,-200.,200.,200,-200.,200.);
+  addHisto2D("h2ScatDeltaDiscrTCHEvsIP3d2/Error","#Delta discr TCHE vs IP3d2/Error", 200,-200.,200.,200,-200.,200.);
+  addHisto2D("h2ScatDeltaDiscrTCHPvsIP3d3/Error","#Delta discr TCHP vs IP3d3/Error", 200,-200.,200.,200,-200.,200.);
   
   // Adding Profile plot   
-  addProfile("ProfileDeltaDiscrTCHEvsIP3d2","#Delta discr TCHE vs IP3d2",200,-5.,5.,-200.,200.);
-  addProfile("ProfileDeltaDiscrTCHPvsIP3d3"," #Delta discr TCHP vs IP3d3",200,-5.,5.,-200.,200.);
-  addProfile("ProfileDeltaDiscrTCHEvsIP3d2Error","#Delta discr TCHE vs IP3d2Error",200,-0.5,0.5,-200.,200.);
-  addProfile("ProfileDeltaDiscrTCHPvsIP3d3Error"," #Delta discr TCHP vs IP3d3Error",200,-0.5,0.5,-200.,200.);
-  addProfile("ProfileDeltaDiscrTCHEvsIP3d2/Error","#Delta discr TCHE vs IP3d2/Error",200,-200.,200.,-200.,200.);
+  addProfile("ProfileDeltaDiscrTCHEvsIP3d2","#Delta discr TCHE vs IP3d2",             200,-5.  ,5.  ,-200.,200.);
+  addProfile("ProfileDeltaDiscrTCHPvsIP3d3"," #Delta discr TCHP vs IP3d3",            200,-5.  ,5.  ,-200.,200.);
+  addProfile("ProfileDeltaDiscrTCHEvsIP3d2Error","#Delta discr TCHE vs IP3d2Error",   200,-0.5 ,0.5 ,-200.,200.);
+  addProfile("ProfileDeltaDiscrTCHPvsIP3d3Error"," #Delta discr TCHP vs IP3d3Error",  200,-200.,200.,-200.,200.);
+  addProfile("ProfileDeltaDiscrTCHEvsIP3d2/Error","#Delta discr TCHE vs IP3d2/Error", 200,-200.,200.,-200.,200.);
   addProfile("ProfileDeltaDiscrTCHPvsIP3d3/Error"," #Delta discr TCHP vs IP3d3/Error",200,-200.,200.,-200.,200.);
     
 }
@@ -143,24 +143,7 @@ void JetByJetComparisonHistos::fillAllHistos(const JetInfo& ja, const JetInfo& j
   fillTH(findTH2("h2ScatDiscrJBP"), ja.jbp,jb.jbp);
   fillTH(findTH2("h2ScatDiscrSSVHE"), ja.ssvhe,jb.ssvhp);
   fillTH(findTH2("h2ScatDiscrSSVHP"), ja.ssvhp,jb.ssvhp);
-  
-  /*  
-      fillTH(findTH1("hDeltaDiscrTCHENotDefaultDefault"), ja.tche,  jb.tche);
-      fillTH(findTH1("hDeltaDiscrTCHPNotDefaultDefault"), ja.tchp,  jb.tchp);
-      fillTH(findTH1("hDeltaDiscrSSVHENotDefaultDefault"),ja.ssvhe, jb.ssvhe);
-      fillTH(findTH1("hDeltaDiscrSSVHPNotDefaultDefault"),ja.ssvhp, jb.ssvhp);
-      fillTH(findTH1("hDeltaDiscrCSVNotDefaultDefault"),  ja.csv,   jb.csv);
-      fillTH(findTH1("hDeltaDiscrJPNotDefaultDefault"),  ja.jp,   jb.jp);
-      fillTH(findTH1("hDeltaDiscrJBPNotDefaultDefault"),  ja.jbp,   jb.jbp);
-      fillTH(findTH2("h2ScatDiscrTCHENotDefaultNotDefault"), ja.tche,jb.tche);
-      fillTH(findTH2("h2ScatDiscrTCHPNotDefaultNotDefault"), ja.tchp,jb.tchp);
-      fillTH(findTH2("h2ScatDiscrCSVNotDefaultNotDefault"), ja.csv,jb.csv);
-      fillTH(findTH2("h2ScatDiscrJPNotDefaultNotDefault"), ja.jp,jb.jp);
-      fillTH(findTH2("h2ScatDiscrJBPNotDefaultNotDefault"), ja.jbp,jb.jbp);
-      fillTH(findTH2("h2ScatDiscrSSVHENotDefaultNotDefault"), ja.ssvhe,jb.ssvhp);
-      fillTH(findTH2("h2ScatDiscrSSVHPNotDefaultNotDefault"), ja.ssvhp,jb.ssvhp)  
-  */
-  
+ 
   fillTH(findTH2("h2ScatDeltaDiscrTCHEvsIP3d2"),ja.tche,jb.tche,ja.trk[1].IP3d);
   fillTH(findTH2("h2ScatDeltaDiscrTCHPvsIP3d3"),ja.tchp,jb.tchp,ja.trk[2].IP3d);
   fillTH(findTH2("h2ScatDeltaDiscrTCHEvsIP3d2Error"),ja.tche,jb.tche,ja.trk[1].IP3dError);

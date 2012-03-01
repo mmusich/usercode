@@ -63,24 +63,26 @@ public :
 
 JetByJetComparison::JetByJetComparison(TString filename,TTree *tree)
 {
-// if parameter tree is not specified (or zero), connect the file
-// used to generate this class and read the Tree.
-   if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("JetByJetComparison_origVsnewgeom.root");
-      if (!f) {
-         f = new TFile("JetByJetComparison_origVsnewgeom.root");
-      }
-      tree = (TTree*)gDirectory->Get("JetByJetComparisonTree");
-
-   }
-   Init(tree);
-   filename.ReplaceAll(".root","");
-   TObjArray *allInfos = filename.Tokenize("_");
-   TString filestoCompare_s = allInfos->At(1)->GetName();
-   TObjArray *filestoCompare = (filestoCompare_s).Tokenize("Vs");
-   
-   CompNames[0] = filestoCompare->At(0)->GetName();
-   CompNames[1] = filestoCompare->At(1)->GetName();
+  // if parameter tree is not specified (or zero), connect the file
+  // used to generate this class and read the Tree.
+  if (tree == 0) {
+    // TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("JetByJetComparison_origVsnewgeom.root");
+    TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject(filename);
+    if (!f) {
+      //    f = new TFile("JetByJetComparison_origVsnewgeom.root");
+      f = new TFile(filename);
+    }
+    tree = (TTree*)gDirectory->Get("JetByJetComparisonTree");
+    
+  }
+  Init(tree);
+  filename.ReplaceAll(".root","");
+  TObjArray *allInfos = filename.Tokenize("_");
+  TString filestoCompare_s = allInfos->At(1)->GetName();
+  TObjArray *filestoCompare = (filestoCompare_s).Tokenize("Vs");
+  
+  CompNames[0] = filestoCompare->At(0)->GetName();
+  CompNames[1] = filestoCompare->At(1)->GetName();
 }
 
 JetByJetComparison::~JetByJetComparison()
