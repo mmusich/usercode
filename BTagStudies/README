@@ -2,8 +2,19 @@
 # Instructions for CMSSW_4_2_8
 ##########################################
 
+
+### Next lines are needed if you want to run the package on your local machine
+CVSROOT=:gserver:cmscvs.cern.ch:/cvs_server/repositories/CMSSW
+export CVSROOT
+kinit username@CERN.CH
+###
+
+### Next lines are neede if you want to run the package in a CMSSW installation 
 cmsrel CMSSW_4_2_8 
 cd CMSSW_4_2_8/src/
+###
+
+
 mkdir BTagging
 cd BTagging
 cvs co -A -d BTagStudies UserCode/musich/BTagStudies
