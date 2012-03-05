@@ -62,6 +62,12 @@ void JetByJetComparison::Loop()
     // if (Cut(ientry) < 0) continue;
   }
   
+
+  jetbyjethistos_notdefnotdef.drawNice2dHistos(file_out);
+  jetbyjethistos_notdefdef.drawNice2dHistos(file_out);
+  jetbyjethistos_defnotdef.drawNice2dHistos(file_out);
+
+
   // end of job stuff
    file_out->cd();
    file_out->Write();
