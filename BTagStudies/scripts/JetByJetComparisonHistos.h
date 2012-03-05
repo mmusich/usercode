@@ -23,7 +23,8 @@ class JetByJetComparisonHistos{
     TH2F* findTH2(TString keyword);
     TProfile* findTProfile(TString keyword);
     void fillAllHistos(const JetInfo& ja, const JetInfo& jb, TFile* fout);
-    void fillTH(TH1* h, float value1, float value2, float value3=0);
+    void fillTH(TH1* h, float value1, float value2, float valueX, float valueY=0);
+    void setTDRStyle();
 
  private:
   std::map<TString,Float_t> defaultmap;

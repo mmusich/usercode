@@ -26,7 +26,7 @@ class SVInfo {
 // track related
 class TRKInfo {
  public:
-  Float_t IP3d,IP3dError,IP3dDecayLength,IP3dransverseMomentum,IP3dEta,IP3dPhi;
+  Float_t IP3d,IP3dError,IP3dDecayLength,pT,eta,phi;
   TRKInfo() {}
   ClassDef(TRKInfo,1)
 };

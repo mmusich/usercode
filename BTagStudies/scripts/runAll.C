@@ -1,7 +1,7 @@
 {
   
   gROOT->LoadMacro("./EventByEventNtuple.C+");
-  EventByEventNtuple("./standardPFNtuple_ttbar_orig.root=orig","./standardPFNtuple_ttbar_newgeom.root=newgeom");
+  EventByEventNtuple("../data/standardPFNtuple_ttbar_orig.root=orig","../data/standardPFNtuple_ttbar_newgeom.root=newgeom");
   
   /* list of available files
      

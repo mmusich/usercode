@@ -559,33 +559,33 @@ void MatchTheTree(bool doTree, const TString& matrix_filename = "MatrixOfMatches
 	  TJetInfoA->sv.SVnVertexTracks   =SVnVertexTracks1[j1];
 	  TJetInfoA->sv.SVnVertexTracksAll=SVnVertexTracksAll1[j1];
 	  
- 	  TJetInfoA->trk[0].IP3d		      =IP3dFirst1[j1];                  
- 	  TJetInfoA->trk[0].IP3dError	      =IP3dErrorFirst1[j1];             
- 	  TJetInfoA->trk[0].IP3dDecayLength      =IP3dDecayLengthFirst1[j1];       	
- 	  TJetInfoA->trk[0].IP3dransverseMomentum=IP3dTransverseMomentumFirst1[j1];	
- 	  TJetInfoA->trk[0].IP3dEta	      =IP3dEtaFirst1[j1];               	
- 	  TJetInfoA->trk[0].IP3dPhi              =IP3dPhiFirst1[j1];               	
+ 	  TJetInfoA->trk[0].IP3d	   =IP3dFirst1[j1];                  
+ 	  TJetInfoA->trk[0].IP3dError	   =IP3dErrorFirst1[j1];             
+ 	  TJetInfoA->trk[0].IP3dDecayLength=IP3dDecayLengthFirst1[j1];       	
+ 	  TJetInfoA->trk[0].pT             =IP3dTransverseMomentumFirst1[j1];	
+ 	  TJetInfoA->trk[0].eta	           =IP3dEtaFirst1[j1];               	
+ 	  TJetInfoA->trk[0].phi            =IP3dPhiFirst1[j1];               	
 	  
- 	  TJetInfoA->trk[1].IP3d		      =IP3dSecond1[j1];                 
- 	  TJetInfoA->trk[1].IP3dError	      =IP3dErrorSecond1[j1];            
- 	  TJetInfoA->trk[1].IP3dDecayLength      =IP3dDecayLengthSecond1[j1];      	
- 	  TJetInfoA->trk[1].IP3dransverseMomentum=IP3dTransverseMomentumSecond1[j1];	
- 	  TJetInfoA->trk[1].IP3dEta	      =IP3dEtaSecond1[j1];              	
- 	  TJetInfoA->trk[1].IP3dPhi              =IP3dPhiSecond1[j1];              	
+ 	  TJetInfoA->trk[1].IP3d	   =IP3dSecond1[j1];                 
+ 	  TJetInfoA->trk[1].IP3dError	   =IP3dErrorSecond1[j1];            
+ 	  TJetInfoA->trk[1].IP3dDecayLength=IP3dDecayLengthSecond1[j1];      	
+ 	  TJetInfoA->trk[1].pT             =IP3dTransverseMomentumSecond1[j1];	
+ 	  TJetInfoA->trk[1].eta	           =IP3dEtaSecond1[j1];              	
+ 	  TJetInfoA->trk[1].phi            =IP3dPhiSecond1[j1];              	
 	
- 	  TJetInfoA->trk[2].IP3d		      =IP3dThird1[j1];                  
- 	  TJetInfoA->trk[2].IP3dError	      =IP3dErrorThird1[j1];             	
- 	  TJetInfoA->trk[2].IP3dDecayLength      =IP3dDecayLengthThird1[j1];       
- 	  TJetInfoA->trk[2].IP3dransverseMomentum=IP3dTransverseMomentumThird1[j1];	
- 	  TJetInfoA->trk[2].IP3dEta	      =IP3dEtaThird1[j1];               
- 	  TJetInfoA->trk[2].IP3dPhi              =IP3dPhiThird1[j1];               	
+ 	  TJetInfoA->trk[2].IP3d	   =IP3dThird1[j1];                  
+ 	  TJetInfoA->trk[2].IP3dError	   =IP3dErrorThird1[j1];             	
+ 	  TJetInfoA->trk[2].IP3dDecayLength=IP3dDecayLengthThird1[j1];       
+ 	  TJetInfoA->trk[2].pT             =IP3dTransverseMomentumThird1[j1];	
+ 	  TJetInfoA->trk[2].eta	           =IP3dEtaThird1[j1];               
+ 	  TJetInfoA->trk[2].phi            =IP3dPhiThird1[j1];               	
 	  
- 	  TJetInfoA->trk[3].IP3d		      =IP3dFourth1[j1];                 	
- 	  TJetInfoA->trk[3].IP3dError	      =IP3dErrorFourth1[j1];            
- 	  TJetInfoA->trk[3].IP3dDecayLength      =IP3dDecayLengthFourth1[j1];      	
- 	  TJetInfoA->trk[3].IP3dransverseMomentum=IP3dTransverseMomentumFourth1[j1];	
- 	  TJetInfoA->trk[3].IP3dEta	      =IP3dEtaFourth1[j1];              	
- 	  TJetInfoA->trk[3].IP3dPhi              =IP3dPhiFourth1[j1];              
+ 	  TJetInfoA->trk[3].IP3d	   =IP3dFourth1[j1];                 	
+ 	  TJetInfoA->trk[3].IP3dError	   =IP3dErrorFourth1[j1];            
+ 	  TJetInfoA->trk[3].IP3dDecayLength=IP3dDecayLengthFourth1[j1];      	
+ 	  TJetInfoA->trk[3].pT             =IP3dTransverseMomentumFourth1[j1];	
+ 	  TJetInfoA->trk[3].eta            =IP3dEtaFourth1[j1];              	
+ 	  TJetInfoA->trk[3].phi            =IP3dPhiFourth1[j1];              
 
 	  TJetInfoA->tche =discrtcheglobal1[j1];	    
 	  TJetInfoA->tchp =discrtchpglobal1[j1];	    
@@ -626,33 +626,33 @@ void MatchTheTree(bool doTree, const TString& matrix_filename = "MatrixOfMatches
 	  TJetInfoB->sv.SVnVertexTracks   =SVnVertexTracks2[j2min];
 	  TJetInfoB->sv.SVnVertexTracksAll=SVnVertexTracksAll2[j2min];
 	
- 	  TJetInfoB->trk[0].IP3d		      =IP3dFirst2[j2min];                  
- 	  TJetInfoB->trk[0].IP3dError	      =IP3dErrorFirst2[j2min];             
- 	  TJetInfoB->trk[0].IP3dDecayLength      =IP3dDecayLengthFirst2[j2min];       	
- 	  TJetInfoB->trk[0].IP3dransverseMomentum=IP3dTransverseMomentumFirst2[j2min];	
- 	  TJetInfoB->trk[0].IP3dEta	      =IP3dEtaFirst2[j2min];               	
- 	  TJetInfoB->trk[0].IP3dPhi              =IP3dPhiFirst2[j2min];               	
+ 	  TJetInfoB->trk[0].IP3d	   =IP3dFirst2[j2min];                  
+ 	  TJetInfoB->trk[0].IP3dError	   =IP3dErrorFirst2[j2min];             
+ 	  TJetInfoB->trk[0].IP3dDecayLength=IP3dDecayLengthFirst2[j2min];       	
+ 	  TJetInfoB->trk[0].pT             =IP3dTransverseMomentumFirst2[j2min];	
+ 	  TJetInfoB->trk[0].eta 	   =IP3dEtaFirst2[j2min];               	
+ 	  TJetInfoB->trk[0].phi            =IP3dPhiFirst2[j2min];               	
+	   
+ 	  TJetInfoB->trk[1].IP3d	   =IP3dSecond2[j2min];                 
+ 	  TJetInfoB->trk[1].IP3dError	   =IP3dErrorSecond2[j2min];            
+ 	  TJetInfoB->trk[1].IP3dDecayLength=IP3dDecayLengthSecond2[j2min];      	
+ 	  TJetInfoB->trk[1].pT             =IP3dTransverseMomentumSecond2[j2min];	
+ 	  TJetInfoB->trk[1].eta	           =IP3dEtaSecond2[j2min];              	
+ 	  TJetInfoB->trk[1].phi            =IP3dPhiSecond2[j2min];              	
 	  
- 	  TJetInfoB->trk[1].IP3d		      =IP3dSecond2[j2min];                 
- 	  TJetInfoB->trk[1].IP3dError	      =IP3dErrorSecond2[j2min];            
- 	  TJetInfoB->trk[1].IP3dDecayLength      =IP3dDecayLengthSecond2[j2min];      	
- 	  TJetInfoB->trk[1].IP3dransverseMomentum=IP3dTransverseMomentumSecond2[j2min];	
- 	  TJetInfoB->trk[1].IP3dEta	      =IP3dEtaSecond2[j2min];              	
- 	  TJetInfoB->trk[1].IP3dPhi              =IP3dPhiSecond2[j2min];              	
-	  
- 	  TJetInfoB->trk[2].IP3d		      =IP3dThird2[j2min];                  
- 	  TJetInfoB->trk[2].IP3dError	      =IP3dErrorThird2[j2min];             	
- 	  TJetInfoB->trk[2].IP3dDecayLength      =IP3dDecayLengthThird2[j2min];       
- 	  TJetInfoB->trk[2].IP3dransverseMomentum=IP3dTransverseMomentumThird2[j2min];	
- 	  TJetInfoB->trk[2].IP3dEta	      =IP3dEtaThird2[j2min];               
- 	  TJetInfoB->trk[2].IP3dPhi              =IP3dPhiThird2[j2min];               	
+ 	  TJetInfoB->trk[2].IP3d	   =IP3dThird2[j2min];                  
+ 	  TJetInfoB->trk[2].IP3dError	   =IP3dErrorThird2[j2min];             	
+ 	  TJetInfoB->trk[2].IP3dDecayLength=IP3dDecayLengthThird2[j2min];       
+ 	  TJetInfoB->trk[2].pT             =IP3dTransverseMomentumThird2[j2min];	
+ 	  TJetInfoB->trk[2].eta	           =IP3dEtaThird2[j2min];               
+ 	  TJetInfoB->trk[2].phi            =IP3dPhiThird2[j2min];               	
 	
- 	  TJetInfoB->trk[3].IP3d		      =IP3dFourth2[j2min];                 	
- 	  TJetInfoB->trk[3].IP3dError	      =IP3dErrorFourth2[j2min];            
- 	  TJetInfoB->trk[3].IP3dDecayLength      =IP3dDecayLengthFourth2[j2min];      	
- 	  TJetInfoB->trk[3].IP3dransverseMomentum=IP3dTransverseMomentumFourth2[j2min];	
- 	  TJetInfoB->trk[3].IP3dEta	      =IP3dEtaFourth2[j2min];              	
- 	  TJetInfoB->trk[3].IP3dPhi              =IP3dPhiFourth2[j2min];              
+ 	  TJetInfoB->trk[3].IP3d	   =IP3dFourth2[j2min];                 	
+ 	  TJetInfoB->trk[3].IP3dError	   =IP3dErrorFourth2[j2min];            
+ 	  TJetInfoB->trk[3].IP3dDecayLength=IP3dDecayLengthFourth2[j2min];      	
+ 	  TJetInfoB->trk[3].pT             =IP3dTransverseMomentumFourth2[j2min];	
+ 	  TJetInfoB->trk[3].eta	           =IP3dEtaFourth2[j2min];              	
+ 	  TJetInfoB->trk[3].phi            =IP3dPhiFourth2[j2min];              
 
 	  TJetInfoB->tche =discrtcheglobal2[j2min];	    
 	  TJetInfoB->tchp =discrtchpglobal2[j2min];	    

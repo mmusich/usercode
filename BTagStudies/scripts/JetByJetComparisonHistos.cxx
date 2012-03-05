@@ -4,6 +4,8 @@
 #include <TClass.h>
 #include <TObjArray.h>
 #include <iostream>
+#include <TStyle.h>
+#include <TMath.h>
 
 using namespace std;
 
@@ -16,7 +18,12 @@ JetByJetComparisonHistos::JetByJetComparisonHistos(const TString& s,TFile* fout)
     defaultmap[discriminators[disc]] = defaults[disc];
   }
 
-  //std::cout<<defaultmap.find("TCHE")->second <<" tagger "<< defaultmap.find("TCHE")->first<<std::endl;
+        //  std::cout<<defaultmap.find("TCHE")->second <<" tagger "<< defaultmap.find("TCHE")->first<<std::endl;
+
+  
+
+  
+  
 
   TObjArray *conditions_from_name = dirname.Tokenize("_"); 
   TString sa = conditions_from_name->At(0)->GetName();
@@ -25,7 +32,8 @@ JetByJetComparisonHistos::JetByJetComparisonHistos(const TString& s,TFile* fout)
   CondBNotDef = sb.Contains("NotDefault");
   h1vec.clear();
   h2vec.clear();
-  hprofvec.clear();    
+  hprofvec.clear(); 
+    setTDRStyle();
   fout->cd(); 
   fout->mkdir(dirname.Data()); 
   fout->cd(dirname.Data()); 
@@ -35,27 +43,272 @@ JetByJetComparisonHistos::JetByJetComparisonHistos(const TString& s,TFile* fout)
 void JetByJetComparisonHistos::addAllHistos() {
  
   //Histograms 1D 
-  addHisto("hDeltaDiscrTCHE", "#Delta DiscrTCHE ;#Delta DiscrTCHE;jets",  1000,-200.,200.);
-  addHisto("hDeltaDiscrTCHP", "#Delta DiscrTCHP ;#Delta DiscrTCHP;jets",  1000,-200.,200.);
-  addHisto("hDeltaDiscrSSVHE","#Delta DiscrSSVHE ;#Delta DiscrSSVHE;jets",1000,-5.,5.    );
-  addHisto("hDeltaDiscrSSVHP","#Delta DiscrSSVHP ;#Delta DiscrSSVHP;jets",1000,-5.,5.    );
-  addHisto("hDeltaDiscrCSV",  "#Delta DiscrCSV ;#Delta DiscrCSV;jets",    1000,-5.,5.    );
+    addHisto("hDeltaDiscrTCHE", "#Delta DiscrTCHE ;#Delta DiscrTCHE;jets",  1000,-200.,200.);
+    addHisto("hDeltaDiscrTCHP", "#Delta DiscrTCHP ;#Delta DiscrTCHP;jets",  1000,-200.,200.);
+    addHisto("hDeltaDiscrSSVHE","#Delta DiscrSSVHE ;#Delta DiscrSSVHE;jets",1000,-5.,5.    );
+    addHisto("hDeltaDiscrSSVHP","#Delta DiscrSSVHP ;#Delta DiscrSSVHP;jets",1000,-5.,5.    );
+    addHisto("hDeltaDiscrCSV",  "#Delta DiscrCSV ;#Delta DiscrCSV;jets",    1000,-5.,5.    );
+    
+    //Histograms 2D (scatter plot for discriminants) ( for cross check)
+
+  addHisto2D("h2ScatDiscrTCHE","Discr TCHE",200,-100.,100.,200,-100.,100.);
+  addHisto2D("h2ScatDiscrTCHP","Discr TCHP",200,-100.,100.,200,-100.,100.);
+  addHisto2D("h2ScatDiscrSSVHE","Discr SSVHE",100,-5.,5.,100,-5.,5.);
+  addHisto2D("h2ScatDiscrSSVHP","Discr SSVHP",100,-5.,5.,100,-5.,5.);
+  addHisto2D("h2ScatDiscrCSV","Discr CSV",100,-5.,5.,100,-5.,5.);
+  addHisto2D("h2ScatDiscrJP","Discr JP",100,0.,4.,100,0.,4.);
+  addHisto2D("h2ScatDiscrJBP","Discr JBP",100,0.,12.,100,0.,12.);
+
+
+
+    
  
   //Histograms 2D (scatter plot for differences)  
-  addHisto2D("h2ScatDeltaDiscrTCHEvsIP3d2",      "#Delta discr TCHE vs IP3d2",       200,-5.  ,5.  ,200,-200.,200.);
-  addHisto2D("h2ScatDeltaDiscrTCHPvsIP3d3",      "#Delta discr TCHP vs IP3d3",       200,-5.  ,5.  ,200,-200.,200.);
-  addHisto2D("h2ScatDeltaDiscrTCHEvsIP3d2Error", "#Delta discr TCHE vs IP3d2Error",  200,-0.5 ,0.5 ,200,-200.,200.);
-  addHisto2D("h2ScatDeltaDiscrTCHPvsIP3d3Error", "#Delta discr TCHP vs IP3d3Error",  200,-200.,200.,200,-200.,200.);
-  addHisto2D("h2ScatDeltaDiscrTCHEvsIP3d2/Error","#Delta discr TCHE vs IP3d2/Error", 200,-200.,200.,200,-200.,200.);
-  addHisto2D("h2ScatDeltaDiscrTCHPvsIP3d3/Error","#Delta discr TCHP vs IP3d3/Error", 200,-200.,200.,200,-200.,200.);
+    addHisto2D("h2ScatDeltaDiscrTCHEvsIP3d2","#Delta discr TCHE vs IP3d2",200,-5.,5.,200,-200.,200.);
+    addHisto2D("h2ScatDeltaDiscrTCHPvsIP3d3"," #Delta discr TCHP vs IP3d3",200,-5.,5.,200,-200.,200.);
+    addHisto2D("h2ScatDeltaDiscrTCHEvsIP3d2Error","#Delta discr TCHE vs IP3d2Error",200,-0.5,0.5,200,-200.,200.);
+    addHisto2D("h2ScatDeltaDiscrTCHPvsIP3d3Error"," #Delta discr TCHP vs IP3d3Error",200,-200.,200.,200,-200.,200.);
+    addHisto2D("h2ScatDeltaDiscrTCHEvsIP3d2/Error","#Delta discr TCHE vs IP3d2/Error",200,-200.,200.,200,-200.,200.);
+    addHisto2D("h2ScatDeltaDiscrTCHPvsIP3d3/Error"," #Delta discr TCHP vs IP3d3/Error",200,-200.,200.,200,-200.,200.);
+    addHisto2D("h2ScatDeltaDiscrTCHEvsEta","#Delta discr TCHE vs Eta",200,-4.,4.,200,-200.,200.);
+    addHisto2D("h2ScatDeltaDiscrTCHPvsEta"," #Delta discr TCHP vs Eta",200,-4.,4.,200,-200.,200.);
+    addHisto2D("h2ScatDeltaDiscrTCHEvsPhi","#Delta discr TCHE vs Phi",200,-4,4,200,-200.,200.);
+    addHisto2D("h2ScatDeltaDiscrTCHPvsPhi"," #Delta discr TCHP vs Phi",200,-4.,4.,200,-200.,200.);
+    addHisto2D("h2ScatDeltaDiscrTCHEvsDeltaPVz","#Delta discr TCHE vs DeltaPVz",200,-1,1,200,-200.,200.);
+    addHisto2D("h2ScatDeltaDiscrTCHPvsDeltaPVz","#Delta discr TCHP vs DeltaPVz",200,-1,1,200,-200.,200.);
+    addHisto2D("h2ScatDeltaDiscrTCHEvsDelta3PV","#Delta discr TCHE vs Delta3PV",200,-1,1,200,-200.,200.);
+    addHisto2D("h2ScatDeltaDiscrTCHPvsDelta3PV","#Delta discr TCHP vs Delta3PV",200,-1,1,200,-200.,200.);
+    addHisto2D("h2ScatDeltaDiscrTCHEvsDeltaXYPV","#Delta discr TCHE vs DeltaXYPV",200,-1,1,200,-200.,200.);
+    addHisto2D("h2ScatDeltaDiscrTCHPvsDeltaXYPV","#Delta discr TCHP vs DeltaXYPV",200,-1,1,200,-200.,200.);
+    addHisto2D("h2ScatDeltaDiscrTCHEvsDeltaIP3dEta2Track","#Delta discr TCHE vs DeltaIP3dEta 2nd Track",200,-5,5,200,-200.,200.);
+    addHisto2D("h2ScatDeltaDiscrTCHPvsDeltaIP3dEta3Track","#Delta discr TCHP vs DeltaIP3dEta 3rd Track",200,-5,5,200,-200.,200.);
+    addHisto2D("h2ScatDeltaDiscrTCHEvsDeltaIP3dPhi2Track","#Delta discr TCHE vs DeltaIP3dPhi 2nd Track",200,-5,5,200,-200.,200.);
+    addHisto2D("h2ScatDeltaDiscrTCHPvsDeltaIP3dPhi3Track","#Delta discr TCHP vs DeltaIP3dPhi 3rd Track",200,-5,5,200,-200.,200.);
+    addHisto2D("h2ScatDeltaDiscrTCHEvsDeltaIP3dPt2Track","#Delta discr TCHE vs DeltaIP3dPt 2nd Track",200,-5000,5000,200,-200.,200.);
+    addHisto2D("h2ScatDeltaDiscrTCHPvsDeltaIP3dPt3Track","#Delta discr TCHP vs DeltaIP3dPt 3rd Track",200,-5000,5000,200,-200.,200.);
+    
+    
+
+    
+    
+    
+        
   
   // Adding Profile plot   
-  addProfile("ProfileDeltaDiscrTCHEvsIP3d2","#Delta discr TCHE vs IP3d2",             200,-5.  ,5.  ,-200.,200.);
-  addProfile("ProfileDeltaDiscrTCHPvsIP3d3"," #Delta discr TCHP vs IP3d3",            200,-5.  ,5.  ,-200.,200.);
-  addProfile("ProfileDeltaDiscrTCHEvsIP3d2Error","#Delta discr TCHE vs IP3d2Error",   200,-0.5 ,0.5 ,-200.,200.);
-  addProfile("ProfileDeltaDiscrTCHPvsIP3d3Error"," #Delta discr TCHP vs IP3d3Error",  200,-200.,200.,-200.,200.);
-  addProfile("ProfileDeltaDiscrTCHEvsIP3d2/Error","#Delta discr TCHE vs IP3d2/Error", 200,-200.,200.,-200.,200.);
-  addProfile("ProfileDeltaDiscrTCHPvsIP3d3/Error"," #Delta discr TCHP vs IP3d3/Error",200,-200.,200.,-200.,200.);
+    addProfile("ProfileDeltaDiscrTCHEvsIP3d2","#Delta discr TCHE vs IP3d2",200,-5.,5.,-200.,200.);
+    addProfile("ProfileDeltaDiscrTCHPvsIP3d3"," #Delta discr TCHP vs IP3d3",200,-5.,5.,-200.,200.);
+    addProfile("ProfileDeltaDiscrTCHEvsIP3d2Error","#Delta discr TCHE vs IP3d2Error",200,-0.5,0.5,-200.,200.);
+    addProfile("ProfileDeltaDiscrTCHPvsIP3d3Error"," #Delta discr TCHP vs IP3d3Error",200,-0.5,0.5,-200.,200.);
+    addProfile("ProfileDeltaDiscrTCHEvsIP3d2/Error","#Delta discr TCHE vs IP3d2/Error",200,-200.,200.,-200.,200.);
+    addProfile("ProfileDeltaDiscrTCHPvsIP3d3/Error"," #Delta discr TCHP vs IP3d3/Error",200,-200.,200.,-200.,200.);
+    addProfile("ProfileDeltaDiscrTCHEvsEta"," #Delta discr TCHE vs Eta",200,-4,4,-200,200);
+    addProfile("ProfileDeltaDiscrTCHPvsEta"," #Delta discr TCHP vs Eta",200,-4,4,-200,200);
+    addProfile("ProfileDeltaDiscrTCHEvsPhi"," #Delta discr TCHE vs Phi",200,-4,4,-200,200);
+    addProfile("ProfileDeltaDiscrTCHPvsPhi"," #Delta discr TCHP vs Phi",200,-4,4,-200,200);
+    addProfile("ProfileDeltaDiscrTCHEvsDeltaPVz", "#Delta discr TCHE vs DeltaPVz",200,-1,1,-200,200);
+    addProfile("ProfileDeltaDiscrTCHPvsDeltaPVz", "#Delta discr TCHP vs DeltaPVz",200,-1,1,-200,200);
+    addProfile("ProfileDeltaDiscrTCHEvsDelta3PV", "#Delta discr TCHE vs Delta3PV",200,-1,1,-200,200);
+    addProfile("ProfileDeltaDiscrTCHPvsDelta3PV", "#Delta discr TCHP vs Delta3PV",200,-1,1,-200,200);
+    addProfile("ProfileDeltaDiscrTCHEvsDeltaXYPV", "#Delta discr TCHE vs DeltaXYPV",200,-1,1,-200,200);
+    addProfile("ProfileDeltaDiscrTCHPvsDeltaXYPV", "#Delta discr TCHE vs DeltaXYPV",200,-1,1,-200,200);
+    addProfile("ProfileDeltaDiscrTCHEvsDeltaIP3dEta2Track","#Delta discr TCHE vs DeltaIP3dEta 2nd Track",200,-5,5,-200.,200.);
+    addProfile("ProfileDeltaDiscrTCHPvsDeltaIP3dEta3Track","#Delta discr TCHP vs DeltaIP3dEta 3rd Track",200,-5,5,-200.,200.);
+    addProfile("ProfileDeltaDiscrTCHEvsDeltaIP3dPhi2Track","#Delta discr TCHE vs DeltaIP3dPhi 2nd Track",200,-5,5,-200.,200.);
+    addProfile("ProfileDeltaDiscrTCHPvsDeltaIP3dPhi3Track","#Delta discr TCHP vs DeltaIP3dPhi 3rd Track",200,-5,5,-200.,200.);
+    addProfile("ProfileDeltaDiscrTCHEvsDeltaIP3dPt2Track","#Delta discr TCHE vs DeltaIP3dPt 2nd Track",200,-5000,5000,-200.,200.);
+    addProfile("ProfileDeltaDiscrTCHPvsDeltaIP3dPt3Track","#Delta discr TCHP vs DeltaIP3dPt 3rd Track",200,-5000,5000,-200.,200.);
+    
+    
+
+    
+}
+
+    ////////////////////////////////////////////
+
+void JetByJetComparisonHistos::setTDRStyle(){
+    
+    TStyle *tdrStyle = new TStyle("tdrStyle","Style for P-TDR");
+    
+    const Int_t NRGBs = 5;
+    const Int_t NCont = 255;
+    
+    tdrStyle->SetPalette(1);
+    
+        // Double_t stops[NRGBs] = { 0.00, 0.34, 0.61, 0.84, 1.00 };
+        // Double_t red[NRGBs] = { 0.00, 0.00, 0.87, 1.00, 0.51 };
+        // Double_t green[NRGBs] = { 0.00, 0.81, 1.00, 0.20, 0.00 };
+        // Double_t blue[NRGBs] = { 0.51, 1.00, 0.12, 0.00, 0.00 };
+    
+        // blues
+        // Double_t stops[NRGBs] = {0.00, 0.34, 0.61, 0.84, 1.00};
+        // Double_t red[NRGBs]   = {1.00, 0.84, 0.61, 0.34, 0.00};
+        // Double_t green[NRGBs] = {1.00, 0.84, 0.61, 0.34, 0.00};
+        // Double_t  blue[NRGBs]  = {1.00, 1.00, 1.00, 1.00, 1.00};
+        // reds
+        // Double_t stops[NRGBs] = {0.00, 0.34, 0.61, 0.84, 1.00};
+        // Double_t red[NRGBs]   = {1.00, 1.00, 1.00, 1.00, 1.00};
+        // Double_t green[NRGBs] = {1.00, 0.84, 0.61, 0.34, 0.00};
+        // Double_t blue[NRGBs]  = {1.00, 0.84, 0.61, 0.34, 0.00};
+    
+        //TColor::CreateGradientColorTable(NRGBs, stops, red, green, blue, NCont);
+        //tdrStyle->SetNumberContours(NCont);
+    
+        // For the canvas:
+    tdrStyle->SetCanvasBorderMode(0);
+    tdrStyle->SetCanvasColor(kWhite);
+    tdrStyle->SetCanvasDefH(600); //Height of canvas
+    tdrStyle->SetCanvasDefW(600); //Width of canvas
+    tdrStyle->SetCanvasDefX(0);   //POsition on screen
+    tdrStyle->SetCanvasDefY(0);
+    
+        // For the Pad:
+    tdrStyle->SetPadBorderMode(0);
+        // tdrStyle->SetPadBorderSize(Width_t size = 1);
+    tdrStyle->SetPadColor(kWhite);
+    tdrStyle->SetPadGridX(false);
+    tdrStyle->SetPadGridY(false);
+    tdrStyle->SetGridColor(0);
+    tdrStyle->SetGridStyle(3);
+    tdrStyle->SetGridWidth(1);
+    
+        // For the frame:
+    tdrStyle->SetFrameBorderMode(0);
+    tdrStyle->SetFrameBorderSize(1);
+    tdrStyle->SetFrameFillColor(0);
+    tdrStyle->SetFrameFillStyle(0);
+    tdrStyle->SetFrameLineColor(1);
+    tdrStyle->SetFrameLineStyle(1);
+    tdrStyle->SetFrameLineWidth(1);
+    
+        // For the histo:
+        // tdrStyle->SetHistFillColor(1);
+        // tdrStyle->SetHistFillStyle(0);
+    tdrStyle->SetHistLineColor(1);
+    tdrStyle->SetHistLineStyle(0);
+    tdrStyle->SetHistLineWidth(1);
+        // tdrStyle->SetLegoInnerR(Float_t rad = 0.5);
+        // tdrStyle->SetNumberContours(Int_t number = 20);
+    
+    tdrStyle->SetEndErrorSize(2);
+        //  tdrStyle->SetErrorMarker(20);
+    tdrStyle->SetErrorX(0.);
+    
+    tdrStyle->SetMarkerStyle(20);
+    
+        //For the fit/function:
+    tdrStyle->SetOptFit(1);
+    tdrStyle->SetFitFormat("5.4g");
+    tdrStyle->SetFuncColor(2);
+    tdrStyle->SetFuncStyle(1);
+    tdrStyle->SetFuncWidth(1);
+    
+        //For the date:
+    tdrStyle->SetOptDate(0);
+        // tdrStyle->SetDateX(Float_t x = 0.01);
+        // tdrStyle->SetDateY(Float_t y = 0.01);
+    
+        // For the statistics box:
+    tdrStyle->SetOptFile(0);
+    tdrStyle->SetOptStat("emruo"); // To display the mean and RMS:   SetOptStat("mr");
+    tdrStyle->SetStatColor(kWhite);
+    tdrStyle->SetStatFont(42);
+    tdrStyle->SetStatFontSize(0.025);
+    tdrStyle->SetStatTextColor(1);
+    tdrStyle->SetStatFormat("6.4g");
+    tdrStyle->SetStatBorderSize(1);
+    tdrStyle->SetStatH(0.1);
+    tdrStyle->SetStatW(0.15);
+        // tdrStyle->SetStatStyle(Style_t style = 1001);
+        // tdrStyle->SetStatX(Float_t x = 0);
+        // tdrStyle->SetStatY(Float_t y = 0);
+    
+        // Margins:
+    tdrStyle->SetPadTopMargin(0.07);
+    tdrStyle->SetPadBottomMargin(0.15);
+    tdrStyle->SetPadLeftMargin(0.16);
+    tdrStyle->SetPadRightMargin(0.02);
+    
+        // For the Global title:
+    tdrStyle->SetOptTitle(0);
+    tdrStyle->SetTitleFont(42);
+    tdrStyle->SetTitleColor(1);
+    tdrStyle->SetTitleTextColor(1);
+    tdrStyle->SetTitleFillColor(10);
+    tdrStyle->SetTitleFontSize(0.05);
+        // tdrStyle->SetTitleH(0); // Set the height of the title box
+        // tdrStyle->SetTitleW(0); // Set the width of the title box
+        // tdrStyle->SetTitleX(0); // Set the position of the title box
+        // tdrStyle->SetTitleY(0.985); // Set the position of the title box
+        // tdrStyle->SetTitleStyle(Style_t style = 1001);
+        // tdrStyle->SetTitleBorderSize(2);
+    
+        // For the axis titles:
+    tdrStyle->SetTitleColor(1, "XYZ");
+    tdrStyle->SetTitleFont(42, "XYZ");
+    tdrStyle->SetTitleSize(0.06, "XYZ");
+        // tdrStyle->SetTitleXSize(Float_t size = 0.02); // Another way to set the size?
+        // tdrStyle->SetTitleYSize(Float_t size = 0.02);
+    tdrStyle->SetTitleXOffset(0.9);
+    tdrStyle->SetTitleYOffset(1.25);
+        // tdrStyle->SetTitleOffset(1.1, "Y"); // Another way to set the Offset
+    
+        // For the axis labels:
+    tdrStyle->SetLabelColor(1, "XYZ");
+    tdrStyle->SetLabelFont(42, "XYZ");
+    tdrStyle->SetLabelOffset(0.007, "XYZ");
+    tdrStyle->SetLabelSize(0.05, "XYZ");
+    
+        // For the axis:
+    tdrStyle->SetAxisColor(1, "XYZ");
+    tdrStyle->SetStripDecimals(kTRUE);
+    tdrStyle->SetTickLength(0.03, "XYZ");
+    tdrStyle->SetNdivisions(510, "XYZ");
+    tdrStyle->SetPadTickX(1);  // To get tick marks on the opposite side of the frame
+    tdrStyle->SetPadTickY(1);
+    
+        // Change for log plots:
+    tdrStyle->SetOptLogx(0);
+    tdrStyle->SetOptLogy(0);
+    tdrStyle->SetOptLogz(0);
+    
+        // Postscript options:
+    tdrStyle->SetPaperSize(20.,20.);
+        // tdrStyle->SetLineScalePS(Float_t scale = 3);
+        // tdrStyle->SetLineStyleString(Int_t i, const char* text);
+        // tdrStyle->SetHeaderPS(const char* header);
+        // tdrStyle->SetTitlePS(const char* pstitle);
+    
+        // tdrStyle->SetBarOffset(Float_t baroff = 0.5);
+        // tdrStyle->SetBarWidth(Float_t barwidth = 0.5);
+        // tdrStyle->SetPaintTextFormat(const char* format = "g");
+        // tdrStyle->SetPalette(Int_t ncolors = 0, Int_t* colors = 0);
+        // tdrStyle->SetTimeOffset(Double_t toffset);
+        // tdrStyle->SetHistMinimumZero(kTRUE);
+    
+    tdrStyle->cd();
+    
+
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
 }
 
@@ -131,38 +384,110 @@ TProfile* JetByJetComparisonHistos::findTProfile(TString keyword){
 ////////////////////////////////////////////////////////////////////////////////////////////
 void JetByJetComparisonHistos::fillAllHistos(const JetInfo& ja, const JetInfo& jb, TFile* fout){
   fout->cd(dirname.Data());
-  fillTH(findTH1("hDeltaDiscrTCHE"), ja.tche,  jb.tche);
-  fillTH(findTH1("hDeltaDiscrTCHP"), ja.tchp,  jb.tchp);
-  fillTH(findTH1("hDeltaDiscrSSVHE"),ja.ssvhe, jb.ssvhe);
-  fillTH(findTH1("hDeltaDiscrSSVHP"),ja.ssvhp, jb.ssvhp);
-  fillTH(findTH1("hDeltaDiscrCSV"),  ja.csv,   jb.csv);
-  fillTH(findTH2("h2ScatDiscrTCHE"), ja.tche,jb.tche);
-  fillTH(findTH2("h2ScatDiscrTCHP"), ja.tchp,jb.tchp);
-  fillTH(findTH2("h2ScatDiscrCSV"), ja.csv,jb.csv);
-  fillTH(findTH2("h2ScatDiscrJP"), ja.jp,jb.jp);
-  fillTH(findTH2("h2ScatDiscrJBP"), ja.jbp,jb.jbp);
-  fillTH(findTH2("h2ScatDiscrSSVHE"), ja.ssvhe,jb.ssvhp);
-  fillTH(findTH2("h2ScatDiscrSSVHP"), ja.ssvhp,jb.ssvhp);
+  fillTH(findTH1("hDeltaDiscrTCHE"),  ja.tche,  jb.tche, ja.tche-jb.tche);
+  fillTH(findTH1("hDeltaDiscrTCHP"),  ja.tchp,  jb.tchp, ja.tchp-jb.tchp);
+  fillTH(findTH1("hDeltaDiscrSSVHE"), ja.ssvhe, jb.ssvhe,ja.ssvhe-jb.ssvhe);
+  fillTH(findTH1("hDeltaDiscrSSVHP"), ja.ssvhp, jb.ssvhp,ja.ssvhp-jb.ssvhp);
+  fillTH(findTH1("hDeltaDiscrCSV"),   ja.csv,   jb.csv,  ja.csv-jb.csv);
+  fillTH(findTH2("h2ScatDiscrTCHE"),  ja.tche,  jb.tche, ja.tche, jb.tche);
+  fillTH(findTH2("h2ScatDiscrTCHP"),  ja.tchp,  jb.tchp, ja.tchp, jb.tchp);
+  fillTH(findTH2("h2ScatDiscrCSV"),   ja.csv,   jb.csv,  ja.csv,  jb.csv);
+  fillTH(findTH2("h2ScatDiscrJP"),    ja.jp,    jb.jp,   ja.jp,   jb.jp);
+  fillTH(findTH2("h2ScatDiscrJBP"),   ja.jbp,   jb.jbp,  ja.jbp,  jb.jbp);
+  fillTH(findTH2("h2ScatDiscrSSVHE"), ja.ssvhe, jb.ssvhe,ja.ssvhe,jb.ssvhe);
+  fillTH(findTH2("h2ScatDiscrSSVHP"), ja.ssvhp, jb.ssvhp,ja.ssvhp,jb.ssvhp);
+  
+  /*  
+      fillTH(findTH1("hDeltaDiscrTCHENotDefaultDefault"), ja.tche,  jb.tche);
+      fillTH(findTH1("hDeltaDiscrTCHPNotDefaultDefault"), ja.tchp,  jb.tchp);
+      fillTH(findTH1("hDeltaDiscrSSVHENotDefaultDefault"),ja.ssvhe, jb.ssvhe);
+      fillTH(findTH1("hDeltaDiscrSSVHPNotDefaultDefault"),ja.ssvhp, jb.ssvhp);
+      fillTH(findTH1("hDeltaDiscrCSVNotDefaultDefault"),  ja.csv,   jb.csv);
+      fillTH(findTH1("hDeltaDiscrJPNotDefaultDefault"),  ja.jp,   jb.jp);
+      fillTH(findTH1("hDeltaDiscrJBPNotDefaultDefault"),  ja.jbp,   jb.jbp);
+      fillTH(findTH2("h2ScatDiscrTCHENotDefaultNotDefault"), ja.tche,jb.tche);
+      fillTH(findTH2("h2ScatDiscrTCHPNotDefaultNotDefault"), ja.tchp,jb.tchp);
+      fillTH(findTH2("h2ScatDiscrCSVNotDefaultNotDefault"), ja.csv,jb.csv);
+      fillTH(findTH2("h2ScatDiscrJPNotDefaultNotDefault"), ja.jp,jb.jp);
+      fillTH(findTH2("h2ScatDiscrJBPNotDefaultNotDefault"), ja.jbp,jb.jbp);
+      fillTH(findTH2("h2ScatDiscrSSVHENotDefaultNotDefault"), ja.ssvhe,jb.ssvhp);
+      fillTH(findTH2("h2ScatDiscrSSVHPNotDefaultNotDefault"), ja.ssvhp,jb.ssvhp)  
+  */
+  
+  fillTH(findTH2("h2ScatDeltaDiscrTCHEvsIP3d2"),      ja.tche,jb.tche,ja.trk[1].IP3d,ja.tche-jb.tche);
+  fillTH(findTH2("h2ScatDeltaDiscrTCHPvsIP3d3"),      ja.tchp,jb.tchp,ja.trk[2].IP3d,ja.tchp-jb.tchp);
+  fillTH(findTH2("h2ScatDeltaDiscrTCHEvsIP3d2Error"), ja.tche,jb.tche,ja.trk[1].IP3dError,ja.tche-jb.tche);
+  fillTH(findTH2("h2ScatDeltaDiscrTCHPvsIP3d3Error"), ja.tchp,jb.tchp,ja.trk[2].IP3dError,ja.tchp-jb.tchp);
+  fillTH(findTH2("h2ScatDeltaDiscrTCHEvsIP3d2/Error"),ja.tche,jb.tche,(ja.trk[1].IP3d)/(ja.trk[1].IP3dError),ja.tche-jb.tche);
+  fillTH(findTH2("h2ScatDeltaDiscrTCHPvsIP3d3/Error"),ja.tchp,jb.tchp,(ja.trk[2].IP3d)/(ja.trk[2].IP3dError),ja.tchp-jb.tchp);
+  fillTH(findTH2("h2ScatDeltaDiscrTCHEvsEta"),        ja.tche,jb.tche,ja.eta,ja.tche-jb.tche);
+  fillTH(findTH2("h2ScatDeltaDiscrTCHPvsEta"),        ja.tchp,jb.tchp,ja.eta,ja.tchp-jb.tchp);
+  fillTH(findTH2("h2ScatDeltaDiscrTCHEvsPhi"),        ja.tche,jb.tche,ja.phi,ja.tche-jb.tche);
+  fillTH(findTH2("h2ScatDeltaDiscrTCHPvsPhi"),        ja.tchp,jb.tchp,ja.phi,ja.tchp-jb.tchp);
+  fillTH(findTH2("h2ScatDeltaDiscrTCHEvsDeltaPVz"),        ja.tche,jb.tche,(ja.pv.PVz-jb.pv.PVz),ja.tche-jb.tche);
+  fillTH(findTH2("h2ScatDeltaDiscrTCHPvsDeltaPVz"),        ja.tchp,jb.tchp,(ja.pv.PVz-jb.pv.PVz),ja.tchp-jb.tchp);
+  
+  float deltax = (ja.pv.PVx-jb.pv.PVx) ;
+  float deltay = (ja.pv.PVy-jb.pv.PVy) ;
+  float deltaz = (ja.pv.PVz-jb.pv.PVz) ;
  
-  fillTH(findTH2("h2ScatDeltaDiscrTCHEvsIP3d2"),ja.tche,jb.tche,ja.trk[1].IP3d);
-  fillTH(findTH2("h2ScatDeltaDiscrTCHPvsIP3d3"),ja.tchp,jb.tchp,ja.trk[2].IP3d);
-  fillTH(findTH2("h2ScatDeltaDiscrTCHEvsIP3d2Error"),ja.tche,jb.tche,ja.trk[1].IP3dError);
-  fillTH(findTH2("h2ScatDeltaDiscrTCHPvsIP3d3Error"),ja.tchp,jb.tchp,ja.trk[2].IP3dError);
-  fillTH(findTH2("h2ScatDeltaDiscrTCHEvsIP3d2/Error"),ja.tche,jb.tche,(ja.trk[1].IP3d)/(ja.trk[1].IP3dError));
-  fillTH(findTH2("h2ScatDeltaDiscrTCHPvsIP3d3/Error"),ja.tchp,jb.tchp,(ja.trk[2].IP3d)/(ja.trk[2].IP3dError));
+  fillTH(findTH2("h2ScatDeltaDiscrTCHEvsDelta3PV"),          ja.tche,jb.tche,TMath::Sqrt(TMath::Power(deltax,2)+TMath::Power(deltay,2)+TMath::Power(deltaz,2)),ja.tche-jb.tche);
+  fillTH(findTH2("h2ScatDeltaDiscrTCHPvsDelta3PV"),          ja.tchp,jb.tchp,TMath::Sqrt(TMath::Power(deltax,2)+TMath::Power(deltay,2)+TMath::Power(deltaz,2)),ja.tchp-jb.tchp);
+  fillTH(findTH2("h2ScatDeltaDiscrTCHEvsDeltaXYPV"),         ja.tche,jb.tche,TMath::Sqrt(TMath::Power(deltax,2)+TMath::Power(deltay,2)),ja.tche-jb.tche);
+  fillTH(findTH2("h2ScatDeltaDiscrTCHPvsDeltaXYPV"),         ja.tchp,jb.tchp,TMath::Sqrt(TMath::Power(deltax,2)+TMath::Power(deltay,2)),ja.tchp-jb.tchp);
+  fillTH(findTH2("h2ScatDeltaDiscrTCHEvsDeltaIP3dEta2Track"),ja.tche,jb.tche,(ja.trk[1].eta-jb.trk[1].eta),ja.tche-jb.tche);
+  fillTH(findTH2("h2ScatDeltaDiscrTCHPvsDeltaIP3dEta3Track"),ja.tchp,jb.tchp,(ja.trk[2].eta-jb.trk[2].eta),ja.tchp-jb.tchp);
+  fillTH(findTH2("h2ScatDeltaDiscrTCHEvsDeltaIP3dPhi2Track"),ja.tche,jb.tche,(ja.trk[1].phi-jb.trk[1].phi),ja.tche-jb.tche);
+  fillTH(findTH2("h2ScatDeltaDiscrTCHPvsDeltaIP3dPhi3Track"),ja.tchp,jb.tchp,(ja.trk[2].phi-jb.trk[2].phi),ja.tchp-jb.tchp);
+  fillTH(findTH2("h2ScatDeltaDiscrTCHEvsDeltaIP3dPt2Track"), ja.tche,jb.tche,(ja.trk[1].pT-jb.trk[1].pT),ja.tche-jb.tche);
+  fillTH(findTH2("h2ScatDeltaDiscrTCHPvsDeltaIP3dPt3Track"), ja.tchp,jb.tchp,(ja.trk[2].pT-jb.trk[2].pT),ja.tchp-jb.tchp);
+           
+    
 
-  fillTH(findTProfile("ProfileDeltaDiscrTCHEvsIP3d2"),ja.tche,jb.tche,ja.trk[1].IP3d);
-  fillTH(findTProfile("ProfileDeltaDiscrTCHPvsIP3d3"),ja.tchp,jb.tchp,ja.trk[2].IP3d);
-  fillTH(findTProfile("ProfileDeltaDiscrTCHEvsIP3d2Error"),ja.tche,jb.tche,ja.trk[1].IP3dError);
-  fillTH(findTProfile("ProfileDeltaDiscrTCHPvsIP3d3Error"),ja.tchp,jb.tchp,ja.trk[2].IP3dError);
-  fillTH(findTProfile("ProfileDeltaDiscrTCHEvsIP3d2/Error"),ja.tche,jb.tche,(ja.trk[1].IP3d)/(ja.trk[1].IP3dError));
-  fillTH(findTProfile("ProfileDeltaDiscrTCHPvsIP3d3/Error"),ja.tchp,jb.tchp,(ja.trk[2].IP3d)/(ja.trk[2].IP3dError));
+
+
+
+
+  fillTH(findTProfile("ProfileDeltaDiscrTCHEvsIP3d2"),      ja.tche,jb.tche,ja.trk[1].IP3d,ja.tche-jb.tche);
+  fillTH(findTProfile("ProfileDeltaDiscrTCHPvsIP3d3"),      ja.tchp,jb.tchp,ja.trk[2].IP3d,ja.tchp-jb.tchp);
+  fillTH(findTProfile("ProfileDeltaDiscrTCHEvsIP3d2Error"), ja.tche,jb.tche,ja.trk[1].IP3dError,ja.tche-jb.tche);
+  fillTH(findTProfile("ProfileDeltaDiscrTCHPvsIP3d3Error"), ja.tchp,jb.tchp,ja.trk[2].IP3dError,ja.tchp-jb.tchp);
+  fillTH(findTProfile("ProfileDeltaDiscrTCHEvsIP3d2/Error"),ja.tche,jb.tche,(ja.trk[1].IP3d)/(ja.trk[1].IP3dError),ja.tche-jb.tchp);
+  fillTH(findTProfile("ProfileDeltaDiscrTCHPvsIP3d3/Error"),ja.tchp,jb.tchp,(ja.trk[2].IP3d)/(ja.trk[2].IP3dError),ja.tchp-jb.tchp);
+  fillTH(findTProfile("ProfileDeltaDiscrTCHEvsDelta3PV"),        ja.tche,jb.tche,TMath::Sqrt(TMath::Power(deltax,2)+TMath::Power(deltay,2)+TMath::Power(deltaz,2)),ja.tche-jb.tche);
+  fillTH(findTProfile("ProfileDeltaDiscrTCHPvsDelta3PV"),        ja.tchp,jb.tchp,TMath::Sqrt(TMath::Power(deltax,2)+TMath::Power(deltay,2)+TMath::Power(deltaz,2)),ja.tchp-jb.tchp);
+  fillTH(findTProfile("ProfileDeltaDiscrTCHEvsDeltaXYPV"),        ja.tche,jb.tche,TMath::Sqrt(TMath::Power(deltax,2)+TMath::Power(deltay,2)),ja.tche-jb.tche);
+  fillTH(findTProfile("ProfileDeltaDiscrTCHPvsDeltaXYPV"),        ja.tchp,jb.tchp,TMath::Sqrt(TMath::Power(deltax,2)+TMath::Power(deltay,2)),ja.tchp-jb.tchp);
+  fillTH(findTProfile("ProfileDeltaDiscrTCHEvsDeltaPVz"),        ja.tche,jb.tche,(ja.pv.PVz-jb.pv.PVz),ja.tche-jb.tche);
+  fillTH(findTProfile("ProfileDeltaDiscrTCHPvsDeltaPVz"),        ja.tchp,jb.tchp,(ja.pv.PVz-jb.pv.PVz),ja.tchp-jb.tchp);
+  fillTH(findTProfile("ProfileDeltaDiscrTCHEvsDeltaIP3dEta2Track"),        ja.tche,jb.tche,(ja.trk[1].eta-jb.trk[1].eta),ja.tche-jb.tche);
+  fillTH(findTProfile("ProfileDeltaDiscrTCHPvsDeltaIP3dEta3Track"),        ja.tchp,jb.tchp,(ja.trk[2].eta-jb.trk[2].eta),ja.tchp-jb.tchp);
+  fillTH(findTProfile("ProfileDeltaDiscrTCHEvsDeltaIP3dPhi2Track"),        ja.tche,jb.tche,(ja.trk[1].phi-jb.trk[1].phi),ja.tche-jb.tche);
+  fillTH(findTProfile("ProfileDeltaDiscrTCHPvsDeltaIP3dPhi3Track"),        ja.tchp,jb.tchp,(ja.trk[2].phi-jb.trk[2].phi),ja.tchp-jb.tchp);
+  fillTH(findTProfile("ProfileDeltaDiscrTCHEvsDeltaIP3dPt2Track"),        ja.tche,jb.tche,(ja.trk[1].pT-jb.trk[1].pT),ja.tche-jb.tche);
+  fillTH(findTProfile("ProfileDeltaDiscrTCHPvsDeltaIP3dPt3Track"),        ja.tchp,jb.tchp,(ja.trk[2].pT-jb.trk[2].pT),ja.tchp-jb.tchp);
+  fillTH(findTProfile("ProfileDeltaDiscrTCHEvsEta"),        ja.tche,jb.tche,ja.eta,ja.tche-jb.tche);
+  fillTH(findTProfile("ProfileDeltaDiscrTCHPvsEta"),        ja.tchp,jb.tchp,ja.eta,ja.tchp-jb.tchp);
+  fillTH(findTProfile("ProfileDeltaDiscrTCHEvsPhi"),        ja.tche,jb.tche,ja.phi,ja.tche-jb.tche);
+  fillTH(findTProfile("ProfileDeltaDiscrTCHPvsPhi"),        ja.tchp,jb.tchp,ja.phi,ja.tchp-jb.tchp);
+    
+           
+           
+           
+
+                
+
+ 
+
+
    
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
-void JetByJetComparisonHistos::fillTH(TH1* p_h, float value1, float value2, float value3){ 
-    
+void JetByJetComparisonHistos::fillTH(TH1* p_h, float value1, float value2, float valueX, float valueY){ 
+  // value1, value2 needed for...
+  // valueX
+  // valueY ...    
   Float_t default_(0.);
   TString tagger_;
   
@@ -173,52 +498,52 @@ void JetByJetComparisonHistos::fillTH(TH1* p_h, float value1, float value2, floa
     }
   }                    
    
-  //std::cout<<"tagger_="<<tagger_<<"default_="<<default_<<std::endl;
+        // std::cout<<"tagger_="<<tagger_<<"default_="<<default_<<std::endl;
        
   if ( p_h->IsA()->InheritsFrom("TH1F") ) {                              // opening if type TH1F
     if (CondANotDef == true && CondBNotDef == false){                    // opening else if condition on case Default-Non Default
       if(value1 != default_ && value2 == default_){                   
-	p_h->Fill(value1-value2);
+	p_h->Fill(valueX);
       }                                                               
     } else if(CondANotDef == false && CondBNotDef == true){              // opening else if condition on case Not Default - Default
       if(value1 == default_ && value2 != default_){                    
-	p_h->Fill(value1-value2);
+	p_h->Fill(valueX);
       }                                                                
     }                                                                    // closing else if condition on case Not Default - Defaul
     else if(CondANotDef == true && CondBNotDef == true){                 // opening else if condition case NotDefault - Not Default
       if(value1 != default_ && value2 != default_){                      // opening if condition on values
-	p_h->Fill(value1-value2);
+	p_h->Fill(valueX);
       }                                                                  // closing if condition
     }                                                                    // closing else if condition case Not Default - Not Default 
   } else if ( p_h->IsA()->InheritsFrom("TH2F") ) {                       // opening if type TH2
     if (CondANotDef == true && CondBNotDef == false){                    // opening else if condition on case Default - Not Default 
       if(value1 != default_ && value2 == default_) {                  
-	p_h->Fill(value1,value2);
+	p_h->Fill(valueX,valueY);
       }                                                               
     } else if (CondANotDef == false && CondBNotDef == true) {            // opening else if condition on case Not Default - Default 
       if(value1 == default_ && value2 != default_) {                 
-	p_h->Fill(value1,value2);
+	p_h->Fill(valueY,valueX);
       }                                                                  // closing else if condition on case Not Default - Default
     }
     else if (CondANotDef == true && CondBNotDef == true){              
       if(value1 != default_ && value2 != default_){
-	p_h->Fill(value1,value2);
+	p_h->Fill(valueX,valueY);
       }
     }
   } else if ( p_h->IsA()->InheritsFrom("TProfile") ) {               //opening if type TProfile
     if (CondANotDef == false && CondBNotDef == true){               //opening else if condition on case Default-Non Default
       if(value1 == default_ && value2 != default_){                   
-	p_h->Fill(value1-value2,value3);  
+	p_h->Fill(valueX,valueY);  
       }                          //opening if type TH1F 
     }
     else if (CondANotDef == true && CondBNotDef == false ) {        //opening else if condition on case Not Default - Default 
       if(value2 == default_ && value1 != default_) {                 
-	p_h->Fill(value1-value2,value3);
+	p_h->Fill(valueX,valueY);
       }                                                             // closing else if condition on case Not Default - Default
     }
     else if (CondANotDef == true && CondBNotDef == true){
       if(value1 != default_ && value2 != default_){
-	p_h->Fill(value1-value2,value3);
+	p_h->Fill(valueX,valueY);
       }
     }  
   } else {                                                               // opening if another TH* type
