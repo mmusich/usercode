@@ -25,7 +25,8 @@ class JetByJetComparisonHistos{
     void fillAllHistos(const JetInfo& ja, const JetInfo& jb, TFile* fout);
     void fillTH(TH1* h, float value1, float value2, float valueX, float valueY=0);
     void drawNice2dHistos(TFile*);
-    void setTDRStyle();
+    void setTDRStyle(TString palettename);
+    void cmsPrel(const double& intLumi);
 
  private:
   std::map<TString,Float_t> defaultmap;
