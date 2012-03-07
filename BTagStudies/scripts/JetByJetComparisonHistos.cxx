@@ -31,7 +31,7 @@ JetByJetComparisonHistos::JetByJetComparisonHistos(const TString& s,TFile* fout)
   h1vec.clear();
   h2vec.clear();
   hprofvec.clear(); 
-  setTDRStyle("blue");
+  setTDRStyle("blues");
   fout->cd(); 
   fout->mkdir(dirname.Data()); 
   fout->cd(dirname.Data()); 
@@ -102,6 +102,19 @@ void JetByJetComparisonHistos::addAllHistos() {
         //Histograms 2D (scatter plot for differences) CSV discriminant
     
     
+ addHisto2D("h2ScatDeltaDiscrCSVvsSV3dDistance","#Delta discr CSV  vs SV3dDistance",50,-2.,14.,50,-5.,5.);
+ addHisto2D("h2ScatDeltaDiscrCSVvsSV3dDistanceError"," #Delta discr CSV vs SV3dDistanceError",50,-1.,3.,50,-5.,5.);
+ addHisto2D("h2ScatDeltaDiscrCSVvsSV3dDistanceoverSV3dDistanceError"," #Delta discr CSV vs SV3dDistanceoverSV3dDistanceError",50,-100.,100.,50,-5.,5.);
+ addHisto2D("h2ScatDeltaDiscrCSVvsDeltaPVz","#Delta discr CSV vs DeltaPVz",50,-0.05,0.05,50,-5.,5.);
+ addHisto2D("h2ScatDeltaDiscrCSVvsDelta3PV","#Delta discr CSV vs Delta3PV",50,0,0.05,50,-5.,5.);
+ addHisto2D("h2ScatDeltaDiscrCSVvsDeltaXYPV","#Delta discr CSV  vs DeltaXYPV",50,0,0.05,50,-5.,5.);
+
+
+
+
+
+
+
 
     
 
@@ -144,63 +157,63 @@ void JetByJetComparisonHistos::setTDRStyle(TString palettename) {
         
         TStyle *tdrStyle = new TStyle("tdrStyle","Style for P-TDR");
         
-        const Int_t NRGBs = 5;
+	const Int_t NRGBs = 5;
         const Int_t NCont = 255;
         
-        Double_t stops[NRGBs];  
-        Double_t red[NRGBs];     
-        Double_t green[NRGBs];     
-        Double_t blue[NRGBs]; 
+	   Double_t stops[NRGBs];  
+	   Double_t red[NRGBs];     
+	   Double_t green[NRGBs];     
+           Double_t blue[NRGBs]; 
         
-       if (palettename == "blues"){
-         Double_t   stops[NRGBs] = {0.00, 0.34, 0.61, 0.84, 1.00};
-         Double_t   red[NRGBs]   = {1.00, 0.91, 0.80, 0.67, 1.00};
-         Double_t   green[NRGBs] = {1.00, 0.91, 0.80, 0.67, 1.00};
-         Double_t   blue[NRGBs]  = {1.00, 0.91, 0.80, 0.67, 1.00};
+	      if (palettename == "blues"){
+      Double_t  stops[NRGBs] = {0.00, 0.34, 0.61, 0.84, 1.00};
+      Double_t  red[NRGBs]   = {1.00, 0.91, 0.80, 0.67, 1.00};
+      Double_t  green[NRGBs] = {1.00, 0.91, 0.80, 0.67, 1.00};
+      Double_t    blue[NRGBs]  = {1.00, 0.91, 0.80, 0.67, 1.00};
         }
-    /*    else if(palettename == "gray"){
+	      /*   else if(palettename == "gray"){
             stops = {0.00, 0.34, 0.61, 0.84, 1.00};
             red   = {1.00, 0.84, 0.61, 0.34, 0.00};
             green = {1.00, 0.84, 0.61, 0.34, 0.00};
             blue  = {1.00, 0.84, 0.61, 0.34, 0.00};
         } 
         else if(palettename == "blues"){
-            stops = {0.00, 0.34, 0.61, 0.84, 1.00};
-            red   = {1.00, 0.84, 0.61, 0.34, 0.00};
-            green = {1.00, 0.84, 0.61, 0.34, 0.00};
-            blue  = {1.00, 1.00, 1.00, 1.00, 1.00};
+       Double_t     stops[NRGBs] = {0.00, 0.34, 0.61, 0.84, 1.00};
+       Double_t     red[NRGBs]  = {1.00, 0.84, 0.61, 0.34, 0.00};
+       Double_t     green[NRGBs] = {1.00, 0.84, 0.61, 0.34, 0.00};
+       Double_t     blue[NRGBs]  = {1.00, 1.00, 1.00, 1.00, 1.00};
         }
         else if(palettename == "reds"){
-            stops = {0.00, 0.34, 0.61, 0.84, 1.00};
-            red   = {1.00, 1.00, 1.00, 1.00, 1.00};
-            green = {1.00, 0.84, 0.61, 0.34, 0.00};
-            blue  = {1.00, 0.84, 0.61, 0.34, 0.00};
+       Double_t     stops[NRGBs] = {0.00, 0.34, 0.61, 0.84, 1.00};
+       Double_t     red[NRGBs]   = {1.00, 1.00, 1.00, 1.00, 1.00};
+       Double_t     green[NRGBs] = {1.00, 0.84, 0.61, 0.34, 0.00};
+       Double_t     blue[NRGBs]  = {1.00, 0.84, 0.61, 0.34, 0.00};
         }
         else if(palettename == "antigray"){
-            stops = {0.00, 0.34, 0.61, 0.84, 1.00};
-            red   = {0.00, 0.34, 0.61, 0.84, 1.00};
-            green = {0.00, 0.34, 0.61, 0.84, 1.00};
-            blue  = {0.00, 0.34, 0.61, 0.84, 1.00};
+       Double_t     stops[NRGBs] = {0.00, 0.34, 0.61, 0.84, 1.00};
+       Double_t     red[NRGBs]   = {0.00, 0.34, 0.61, 0.84, 1.00};
+       Double_t     green[NRGBs] = {0.00, 0.34, 0.61, 0.84, 1.00};
+       Double_t     blue[NRGBs]  = {0.00, 0.34, 0.61, 0.84, 1.00};
         }
         else if(palettename == "fire"){
-            stops = {0.00, 0.20, 0.80, 1.00};
-            red   = {1.00, 1.00, 1.00, 0.50};
-            green = {1.00, 1.00, 0.00, 0.00};
-            blue  = {0.20, 0.00, 0.00, 0.00};
+       Double_t     stops[NRGBs] = {0.00, 0.20, 0.80, 1.00};
+       Double_t     red[NRGBs]   = {1.00, 1.00, 1.00, 0.50};
+       Double_t     green[NRGBs] = {1.00, 1.00, 0.00, 0.00};
+       Double_t     blue[NRGBs]  = {0.20, 0.00, 0.00, 0.00};
         }
         else if(palettename == "antifire"){
-            stops = {0.00, 0.20, 0.80, 1.00};
-            red   = {0.50, 1.00, 1.00, 1.00};
-            green = {0.00, 0.00, 1.00, 1.00};
-            blue  = {0.00, 0.00, 0.00, 0.20};
+       Double_t     stops[NRGBs] = {0.00, 0.20, 0.80, 1.00};
+       Double_t     red[NRGBs]   = {0.50, 1.00, 1.00, 1.00};
+       Double_t     green[NRGBs] = {0.00, 0.00, 1.00, 1.00};
+       Double_t     blue[NRGBs]  = {0.00, 0.00, 0.00, 0.20};
         } else{
                 // default palette, looks cool
-            stops = {0.00, 0.34, 0.61, 0.84, 1.00};
-            red   = {0.00, 0.00, 0.87, 1.00, 0.51};
-            green = {0.00, 0.81, 1.00, 0.20, 0.00};
-            blue  = {0.51, 1.00, 0.12, 0.00, 0.00};
+       Double_t     stops[NRGBs] = {0.00, 0.34, 0.61, 0.84, 1.00};
+       Double_t     red[NRGBs]   = {0.00, 0.00, 0.87, 1.00, 0.51};
+       Double_t     green[NRGBs] = {0.00, 0.81, 1.00, 0.20, 0.00};
+       Double_t     blue[NRGBs]  = {0.51, 1.00, 0.12, 0.00, 0.00};
         }
-     */
+	      */
         
         TColor::CreateGradientColorTable(NRGBs, stops, red, green, blue, NCont);
         tdrStyle->SetNumberContours(NCont);
@@ -586,8 +599,8 @@ void JetByJetComparisonHistos::fillAllHistos(const JetInfo& ja, const JetInfo& j
   fillTH(findTH1("hDeltaDiscrSSVHE"), ja.ssvhe, jb.ssvhe,ja.ssvhe-jb.ssvhe);
   fillTH(findTH1("hDeltaDiscrSSVHP"), ja.ssvhp, jb.ssvhp,ja.ssvhp-jb.ssvhp);
   fillTH(findTH1("hDeltaDiscrCSV"),   ja.csv,   jb.csv,  ja.csv-jb.csv);
-  fillTH(findTH1("hDeltaPT2Track"),    0,   0,  ja.trk[1].pT-jb.trk[1].pT);
-  fillTH(findTH1("hDeltaPT3Track"),    0,   0,  ja.trk[2].pT-jb.trk[2].pT);
+  fillTH(findTH1("hDeltaPT2Track"),    0,   0,  (ja.trk[1].pT)-(jb.trk[1].pT));
+  fillTH(findTH1("hDeltaPT3Track"),    0,   0,  (ja.trk[2].pT)-(jb.trk[2].pT));
   fillTH(findTH1("hDeltaEta2Track"),   0,   0,  ja.trk[1].eta-jb.trk[1].eta);
   fillTH(findTH1("hDeltaEta3Track"),   0,   0,  ja.trk[2].eta-jb.trk[2].eta);
   fillTH(findTH1("hDeltaPhi2Track"),   0,   0,  ja.trk[1].phi-jb.trk[1].phi);
@@ -680,6 +693,19 @@ void JetByJetComparisonHistos::fillAllHistos(const JetInfo& ja, const JetInfo& j
     fillTH(findTH2("h2ScatDeltaDiscrSSVHPvsSV3dDistanceoverSV3dDistanceError"),ja.ssvhp,jb.ssvhp,(ja.sv.SV3dDistance)/(ja.sv.SV3dDistanceError),ja.ssvhp-jb.ssvhp);
     fillTH(findTH2("h2ScatDeltaDiscrSSVHPvsSVMass"),ja.ssvhp,jb.ssvhp,ja.sv.SVMass,ja.ssvhp-jb.ssvhp);
     fillTH(findTH2("h2ScatDeltaDiscrSSVHPvsSVtotCharge"),ja.ssvhp,jb.ssvhp,ja.sv.SVtotCharge,ja.ssvhp-jb.ssvhp);
+
+    // filling CSV Plot
+
+    fillTH(findTH2("h2ScatDeltaDiscrCSVvsSV3dDistance"),ja.csv,jb.csv,ja.sv.SV3dDistance,ja.csv-jb.csv);
+    fillTH(findTH2("h2ScatDeltaDiscrCSVvsSV3dDistanceError"),ja.csv,jb.csv,ja.sv.SV3dDistanceError,ja.csv-jb.csv);
+    fillTH(findTH2("h2ScatDeltaDiscrCSVvsSV3dDistanceoverSV3dDistanceError"),ja.csv,jb.csv,(ja.sv.SV3dDistance)/(ja.sv.SV3dDistanceError),ja.csv-jb.csv);
+    fillTH(findTH2("h2ScatDeltaDiscrCSVvsDelta3PV"),          ja.csv,jb.csv,TMath::Sqrt(TMath::Power(deltax,2)+TMath::Power(deltay,2)+TMath::Power(deltaz,2)),ja.csv-jb.csv);
+    fillTH(findTH2("h2ScatDeltaDiscrCSVvsDeltaXYPV"),         ja.csv,jb.csv,TMath::Sqrt(TMath::Power(deltax,2)+TMath::Power(deltay,2)),ja.csv-jb.csv);
+    fillTH(findTH2("h2ScatDeltaDiscrTCHEvsDeltaPVz"),        ja.csv,jb.csv,(ja.pv.PVz-jb.pv.PVz),ja.csv-jb.csv);
+
+
+
+
     
     
     
