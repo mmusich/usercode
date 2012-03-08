@@ -91,37 +91,41 @@ void MatchTheTree(bool doTree, const TString& matrix_filename = "MatrixOfMatches
   Float_t eta1[nMaxjets_],            eta2[nMaxjets_];
   Float_t phi1[nMaxjets_],            phi2[nMaxjets_];
 
-  // Infos on the most significant track
+  // Infos on the 1st significant track
   Float_t IP3dFirst1[nMaxjets_],                   IP3dFirst2[nMaxjets_];
   Float_t IP3dErrorFirst1[nMaxjets_],              IP3dErrorFirst2[nMaxjets_];
   Float_t IP3dDecayLengthFirst1[nMaxjets_],        IP3dDecayLengthFirst2[nMaxjets_];
   Float_t IP3dTransverseMomentumFirst1[nMaxjets_], IP3dTransverseMomentumFirst2[nMaxjets_];
   Float_t IP3dEtaFirst1[nMaxjets_],                IP3dEtaFirst2[nMaxjets_];
   Float_t IP3dPhiFirst1[nMaxjets_],                IP3dPhiFirst2[nMaxjets_];
+  Int_t   IP3dTrackQualityFirst1[nMaxjets_],       IP3dTrackQualityFirst2[nMaxjets_];
   
-  // Infos on the most significant track
+  // Infos on the 2nd significant track
   Float_t IP3dSecond1[nMaxjets_],                  IP3dSecond2[nMaxjets_];
   Float_t IP3dErrorSecond1[nMaxjets_],             IP3dErrorSecond2[nMaxjets_];
   Float_t IP3dDecayLengthSecond1[nMaxjets_],       IP3dDecayLengthSecond2[nMaxjets_];
   Float_t IP3dTransverseMomentumSecond1[nMaxjets_],IP3dTransverseMomentumSecond2[nMaxjets_];
   Float_t IP3dEtaSecond1[nMaxjets_],               IP3dEtaSecond2[nMaxjets_];
   Float_t IP3dPhiSecond1[nMaxjets_],               IP3dPhiSecond2[nMaxjets_];
+  Int_t   IP3dTrackQualitySecond1[nMaxjets_],       IP3dTrackQualitySecond2[nMaxjets_];
 
-  // Infos on the most significant track
+  // Infos on the 3rd significant track
   Float_t IP3dThird1[nMaxjets_],                   IP3dThird2[nMaxjets_];
   Float_t IP3dErrorThird1[nMaxjets_],              IP3dErrorThird2[nMaxjets_];
   Float_t IP3dDecayLengthThird1[nMaxjets_],        IP3dDecayLengthThird2[nMaxjets_];
   Float_t IP3dTransverseMomentumThird1[nMaxjets_], IP3dTransverseMomentumThird2[nMaxjets_];
   Float_t IP3dEtaThird1[nMaxjets_],                IP3dEtaThird2[nMaxjets_];
   Float_t IP3dPhiThird1[nMaxjets_],                IP3dPhiThird2[nMaxjets_];
+  Int_t   IP3dTrackQualityThird1[nMaxjets_],       IP3dTrackQualityThird2[nMaxjets_];
 
-  // Infos on the most significant track
+  // Infos on the 4th significant track
   Float_t IP3dFourth1[nMaxjets_],                  IP3dFourth2[nMaxjets_];
   Float_t IP3dErrorFourth1[nMaxjets_],             IP3dErrorFourth2[nMaxjets_];
   Float_t IP3dDecayLengthFourth1[nMaxjets_],       IP3dDecayLengthFourth2[nMaxjets_];
   Float_t IP3dTransverseMomentumFourth1[nMaxjets_],IP3dTransverseMomentumFourth2[nMaxjets_];
   Float_t IP3dEtaFourth1[nMaxjets_],               IP3dEtaFourth2[nMaxjets_];
   Float_t IP3dPhiFourth1[nMaxjets_],               IP3dPhiFourth2[nMaxjets_];
+  Int_t   IP3dTrackQualityFourth1[nMaxjets_],       IP3dTrackQualityFourth2[nMaxjets_];
 
   // Jet-id
   Float_t jetNeutralHadronEnergyFraction1[nMaxjets_],jetNeutralHadronEnergyFraction2[nMaxjets_];    // nhf
@@ -205,6 +209,7 @@ void MatchTheTree(bool doTree, const TString& matrix_filename = "MatrixOfMatches
   tree1->SetBranchAddress("IP3dTransverseMomentum1",&IP3dTransverseMomentumFirst1); 
   tree1->SetBranchAddress("IP3dEta1",&IP3dEtaFirst1);		     
   tree1->SetBranchAddress("IP3dPhi1",&IP3dPhiFirst1);		     
+  tree1->SetBranchAddress("IP3dTrackQuality1",&IP3dTrackQualityFirst1);		     
 			   			  		    							     
   tree1->SetBranchAddress("IP3d2",&IP3dSecond1);		     
   tree1->SetBranchAddress("IP3dError2",&IP3dErrorSecond1);	     
@@ -212,20 +217,23 @@ void MatchTheTree(bool doTree, const TString& matrix_filename = "MatrixOfMatches
   tree1->SetBranchAddress("IP3dTransverseMomentum2",&IP3dTransverseMomentumSecond1);
   tree1->SetBranchAddress("IP3dEta2",&IP3dEtaSecond1);               
   tree1->SetBranchAddress("IP3dPhi2",&IP3dPhiSecond1);               
+  tree1->SetBranchAddress("IP3dTrackQuality2",&IP3dTrackQualitySecond1);		     
 			   			  	   	       				     
   tree1->SetBranchAddress("IP3d3",&IP3dThird1);		     		                     
   tree1->SetBranchAddress("IP3dError3",&IP3dErrorThird1);              
   tree1->SetBranchAddress("IP3dDecayLength3",&IP3dDecayLengthThird1);        
   tree1->SetBranchAddress("IP3dTransverseMomentum3",&IP3dTransverseMomentumThird1); 
   tree1->SetBranchAddress("IP3dEta3",&IP3dEtaThird1);                
-  tree1->SetBranchAddress("IP3dPhi3",&IP3dPhiThird1);                
-			   	   			   			  		     				     
+  tree1->SetBranchAddress("IP3dPhi3",&IP3dPhiThird1);                			   	   			   			  		
+  tree1->SetBranchAddress("IP3dTrackQuality3",&IP3dTrackQualityThird1);		     
+     				     
   tree1->SetBranchAddress("IP3d4",&IP3dFourth1);                  
   tree1->SetBranchAddress("IP3dError4",&IP3dErrorFourth1);             
   tree1->SetBranchAddress("IP3dDecayLength4",&IP3dDecayLengthFourth1);       
   tree1->SetBranchAddress("IP3dTransverseMomentum4",&IP3dTransverseMomentumFourth1);
   tree1->SetBranchAddress("IP3dEta4",&IP3dEtaFourth1);               
   tree1->SetBranchAddress("IP3dPhi4",&IP3dPhiFourth1);               
+  tree1->SetBranchAddress("IP3dTrackQuality4",&IP3dTrackQualityFourth1);		     
 
   tree1->SetBranchAddress("standardCombinedSecondaryVertexPFBJetTags",&discrcsvglobal1);
   tree1->SetBranchAddress("standardJetProbabilityPFBJetTags",&discrjpglobal1);
@@ -285,6 +293,7 @@ void MatchTheTree(bool doTree, const TString& matrix_filename = "MatrixOfMatches
   tree2->SetBranchAddress("IP3dTransverseMomentum1",&IP3dTransverseMomentumFirst2); 
   tree2->SetBranchAddress("IP3dEta1",&IP3dEtaFirst2);		     
   tree2->SetBranchAddress("IP3dPhi1",&IP3dPhiFirst2);		     
+  tree2->SetBranchAddress("IP3dTrackQuality1",&IP3dTrackQualityFirst2);		     
 			   			  		    							     
   tree2->SetBranchAddress("IP3d2",&IP3dSecond2);		     
   tree2->SetBranchAddress("IP3dError2",&IP3dErrorSecond2);	     
@@ -292,13 +301,15 @@ void MatchTheTree(bool doTree, const TString& matrix_filename = "MatrixOfMatches
   tree2->SetBranchAddress("IP3dTransverseMomentum2",&IP3dTransverseMomentumSecond2);
   tree2->SetBranchAddress("IP3dEta2",&IP3dEtaSecond2);               
   tree2->SetBranchAddress("IP3dPhi2",&IP3dPhiSecond2);               
-			   			  	   	       				     
+  tree2->SetBranchAddress("IP3dTrackQuality2",&IP3dTrackQualitySecond2);		     			   			
+  	   	       				     
   tree2->SetBranchAddress("IP3d3",&IP3dThird2);		     		                     
   tree2->SetBranchAddress("IP3dError3",&IP3dErrorThird2);              
   tree2->SetBranchAddress("IP3dDecayLength3",&IP3dDecayLengthThird2);        
   tree2->SetBranchAddress("IP3dTransverseMomentum3",&IP3dTransverseMomentumThird2); 
   tree2->SetBranchAddress("IP3dEta3",&IP3dEtaThird2);                
   tree2->SetBranchAddress("IP3dPhi3",&IP3dPhiThird2);                
+  tree2->SetBranchAddress("IP3dTrackQuality3",&IP3dTrackQualityThird2);		     
 			   	   			   			  		     				     
   tree2->SetBranchAddress("IP3d4",&IP3dFourth2);                  
   tree2->SetBranchAddress("IP3dError4",&IP3dErrorFourth2);             
@@ -306,6 +317,7 @@ void MatchTheTree(bool doTree, const TString& matrix_filename = "MatrixOfMatches
   tree2->SetBranchAddress("IP3dTransverseMomentum4",&IP3dTransverseMomentumFourth2);
   tree2->SetBranchAddress("IP3dEta4",&IP3dEtaFourth2);               
   tree2->SetBranchAddress("IP3dPhi4",&IP3dPhiFourth2);
+  tree2->SetBranchAddress("IP3dTrackQuality4",&IP3dTrackQualityFourth2);		     
 
   tree2->SetBranchAddress("standardSimpleSecondaryVertexHighPurPFBJetTags",&discrssvhpglobal2);
   tree2->SetBranchAddress("standardJetProbabilityPFBJetTags",&discrjpglobal2);
@@ -565,27 +577,31 @@ void MatchTheTree(bool doTree, const TString& matrix_filename = "MatrixOfMatches
  	  TJetInfoA->trk[0].pT             =IP3dTransverseMomentumFirst1[j1];	
  	  TJetInfoA->trk[0].eta	           =IP3dEtaFirst1[j1];               	
  	  TJetInfoA->trk[0].phi            =IP3dPhiFirst1[j1];               	
-	  
+ 	  TJetInfoA->trk[0].quality	   =IP3dTrackQualityFirst1[j1];                  	  
+
  	  TJetInfoA->trk[1].IP3d	   =IP3dSecond1[j1];                 
  	  TJetInfoA->trk[1].IP3dError	   =IP3dErrorSecond1[j1];            
  	  TJetInfoA->trk[1].IP3dDecayLength=IP3dDecayLengthSecond1[j1];      	
  	  TJetInfoA->trk[1].pT             =IP3dTransverseMomentumSecond1[j1];	
  	  TJetInfoA->trk[1].eta	           =IP3dEtaSecond1[j1];              	
  	  TJetInfoA->trk[1].phi            =IP3dPhiSecond1[j1];              	
-	
+ 	  TJetInfoA->trk[1].quality	   =IP3dTrackQualitySecond1[j1];                  	  
+
  	  TJetInfoA->trk[2].IP3d	   =IP3dThird1[j1];                  
  	  TJetInfoA->trk[2].IP3dError	   =IP3dErrorThird1[j1];             	
  	  TJetInfoA->trk[2].IP3dDecayLength=IP3dDecayLengthThird1[j1];       
  	  TJetInfoA->trk[2].pT             =IP3dTransverseMomentumThird1[j1];	
  	  TJetInfoA->trk[2].eta	           =IP3dEtaThird1[j1];               
  	  TJetInfoA->trk[2].phi            =IP3dPhiThird1[j1];               	
-	  
+ 	  TJetInfoA->trk[2].quality	   =IP3dTrackQualityThird1[j1];                  	  	  
+
  	  TJetInfoA->trk[3].IP3d	   =IP3dFourth1[j1];                 	
  	  TJetInfoA->trk[3].IP3dError	   =IP3dErrorFourth1[j1];            
  	  TJetInfoA->trk[3].IP3dDecayLength=IP3dDecayLengthFourth1[j1];      	
  	  TJetInfoA->trk[3].pT             =IP3dTransverseMomentumFourth1[j1];	
  	  TJetInfoA->trk[3].eta            =IP3dEtaFourth1[j1];              	
  	  TJetInfoA->trk[3].phi            =IP3dPhiFourth1[j1];              
+ 	  TJetInfoA->trk[3].quality	   =IP3dTrackQualityFourth1[j1];                  	  
 
 	  TJetInfoA->tche =discrtcheglobal1[j1];	    
 	  TJetInfoA->tchp =discrtchpglobal1[j1];	    
@@ -632,6 +648,7 @@ void MatchTheTree(bool doTree, const TString& matrix_filename = "MatrixOfMatches
  	  TJetInfoB->trk[0].pT             =IP3dTransverseMomentumFirst2[j2min];	
  	  TJetInfoB->trk[0].eta 	   =IP3dEtaFirst2[j2min];               	
  	  TJetInfoB->trk[0].phi            =IP3dPhiFirst2[j2min];               	
+ 	  TJetInfoB->trk[0].quality	   =IP3dTrackQualityFirst2[j2min];                  	  
 	   
  	  TJetInfoB->trk[1].IP3d	   =IP3dSecond2[j2min];                 
  	  TJetInfoB->trk[1].IP3dError	   =IP3dErrorSecond2[j2min];            
@@ -639,6 +656,7 @@ void MatchTheTree(bool doTree, const TString& matrix_filename = "MatrixOfMatches
  	  TJetInfoB->trk[1].pT             =IP3dTransverseMomentumSecond2[j2min];	
  	  TJetInfoB->trk[1].eta	           =IP3dEtaSecond2[j2min];              	
  	  TJetInfoB->trk[1].phi            =IP3dPhiSecond2[j2min];              	
+ 	  TJetInfoB->trk[1].quality	   =IP3dTrackQualitySecond2[j2min];                  	  
 	  
  	  TJetInfoB->trk[2].IP3d	   =IP3dThird2[j2min];                  
  	  TJetInfoB->trk[2].IP3dError	   =IP3dErrorThird2[j2min];             	
@@ -646,13 +664,15 @@ void MatchTheTree(bool doTree, const TString& matrix_filename = "MatrixOfMatches
  	  TJetInfoB->trk[2].pT             =IP3dTransverseMomentumThird2[j2min];	
  	  TJetInfoB->trk[2].eta	           =IP3dEtaThird2[j2min];               
  	  TJetInfoB->trk[2].phi            =IP3dPhiThird2[j2min];               	
-	
+ 	  TJetInfoB->trk[2].quality	   =IP3dTrackQualityThird2[j2min];                  	  	
+
  	  TJetInfoB->trk[3].IP3d	   =IP3dFourth2[j2min];                 	
  	  TJetInfoB->trk[3].IP3dError	   =IP3dErrorFourth2[j2min];            
  	  TJetInfoB->trk[3].IP3dDecayLength=IP3dDecayLengthFourth2[j2min];      	
  	  TJetInfoB->trk[3].pT             =IP3dTransverseMomentumFourth2[j2min];	
  	  TJetInfoB->trk[3].eta	           =IP3dEtaFourth2[j2min];              	
  	  TJetInfoB->trk[3].phi            =IP3dPhiFourth2[j2min];              
+ 	  TJetInfoB->trk[3].quality	   =IP3dTrackQualityFourth2[j2min];                  	  
 
 	  TJetInfoB->tche =discrtcheglobal2[j2min];	    
 	  TJetInfoB->tchp =discrtchpglobal2[j2min];	    

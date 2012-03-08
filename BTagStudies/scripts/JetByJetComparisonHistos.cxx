@@ -46,12 +46,12 @@ void JetByJetComparisonHistos::addAllHistos() {
   addHisto("hDeltaDiscrSSVHE","#Delta DiscrSSVHE ;#Delta DiscrSSVHE;jets",1000,-5.,5.    );
   addHisto("hDeltaDiscrSSVHP","#Delta DiscrSSVHP ;#Delta DiscrSSVHP;jets",1000,-5.,5.    );
   addHisto("hDeltaDiscrCSV",  "#Delta DiscrCSV ;#Delta DiscrCSV;jets",    1000,-5.,5.    );
-  addHisto("hDeltaPT2Track",  "#Delta PT 2 Track ;#Delta PT 2 Track;jets",    1000,0.,500.    );
-  addHisto("hDeltaPT3Track",  "#Delta PT 3 Track;#Delta PT 3 Track;jets",    1000,0.,500.    );
-  addHisto("hDeltaEta2Track",  "#Delta Eta 2 Track ;#Delta Eta 2 Track;jets",    1000,-2.8,2.8    );
-  addHisto("hDeltaEta3Track",  "#Delta Eta 3 Track ;#Delta Eta 3 Track;jets",    1000,-2.8,2.8    );
-  addHisto("hDeltaPhi2Track",  "#Delta Phi 2 Track ;#Delta Phi 2 Track;jets",    1000,-3.2,3.2    );
-  addHisto("hDeltaPhi3Track",  "#Delta Phi 3 Track ;#Delta Phi 3 Track;jets",    1000,-3.2,3.2    );
+  addHisto("hDeltaPT2TrackTCHE",  "#Delta PT 2 Track ;#Delta PT 2 Track;jets",    1000,0.,500.    );
+  addHisto("hDeltaPT3TrackTCHP",  "#Delta PT 3 Track;#Delta PT 3 Track;jets",    1000,0.,500.    );
+  addHisto("hDeltaEta2TrackTCHE",  "#Delta Eta 2 Track ;#Delta Eta 2 Track;jets",    1000,-2.8,2.8    );
+  addHisto("hDeltaEta3TrackTCHP",  "#Delta Eta 3 Track ;#Delta Eta 3 Track;jets",    1000,-2.8,2.8    );
+  addHisto("hDeltaPhi2TrackTCHE",  "#Delta Phi 2 Track ;#Delta Phi 2 Track;jets",    1000,-3.2,3.2    );
+  addHisto("hDeltaPhi3TrackTCHP",  "#Delta Phi 3 Track ;#Delta Phi 3 Track;jets",    1000,-3.2,3.2    );
     
   //Histograms 2D (scatter plot for discriminants) ( for cross check)
   addHisto2D("h2ScatDiscrTCHE","Discr TCHE",100,-100.,100.,100,-100.,100.);
@@ -599,12 +599,12 @@ void JetByJetComparisonHistos::fillAllHistos(const JetInfo& ja, const JetInfo& j
   fillTH(findTH1("hDeltaDiscrSSVHE"), ja.ssvhe, jb.ssvhe,ja.ssvhe-jb.ssvhe);
   fillTH(findTH1("hDeltaDiscrSSVHP"), ja.ssvhp, jb.ssvhp,ja.ssvhp-jb.ssvhp);
   fillTH(findTH1("hDeltaDiscrCSV"),   ja.csv,   jb.csv,  ja.csv-jb.csv);
-  fillTH(findTH1("hDeltaPT2Track"),    0,   0,  (ja.trk[1].pT)-(jb.trk[1].pT));
-  fillTH(findTH1("hDeltaPT3Track"),    0,   0,  (ja.trk[2].pT)-(jb.trk[2].pT));
-  fillTH(findTH1("hDeltaEta2Track"),   0,   0,  ja.trk[1].eta-jb.trk[1].eta);
-  fillTH(findTH1("hDeltaEta3Track"),   0,   0,  ja.trk[2].eta-jb.trk[2].eta);
-  fillTH(findTH1("hDeltaPhi2Track"),   0,   0,  ja.trk[1].phi-jb.trk[1].phi);
-  fillTH(findTH1("hDeltaPhi3Track"),   0,   0,  ja.trk[2].phi-jb.trk[2].phi);
+  fillTH(findTH1("hDeltaPT2TrackTCHE"),    ja.tche,   jb.tche,  (ja.trk[1].pT)-(jb.trk[1].pT));
+  fillTH(findTH1("hDeltaPT3TrackTCHP"),    ja.tchp,   jb.tchp,  (ja.trk[2].pT)-(jb.trk[2].pT));
+  fillTH(findTH1("hDeltaEta2TrackTCHE"),   ja.tche,   jb.tche,  (ja.trk[1].eta)-(jb.trk[1].eta));
+  fillTH(findTH1("hDeltaEta3TrackTCHP"),   ja.tchp,   jb.tchp,  (ja.trk[2].eta)-(jb.trk[2].eta));
+  fillTH(findTH1("hDeltaPhi2TrackTCHE"),   ja.tche,   jb.tche,  (ja.trk[1].phi)-(jb.trk[1].phi));
+  fillTH(findTH1("hDeltaPhi3TrackTCHP"),   jb.tchp,   jb.tchp,  (ja.trk[2].phi)-(jb.trk[2].phi));
     
     
   fillTH(findTH2("h2ScatDiscrTCHE"),  ja.tche,  jb.tche, ja.tche, jb.tche);
@@ -701,7 +701,7 @@ void JetByJetComparisonHistos::fillAllHistos(const JetInfo& ja, const JetInfo& j
     fillTH(findTH2("h2ScatDeltaDiscrCSVvsSV3dDistanceoverSV3dDistanceError"),ja.csv,jb.csv,(ja.sv.SV3dDistance)/(ja.sv.SV3dDistanceError),ja.csv-jb.csv);
     fillTH(findTH2("h2ScatDeltaDiscrCSVvsDelta3PV"),          ja.csv,jb.csv,TMath::Sqrt(TMath::Power(deltax,2)+TMath::Power(deltay,2)+TMath::Power(deltaz,2)),ja.csv-jb.csv);
     fillTH(findTH2("h2ScatDeltaDiscrCSVvsDeltaXYPV"),         ja.csv,jb.csv,TMath::Sqrt(TMath::Power(deltax,2)+TMath::Power(deltay,2)),ja.csv-jb.csv);
-    fillTH(findTH2("h2ScatDeltaDiscrTCHEvsDeltaPVz"),        ja.csv,jb.csv,(ja.pv.PVz-jb.pv.PVz),ja.csv-jb.csv);
+    fillTH(findTH2("h2ScatDeltaDiscrCSVvsDeltaPVz"),        ja.csv,jb.csv,(ja.pv.PVz-jb.pv.PVz),ja.csv-jb.csv);
 
 
 
@@ -785,10 +785,34 @@ void JetByJetComparisonHistos::fillTH(TH1* p_h, float value1, float value2, floa
 void JetByJetComparisonHistos::drawNice2dHistos(TFile* fout)
 {
 
+  //LOOP on the 1D histograms
+
+for(UInt_t h1=0; h1< h1vec.size(); h1++){
+    TCanvas *c1 = new TCanvas(h1vec[h1]->GetName(),h1vec[h1]->GetName(),800,600);
+    c1->cd();
+    gPad->SetTopMargin(0.07);
+    gPad->SetRightMargin(0.15);
+    h1vec[h1]->SetStats(kFALSE);
+
+    h1vec[h1]->Draw();
+
+    fout->cd(dirname.Data()); 
+    h1vec[h1]->Write();
+    
+    TString canvName1 = h1vec[h1]->GetName();
+    c1->SaveAs(dirname+canvName1+".png");
+    c1->Delete();
+    
+
+
+ }
+
+
+
  // LOOP on the 2D histograms
   for(UInt_t h=0; h< h2vec.size(); h++){
-    TCanvas *c = new TCanvas(h2vec[h]->GetName(),h2vec[h]->GetName(),800,600);
-    c->cd();
+    TCanvas *c2 = new TCanvas(h2vec[h]->GetName(),h2vec[h]->GetName(),800,600);
+    c2->cd();
     gPad->SetTopMargin(0.07);
     gPad->SetRightMargin(0.15);
     h2vec[h]->SetStats(kFALSE);
@@ -808,7 +832,8 @@ void JetByJetComparisonHistos::drawNice2dHistos(TFile* fout)
     h2vec[h]->Write();
     hpfx_tmp->Write();
     TString canvName = h2vec[h]->GetName();
-    c->SaveAs(dirname+canvName+".png");
+    c2->SaveAs(dirname+canvName+".png");
+    c2->Delete();
       
   }
   
