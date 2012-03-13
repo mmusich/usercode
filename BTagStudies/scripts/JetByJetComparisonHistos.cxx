@@ -61,8 +61,8 @@ void JetByJetComparisonHistos::addAllHistos() {
   addHisto("hDeltaEta3TrackTCHP",  "#Delta Eta 3 Track ;#Delta Eta 3 Track;jets",    100,-1.5,1.5    );
   addHisto("hDeltaPhi2TrackTCHE",  "#Delta Phi 2 Track ;#Delta Phi 2 Track;jets",    100,-1.5,1.5    );
   addHisto("hDeltaPhi3TrackTCHP",  "#Delta Phi 3 Track ;#Delta Phi 3 Track;jets",    100,-1.5,1.5    );
-  addHisto("hDeltaXYPVTCHE",  "#Delta XYPV ;#Delta XYPV;jets",    100,0,0.03    );
-  addHisto("hDeltaZPVTCHE",  "#Delta ZPV ;#Delta ZPV;jets",    100,-0.3,0.03    );
+  addHisto("hDeltaXYPVTCHE", "#Delta XYPV ;#Delta XYPV;jets",    100, 0,0.03    );
+  addHisto("hDeltaZPVTCHE",  "#Delta ZPV ;#Delta ZPV;jets",      100,-0.3,0.3    );
  
 
     
@@ -461,12 +461,11 @@ void JetByJetComparisonHistos::drawNice2dHistos(TFile* fout)
     gPad->SetRightMargin(0.15);
     h2vec[h]->SetStats(kFALSE);
     h2vec[h]->Draw("colz");
-    // c->Draw();
 
     TProfile *hpfx_tmp = (TProfile*) h2vec[h]->ProfileX("_pfx",1,-1,"o");
     hpfx_tmp->SetStats(kFALSE);
-    hpfx_tmp->SetMarkerColor(kRed); 
-    hpfx_tmp->SetMarkerSize(1); 
+    hpfx_tmp->SetMarkerColor(kBlack); 
+    hpfx_tmp->SetMarkerSize(0.75); 
     hpfx_tmp->SetMarkerStyle(20); 
     hpfx_tmp->Draw("psame");
 

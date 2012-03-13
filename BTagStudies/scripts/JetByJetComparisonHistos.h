@@ -33,7 +33,7 @@ class JetByJetComparisonHistos{
   std::map<TString,Float_t> defaultmap;
   TString dirname; 
   bool CondANotDef, CondBNotDef;
-TString obj1name_, obj2name_;
+  TString obj1name_, obj2name_;
   
   // store vector for dealing with canvas
   std::vector<TH1F*> h1vec;
