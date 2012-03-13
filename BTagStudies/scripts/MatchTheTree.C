@@ -470,7 +470,7 @@ void MatchTheTree(bool doTree, const TString& matrix_filename = "MatrixOfMatches
   Int_t nMaxEvents_(matchList->GetN());
   if(maxEvents!=-1) nMaxEvents_ = maxEvents; 
   
-  for (Int_t i=0; i<nMaxEvents_; i++) {
+  for (Int_t i=0; i<10000; i++) {
       
     Int_t entry1 = (Int_t)matchList->GetX()[i];
     Int_t entry2 = (Int_t)matchList->GetY()[i];
