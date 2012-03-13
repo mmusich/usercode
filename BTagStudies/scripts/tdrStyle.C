@@ -105,7 +105,35 @@ void setTDRStyle(TString palettename) {
       blue[i] = blue1[i];
     }
 
-  } else{
+  } else if(palettename == "logredblue") {
+
+     Double_t stops1[5] = {0.0001, 0.0010, 0.0100, 0.1000,  1.0000};
+     Double_t red1[5]   = {1.00,   0.75,   0.50,   0.25,    0.00};
+     Double_t green1[5] = {0.00,   0.00,   0.00,   0.00,    0.00};
+     Double_t blue1[5]  = {0.00,   0.25,   0.50,   0.75,    1.00};
+    
+    for(Int_t i=0; i<NRGBs; i++){
+      stops[i] = stops1[i];
+      red[i] = red1[i];
+      green[i] = green1[i];
+      blue[i] = blue1[i];
+    }
+    
+   } else if(palettename == "logbluered") {
+
+     Double_t stops1[5] = {0.0001, 0.0010, 0.0100, 0.1000,  1.0000};
+     Double_t red1[5]  = {0.00,   0.25,   0.50,   0.75,    1.00};
+     Double_t green1[5] = {0.00,   0.00,   0.00,   0.00,    0.00};
+     Double_t blue1[5]   = {1.00,   0.75,   0.50,   0.25,    0.00};
+
+    for(Int_t i=0; i<NRGBs; i++){
+      stops[i] = stops1[i];
+      red[i] = red1[i];
+      green[i] = green1[i];
+      blue[i] = blue1[i];
+    }
+    
+  } else {
     // default palette, looks cool
     Double_t stops1[5] = {0.00, 0.34, 0.61, 0.84, 1.00};
     Double_t red1[5]   = {0.00, 0.00, 0.87, 1.00, 0.51};

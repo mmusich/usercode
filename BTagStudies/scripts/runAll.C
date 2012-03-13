@@ -1,7 +1,7 @@
 {
   
   gROOT->LoadMacro("./EventByEventNtuple.C+");
-  //  EventByEventNtuple("../data/standardPFNtuple_ttbar_orig.root=orig","../data/standardPFNtuple_ttbar_newgeom.root=newgeom");
+  EventByEventNtuple("../data/standardPFNtuple_ttbar_orig.root=orig","../data/standardPFNtuple_ttbar_newgeom.root=newgeom");
   
   /* list of available files for analysis
      
@@ -26,7 +26,7 @@
   gROOT->LoadMacro("./JetInfo.cxx+");
  
   gROOT->LoadMacro("./MatchTheTree.C+");
-  //  MatchTheTree(true,"MatrixOfMatches.root",-1);
+  MatchTheTree(true,"MatrixOfMatches.root",-1);
 
   // this will work only for TTree and not for flat Ntuple
 
