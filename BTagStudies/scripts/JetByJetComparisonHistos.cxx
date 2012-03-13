@@ -69,9 +69,9 @@ void JetByJetComparisonHistos::addAllHistos() {
   //Histograms 2D (scatter plot for discriminants) ( for cross check)
   addHisto2D("h2ScatDiscrTCHE","Discr TCHE",obj1name_,obj2name_,100,-20.,20.,100,-20.,20.);
   addHisto2D("h2ScatDiscrTCHP","Discr TCHP",obj1name_,obj2name_,100,-20.,20.,100,-20.,20.);
-  addHisto2D("h2ScatDiscrSSVHE","Discr SSVHE",obj1name_,obj2name_,100,-3.1,3.1,100,-3.1,3.1);
-  addHisto2D("h2ScatDiscrSSVHP","Discr SSVHP",obj1name_,obj2name_,100,-3.1,3.1,100,-3.1,3.1);
-  addHisto2D("h2ScatDiscrCSV","Discr CSV",obj1name_,obj2name_,100,-1.,1.,100,-1.,1.);
+  addHisto2D("h2ScatDiscrSSVHE","Discr SSVHE",obj1name_,obj2name_,100,-3.1,6.1,100,-3.1,6.1);
+  addHisto2D("h2ScatDiscrSSVHP","Discr SSVHP",obj1name_,obj2name_,100,-3.1,6.1,100,-3.1,6.1);
+  addHisto2D("h2ScatDiscrCSV","Discr CSV",obj1name_,obj2name_,100,-1.,1.4,100,-1.,1.4);
   addHisto2D("h2ScatDiscrJP","Discr JP",obj1name_,obj2name_,150,0.,4.,150,0.,4.);
   addHisto2D("h2ScatDiscrJBP","Discr JBP",obj1name_,obj2name_,150,0.,12.,150,0.,12.);
 
