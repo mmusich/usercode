@@ -5,6 +5,8 @@ setenv JobName RootJob
 echo  "Job started at "
 \date;
 
+set inputsource=$1
+
 setenv LXBATCH_DIR `pwd`
 setenv CMSSW_DIR ${CMSSW_BASE}/src/BTagging/BTagStudies/scripts
 
@@ -13,13 +15,36 @@ eval `scramv1 runtime -csh`
 
 cd $LXBATCH_DIR
 
-cp -pr $CMSSW_DIR/runAll.C .
+cp -pr $CMSSW_DIR/JetInfo.cxx .
+cp -pr $CMSSW_DIR/JetInfo.h .
+cp -pr $CMSSW_DIR/runAll_TEMPL.C .
 cp -pr $CMSSW_DIR/EventByEventNtuple.C .
 cp -pr $CMSSW_DIR/MatchTheTree.C .
 
+cp $CMSSW_DIR/${inputsource} .
+
+set file1=`more ${inputsource} | grep file1 | awk '{print $2}'`
+set file2=`more ${inputsource} | grep file2 | awk '{print $2}'`
+set name1=`more ${inputsource} | grep name1 | awk '{print $2}'`
+set name2=`more ${inputsource} | grep name2 | awk '{print $2}'`
+
+cat runAll_TEMPL.C | sed "s?FILE1TEMPLATE?${file1}?g" | sed "s?FILE2TEMPLATE?${file2}?g" | sed "s?NAME1TEMPLATE?${name1}?g" | sed "s?NAME2TEMPLATE?${name2}?g" >! runAll.C
+
+rm *.root
+
 root -b -q runAll.C
  
-cp MatrixOfMatches.root $CMSSW_DIR 
-cp JetByJetComparison.root $CMSSW_DIR
+mv MatrixOfMatches.root MatrixOfMatches_${name1}Vs${name2}.root
+rfcp *.root $CASTOR_HOME/BTagging/AssociationTrees
+
+foreach outputfile (`ls | grep root `)
+    echo $outputfile
+    rfcp $outputfile  $CASTOR_HOME/BTagging/AssociationTrees
+end
+
+
+#for RootOutputFile in $(ls *root ); do rfcp ${RootOutputFile} $CASTOR_HOME/BTagging/AssociationTrees/${RootOutputFile}; done
+#cp MatrixOfMatches.root $CMSSW_DIR 
+#rfcp JetByJetComparisonTree_${name1}Vs${name2}.root $CASTOR_HOME/BTagging/AssociationTrees
 
 exit 0
