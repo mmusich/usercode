@@ -51,6 +51,7 @@ void JetByJetComparison::Loop()
   TFile *file_out=new TFile(file_out_name,"recreate");  
   file_out->cd();
 
+  JetByJetComparisonHistos jetbyjethistos_notdefnotdef_all("NotDefault_NotDefault_all",file_out);
   JetByJetComparisonHistos jetbyjethistos_notdefnotdef_b("NotDefault_NotDefault_b",file_out);
   JetByJetComparisonHistos jetbyjethistos_notdefnotdef_udsg("NotDefault_NotDefault_udsg",file_out);
 //  JetByJetComparisonHistos jetbyjethistos_notdefdef("NotDefault_Default",file_out);
@@ -64,6 +65,7 @@ void JetByJetComparison::Loop()
     Long64_t ientry = LoadTree(jentry);
     if (ientry < 0) break;
     nb = fChain->GetEntry(jentry);   nbytes += nb;
+    jetbyjethistos_notdefnotdef_all.fillAllHistos(*JetInfoA,*JetInfoB,file_out);
     if (isB(JetInfoA->MCTrueFlavor) && isB(JetInfoB->MCTrueFlavor)) {
       jetbyjethistos_notdefnotdef_b.fillAllHistos(*JetInfoA,*JetInfoB,file_out);
     } else if (isUDSG(JetInfoA->MCTrueFlavor) && isUDSG(JetInfoB->MCTrueFlavor) ) {
@@ -74,7 +76,7 @@ void JetByJetComparison::Loop()
      if (Cut(ientry) < 0) continue;
   }
   
-
+   jetbyjethistos_notdefnotdef_all.drawNice2dHistos(file_out);
    jetbyjethistos_notdefnotdef_b.drawNice2dHistos(file_out);
    jetbyjethistos_notdefnotdef_udsg.drawNice2dHistos(file_out);
    // jetbyjethistos_notdefdef.drawNice2dHistos(file_out);
