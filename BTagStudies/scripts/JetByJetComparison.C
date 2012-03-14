@@ -64,6 +64,7 @@ void JetByJetComparison::Loop()
   for (Long64_t jentry=0; jentry<nentries;jentry++) {
     Long64_t ientry = LoadTree(jentry);
     if (ientry < 0) break;
+    if ( jentry%10000 == 0 )  cout << "JetByJetComprison Processing Event: " << jentry << endl;
     nb = fChain->GetEntry(jentry);   nbytes += nb;
     jetbyjethistos_notdefnotdef_all.fillAllHistos(*JetInfoA,*JetInfoB,file_out);
     if (isB(JetInfoA->MCTrueFlavor) && isB(JetInfoB->MCTrueFlavor)) {
