@@ -40,6 +40,7 @@ class JetInfo : public TObject {
   Int_t   nTracks;
   Int_t   jetId;
   Int_t   MCTrueFlavor;
+  Float_t MCweight;
   Float_t tche,tchp,ssvhe,ssvhp,csv,jp,jbp;
   PVInfo pv;
   SVInfo sv;

@@ -17,7 +17,7 @@ class JetByJetComparisonHistos{
   JetByJetComparisonHistos(const TString& s, TFile* fout);
     void addAllHistos();
     void addHisto(TString name, TString title,const int& nbins, const Float_t& min, const Float_t& max);
-    void addHisto2D(TString name, TString title,TString firstCond,TString secondCond,const int& nbins, const Float_t& min, const Float_t& max, const int& nbinsy, const Float_t& miny, const Float_t& maxy);
+    void AddHisto2D(std::string name, std::string title,TString firstCond,TString secondCond ,const int& nbins, const Float_t& min, const Float_t& max, const int& nbinsy, const Float_t& miny, const Float_t& maxy);
     void addHisto2D(TString name,TString title, const int& nbins,const Float_t& min,const Float_t& max,const int& nbinsy,const Float_t& miny,const Float_t& maxy);
     void addProfile(TString name, TString title,const int& nbins, const Float_t& min, const Float_t& max, const Float_t& miny, const Float_t& maxy);
     TH1F* findTH1(TString keyword);
@@ -26,6 +26,7 @@ class JetByJetComparisonHistos{
     void fillAllHistos(const JetInfo& ja, const JetInfo& jb, TFile* fout);
     void fillTH(TH1* h, float value1, float value2, float valueX, float valueY=0);
     void drawNice2dHistos(TFile*);
+    void cmsPrel(const double& intLumi);
     //   void setTDRStyle(TString palettename);
     //   void cmsPrel(const double& intLumi);
 
@@ -33,7 +34,7 @@ class JetByJetComparisonHistos{
   std::map<TString,Float_t> defaultmap;
   TString dirname; 
   bool CondANotDef, CondBNotDef;
-  TString obj1name_, obj2name_;
+TString obj1name_, obj2name_;
   
   // store vector for dealing with canvas
   std::vector<TH1F*> h1vec;

@@ -1,4 +1,4 @@
- #include <TStyle.h>
+#include <TStyle.h>
 #include <TColor.h>
 #include <TLatex.h>
 
@@ -28,7 +28,7 @@ void setTDRStyle(TString palettename) {
     }
 
   } else if(palettename == "gray"){
-    Double_t stops1[5] = {0.00, 0.34, 0.61, 0.84, 1.00};
+    Double_t stops1[5] = {0.00, 0.01, 0.05, 0.09, 0.1};
     Double_t red1[5]   = {1.00, 0.84, 0.61, 0.34, 0.00};
     Double_t green1[5] = {1.00, 0.84, 0.61, 0.34, 0.00};
     Double_t blue1[5]  = {1.00, 0.84, 0.61, 0.34, 0.00};
@@ -106,11 +106,11 @@ void setTDRStyle(TString palettename) {
     }
 
   } else if(palettename == "logredblue") {
-
-     Double_t stops1[5] = {0.0001, 0.0010, 0.0100, 0.1000,  1.0000};
-     Double_t red1[5]   = {1.00,   0.75,   0.50,   0.25,    0.00};
-     Double_t green1[5] = {0.00,   0.00,   0.00,   0.00,    0.00};
-     Double_t blue1[5]  = {0.00,   0.25,   0.50,   0.75,    1.00};
+    
+    Double_t stops1[5] = {0.0001, 0.0010, 0.0100, 0.1000,  1.0000};
+    Double_t red1[5]   = {1.00,   0.75,   0.50,   0.25,    0.00};
+    Double_t green1[5] = {0.00,   0.00,   0.00,   0.00,    0.00};
+    Double_t blue1[5]  = {0.00,   0.25,   0.50,   0.75,    1.00};
     
     for(Int_t i=0; i<NRGBs; i++){
       stops[i] = stops1[i];
@@ -119,13 +119,13 @@ void setTDRStyle(TString palettename) {
       blue[i] = blue1[i];
     }
     
-   } else if(palettename == "logbluered") {
+  } else if(palettename == "logbluered") {
 
-     Double_t stops1[5] = {0.0001, 0.0010, 0.0100, 0.1000,  1.0000};
-     Double_t red1[5]  = {0.00,   0.25,   0.50,   0.75,    1.00};
-     Double_t green1[5] = {0.00,   0.00,   0.00,   0.00,    0.00};
-     Double_t blue1[5]   = {1.00,   0.75,   0.50,   0.25,    0.00};
-
+    Double_t stops1[5] = {0.0001, 0.0010, 0.0100, 0.1000,  1.0000};
+    Double_t red1[5]  = {0.00,   0.25,   0.50,   0.75,    1.00};
+    Double_t green1[5] = {0.00,   0.00,   0.00,   0.00,    0.00};
+    Double_t blue1[5]   = {1.00,   0.75,   0.50,   0.25,    0.00};
+    
     for(Int_t i=0; i<NRGBs; i++){
       stops[i] = stops1[i];
       red[i] = red1[i];
@@ -133,7 +133,7 @@ void setTDRStyle(TString palettename) {
       blue[i] = blue1[i];
     }
     
-  } else {
+  } else{
     // default palette, looks cool
     Double_t stops1[5] = {0.00, 0.34, 0.61, 0.84, 1.00};
     Double_t red1[5]   = {0.00, 0.00, 0.87, 1.00, 0.51};
@@ -225,10 +225,10 @@ void setTDRStyle(TString palettename) {
   tdrStyle->SetPadTopMargin(0.07);
   tdrStyle->SetPadBottomMargin(0.15);
   tdrStyle->SetPadLeftMargin(0.16);
-  tdrStyle->SetPadRightMargin(0.02);
+  tdrStyle->SetPadRightMargin(0.03);
 
   // For the Global title:
-  tdrStyle->SetOptTitle(1);
+  tdrStyle->SetOptTitle(0);
   tdrStyle->SetTitleFont(42);
   tdrStyle->SetTitleColor(1);
   tdrStyle->SetTitleTextColor(1);

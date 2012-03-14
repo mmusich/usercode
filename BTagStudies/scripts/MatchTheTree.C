@@ -470,7 +470,7 @@ void MatchTheTree(bool doTree, const TString& matrix_filename = "MatrixOfMatches
   Int_t nMaxEvents_(matchList->GetN());
   if(maxEvents!=-1) nMaxEvents_ = maxEvents; 
   
-  for (Int_t i=0; i<nMaxEvents_; i++) {
+  for (Int_t i=0; i<10000; i++) {
       
     Int_t entry1 = (Int_t)matchList->GetX()[i];
     Int_t entry2 = (Int_t)matchList->GetY()[i];
@@ -528,6 +528,8 @@ void MatchTheTree(bool doTree, const TString& matrix_filename = "MatrixOfMatches
 
 	// tree 
 	if ( doTree ) {
+
+	  TJetInfoA->MCweight = m_mcweight1;
 	  TJetInfoA->pv.PVx = m_PVx1;		  
 	  TJetInfoA->pv.PVy = m_PVy1;		  
 	  TJetInfoA->pv.PVz = m_PVz1;		  
@@ -535,6 +537,7 @@ void MatchTheTree(bool doTree, const TString& matrix_filename = "MatrixOfMatches
 	  TJetInfoA->pv.PVndof = m_PVndof1;		  
 	  TJetInfoA->pv.PVNormChiSq = m_PVNormChiSq1; 
 	  
+	  TJetInfoB->MCweight = m_mcweight2;
 	  TJetInfoB->pv.PVx = m_PVx2;		  
 	  TJetInfoB->pv.PVy = m_PVy2;		  
 	  TJetInfoB->pv.PVz = m_PVz2;		  
