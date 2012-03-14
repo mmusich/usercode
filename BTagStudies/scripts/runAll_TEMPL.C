@@ -1,5 +1,12 @@
 {
-  
+
+  //===================================================
+  // Disclaimer:
+  //
+  // histogram of differences vs some third variable are always booked as:
+  // (file1 - file2) vs file2 ======> file2 is ALWAYS the reference!
+  //===================================================
+
   gROOT->LoadMacro("./EventByEventNtuple.C+");
   EventByEventNtuple("FILE1TEMPLATE=NAME1TEMPLATE","FILE2TEMPLATE=NAME2TEMPLATE");
   
