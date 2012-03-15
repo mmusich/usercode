@@ -55,26 +55,26 @@ JetByJetComparisonHistos::JetByJetComparisonHistos(const TString& s,TFile* fout)
 void JetByJetComparisonHistos::addAllHistos() {
  
   //Histograms 1D 
-  addHisto("hDeltaDiscrTCHE","#Delta DiscrTCHE;#Delta D_{TCHE};jets",100,-100.,100.);
-  addHisto("hDeltaDiscrTCHP","#Delta DiscrTCHP;#Delta D_{TCHP};jets",100,-100.,100.);
-  addHisto("hDeltaDiscrSSVHE","#Delta DiscrSSVHE;#Delta D_{SSVHE};jets",100,-3.1,3.1);
-  addHisto("hDeltaDiscrSSVHP","#Delta DiscrSSVHP;#Delta D_{SSVHP};jets",100,-3.1,3.1);
-  addHisto("hDeltaDiscrCSV","#Delta DiscrCSV ;#Delta D_{CSV};jets", 100,-1.1,1.1);
-  addHisto("hDeltaPT2TrackTCHE","#Delta PT 2 Track;#Deltap_{T} 2^{nd} track (GeV);jets",100,0.,150.);
-  addHisto("hDeltaPT3TrackTCHP","#Delta PT 3 Track;#Deltap_{T} 3^{rd} track (GeV);jets",100,0.,150.);
-  addHisto("hDeltaEta2TrackTCHE","#Delta Eta 2 Track ;#Delta#eta 2^{nd} track;jets",100,-1.5,1.5);
-  addHisto("hDeltaEta3TrackTCHP","#Delta Eta 3 Track ;#Delta#eta 3^{rd} track;jets",100,-1.5,1.5);
-  addHisto("hDeltaPhi2TrackTCHE","#Delta Phi 2 Track ;#Delta#phi 2^{nd} track;jets",100,-1.5,1.5);
-  addHisto("hDeltaPhi3TrackTCHP","#Delta Phi 3 Track ;#Delta#phi 3^{rd} track;jets",100,-1.5,1.5);
-  addHisto("hDeltaXYPVTCHE","#Delta XYPV ;#DeltaL_{xy}(PV) (cm);vertices",100,0,0.03);
-  addHisto("hDeltaZPVTCHE","#Delta ZPV ;#DeltaZ_{PV} (cm);vertices",100,-0.3,0.3);
+  addHisto("hDeltaDiscrTCHE","#Delta DiscrTCHE;#DeltaD_{TCHE};jets",100,-100.,100.);
+  addHisto("hDeltaDiscrTCHP","#Delta DiscrTCHP;#DeltaD_{TCHP};jets",100,-100.,100.);
+  addHisto("hDeltaDiscrSSVHE","#Delta DiscrSSVHE;#DeltaD_{SSVHE};jets",100,-3.1,3.1);
+  addHisto("hDeltaDiscrSSVHP","#Delta DiscrSSVHP;#DeltaD_{SSVHP};jets",100,-3.1,3.1);
+  addHisto("hDeltaDiscrCSV","#Delta DiscrCSV ;#DeltaD_{CSV};jets", 100,-1.1,1.1);
+  addHisto("hDeltaPT2TrackTCHE","#Delta p_{T} 2^{nd} Track;#Deltap_{T} 2^{nd} track (GeV);jets",100,0.,150.);
+  addHisto("hDeltaPT3TrackTCHP","#Delta p_{T} 3^{rd} Track;#Deltap_{T} 3^{rd} track (GeV);jets",100,0.,150.);
+  addHisto("hDeltaEta2TrackTCHE","#Delta #eta 2^{nd} Track ;#Delta#eta 2^{nd} track;jets",100,-1.5,1.5);
+  addHisto("hDeltaEta3TrackTCHP","#Delta #eta 3^{rd} Track ;#Delta#eta 3^{rd} track;jets",100,-1.5,1.5);
+  addHisto("hDeltaPhi2TrackTCHE","#Delta #phi 2^{nd} Track ;#Delta#phi 2^{nd} track;jets",100,-1.5,1.5);
+  addHisto("hDeltaPhi3TrackTCHP","#Delta #phi 3^{rd} Track ;#Delta#phi 3^{rd} track;jets",100,-1.5,1.5);
+  addHisto("hDeltaXYPVTCHE","#Delta_{xy} PV ;#DeltaL_{xy}(PV) (#mum);vertices",100,0,300);
+  addHisto("hDeltaZPVTCHE","#Delta_{z} PV ;#DeltaZ_{PV} (#mum);vertices",100,-300,300);
 
   //Histograms 2D (scatter plot for discriminants) ( for cross check)
   AddHisto2D("h2ScatDiscrTCHE","D_{TCHE}",obj1name_,obj2name_,100,-20.,20.,100,-20.,20.);
   AddHisto2D("h2ScatDiscrTCHP","D_{TCHP}",obj1name_,obj2name_,100,-20.,20.,100,-20.,20.);
-  AddHisto2D("h2ScatDiscrSSVHE","D_{SSVHE}",obj1name_,obj2name_,100,-3.1,6.1,100,-3.1,6.1);
-  AddHisto2D("h2ScatDiscrSSVHP","D_{SSVHP}",obj1name_,obj2name_,100,-3.1,6.1,100,-3.1,6.1);
-  AddHisto2D("h2ScatDiscrCSV","D_{CSV}",obj1name_,obj2name_,100,-1.,4.,100,-1.,4.);
+  AddHisto2D("h2ScatDiscrSSVHE","D_{SSVHE}",obj1name_,obj2name_,100,-1.1,6.1,100,-1.1,6.1);
+  AddHisto2D("h2ScatDiscrSSVHP","D_{SSVHP}",obj1name_,obj2name_,100,-1.1,6.1,100,-1.1,6.1);
+  AddHisto2D("h2ScatDiscrCSV","D_{CSV}",obj1name_,obj2name_,100,-1,1.,100,-1,1.);
   AddHisto2D("h2ScatDiscrJP","D_{JP}",obj1name_,obj2name_,150,0.,4.,150,0.,4.);
   AddHisto2D("h2ScatDiscrJBP","D_{JBP}",obj1name_,obj2name_,150,0.,12.,150,0.,12.);
 
@@ -82,49 +82,63 @@ void JetByJetComparisonHistos::addAllHistos() {
   // histogram of differences vs some third variable are always booked as:
   // valueA - valueB vs valueB ======> valueB is ALWAYS the reference!
 
-  addHisto2D("h2ScatDeltaDiscrTCHEvsIP3d2","#Delta discr TCHE vs IP3d2;IP_{3D}(2^{nd} track) (cm); #DeltaD_{TCHE}",80,-2.,6.,80,-20.,20.);
-  addHisto2D("h2ScatDeltaDiscrTCHPvsIP3d3"," #Delta discr TCHP vs IP3d3;IP_{3D}(3^{rd} track) (cm); #DeltaD_{TCHP}",80,-2.,6,80,-20.,20.);
-  addHisto2D("h2ScatDeltaDiscrTCHEvsIP3d2Error","#Delta discr TCHE vs IP3d2Error;#sigma_{IP3D}(2^{nd} track) (cm); #DeltaD_{TCHE}",80,0.,0.2,80,-20.,20.);
-  addHisto2D("h2ScatDeltaDiscrTCHPvsIP3d3Error"," #Delta discr TCHP vs IP3d3Error;#sigma_{IP3D}(3^{rd} track) (cm); #DeltaD_{TCHP}",80,0.2,0.2,80,-20.,20.);
-  addHisto2D("h2ScatDeltaDiscrTCHEvsIP3d2overError","#Delta discr TCHE vs IP3d2/Error;SIP_{3D}(2^{nd} track); #DeltaD_{TCHE}",80,-100.,100.,80,-20.,20.);
-  addHisto2D("h2ScatDeltaDiscrTCHPvsIP3d3overError"," #Delta discr TCHP vs IP3d3/Error;SIP_{3D}(3^{rd} track); #DeltaD_{TCHP}",80,-100.,100.,80,-20.,20.);
-  addHisto2D("h2ScatDeltaDiscrTCHEvsEta","#Delta discr TCHE vs Eta;jet #eta; #DeltaD_{TCHE}",30,-1.5,1.5,80,-20.,20.);
-  addHisto2D("h2ScatDeltaDiscrTCHPvsEta"," #Delta discr TCHP vs Eta;jet #eta; #DeltaD_{TCHP}",30,-1.5,1.5,80,-20.,20.);
-  addHisto2D("h2ScatDeltaDiscrTCHEvsPhi","#Delta discr TCHE vs Phi;jet #phi; #DeltaD_{TCHE}",30,-1.5,1.5,80,-20.,20.);
-  addHisto2D("h2ScatDeltaDiscrTCHPvsPhi"," #Delta discr TCHP vs Phi;jet #phi; #DeltaD_{TCHP}",30,-1.5,1.5,80,-20.,20.);
-  addHisto2D("h2ScatDeltaDiscrTCHEvsDeltaPVz","#Delta discr TCHE vs DeltaPVz; #DeltaZ_{PV} (cm); #DeltaD_{TCHE}",60,-0.03,0.03,80,-20.,20.);
-  addHisto2D("h2ScatDeltaDiscrTCHPvsDeltaPVz","#Delta discr TCHP vs DeltaPVz; #DeltaZ_{PV} (cm); #DeltaD_{TCHP}",60,-0.03,0.03,80,-20.,20.);
-  addHisto2D("h2ScatDeltaDiscrTCHEvsDelta3PV","#Delta discr TCHE vs Delta3PV; #DeltaL_{3D}(PV) (cm); #DeltaD_{TCHE}",60,0.,0.03,80,-20.,20.);
-  addHisto2D("h2ScatDeltaDiscrTCHPvsDelta3PV","#Delta discr TCHP vs Delta3PV; #DeltaL_{3D}(PV) (cm); #DeltaD_{TCHP}",60,0.,0.03,80,-20.,20.);
-  addHisto2D("h2ScatDeltaDiscrTCHEvsDeltaXYPV","#Delta discr TCHE vs DeltaXYPV; #DeltaL_{xy}(PV) (cm); #DeltaD_{TCHE}",60,0.,0.03,80,-20.,20.);
-  addHisto2D("h2ScatDeltaDiscrTCHPvsDeltaXYPV","#Delta discr TCHP vs DeltaXYPV; #DeltaL_{xy}(PV) (cm); #DeltaD_{TCHP}",60,0.,0.03,80,-20.,20.);
-  addHisto2D("h2ScatDeltaDiscrTCHEvsDeltaIP3dEta2Track","#Delta discr TCHE vs DeltaIP3dEta 2nd Track; #Delta#eta(2^{nd} track); #DeltaD_{TCHE}",30,-1.5,1.5,80,-20.,20.);
-  addHisto2D("h2ScatDeltaDiscrTCHPvsDeltaIP3dEta3Track","#Delta discr TCHP vs DeltaIP3dEta 3rd Track; #Delta#eta(3^{rd} track); #DeltaD_{TCHP}",30,-1.5,1.5,80,-20.,20.);
-  addHisto2D("h2ScatDeltaDiscrTCHEvsDeltaIP3dPhi2Track","#Delta discr TCHE vs DeltaIP3dPhi 2nd Track; #Delta#phi(2^{nd} track); #DeltaD_{TCHE}",30,-1.5,1.5,80,-20.,20.);
-  addHisto2D("h2ScatDeltaDiscrTCHPvsDeltaIP3dPhi3Track","#Delta discr TCHP vs DeltaIP3dPhi 3rd Track; #Delta#phi(3^{rd} track); #DeltaD_{TCHP}",30,-1.5,1.5,80,-20.,20.);
-  addHisto2D("h2ScatDeltaDiscrTCHEvsDeltaIP3dPt2Track","#Delta discr TCHE vs DeltaIP3dPt 2nd Track; #Deltap_{T}(2^{nd} track) (GeV); #DeltaD_{TCHE}",50,0,150,80,-20.,20.);
-  addHisto2D("h2ScatDeltaDiscrTCHPvsDeltaIP3dPt3Track","#Delta discr TCHP vs DeltaIP3dPt 3rd Track; #Deltap_{T}(3^{rd} track) (GeV); #DeltaD_{TCHP}",50,0,150,80,-20.,20.);
+  addHisto2D("h2ScatDeltaDiscrTCHEvsIP3d2","#Delta discrTCHE vs IP3d2;IP_{3D}(2^{nd} track) (cm); #DeltaD_{TCHE}",80,-2.,6.,80,-20.,20.);
+  addHisto2D("h2ScatDeltaDiscrTCHPvsIP3d3"," #Delta discrTCHP vs IP3d3;IP_{3D}(3^{rd} track) (cm); #DeltaD_{TCHP}",80,-2.,6,80,-20.,20.);
+  addHisto2D("h2ScatDeltaDiscrTCHEvsIP3d2Error","#Delta discrTCHE vs IP3d2Error;#sigma_{IP3D}(2^{nd} track) (cm); #DeltaD_{TCHE}",80,0.,0.2,80,-20.,20.);
+  addHisto2D("h2ScatDeltaDiscrTCHPvsIP3d3Error"," #Delta discrTCHP vs IP3d3Error;#sigma_{IP3D}(3^{rd} track) (cm); #DeltaD_{TCHP}",80,0.2,0.2,80,-20.,20.);
+  addHisto2D("h2ScatDeltaDiscrTCHEvsIP3d2overError","#Delta discrTCHE vs IP3d2/Error;SIP_{3D}(2^{nd} track); #DeltaD_{TCHE}",80,-100.,100.,80,-20.,20.);
+  addHisto2D("h2ScatDeltaDiscrTCHPvsIP3d3overError"," #Delta discrTCHP vs IP3d3/Error;SIP_{3D}(3^{rd} track); #DeltaD_{TCHP}",80,-100.,100.,80,-20.,20.);
+  addHisto2D("h2ScatDeltaDiscrTCHEvsEta","#Delta discrTCHE vs Eta;jet #eta; #DeltaD_{TCHE}",30,-1.5,1.5,80,-20.,20.);
+  addHisto2D("h2ScatDeltaDiscrTCHPvsEta"," #Delta discrTCHP vs Eta;jet #eta; #DeltaD_{TCHP}",30,-1.5,1.5,80,-20.,20.);
+  addHisto2D("h2ScatDeltaDiscrTCHEvsPhi","#Delta discrTCHE vs Phi;jet #phi; #DeltaD_{TCHE}",30,-1.5,1.5,80,-20.,20.);
+  addHisto2D("h2ScatDeltaDiscrTCHPvsPhi"," #Delta discrTCHP vs Phi;jet #phi; #DeltaD_{TCHP}",30,-1.5,1.5,80,-20.,20.);
+  addHisto2D("h2ScatDeltaDiscrTCHEvsDeltaPVz","#Delta discrTCHE vs DeltaPVz; #DeltaZ_{PV} (#mum); #DeltaD_{TCHE}",60,-300,300,80,-20.,20.);
+  addHisto2D("h2ScatDeltaDiscrTCHPvsDeltaPVz","#Delta discrTCHP vs DeltaPVz; #DeltaZ_{PV} (#mum); #DeltaD_{TCHP}",60,-300,300,80,-20.,20.);
+  addHisto2D("h2ScatDeltaDiscrTCHEvsDelta3PV","#Delta discrTCHE vs Delta3PV; #DeltaL_{3D}(PV) (#mum); #DeltaD_{TCHE}",60,0.,300,80,-20.,20.);
+  addHisto2D("h2ScatDeltaDiscrTCHPvsDelta3PV","#Delta discrTCHP vs Delta3PV; #DeltaL_{3D}(PV) (#mum); #DeltaD_{TCHP}",60,0.,300,80,-20.,20.);
+  addHisto2D("h2ScatDeltaDiscrTCHEvsDeltaXYPV","#Delta discrTCHE vs DeltaXYPV; #DeltaL_{xy}(PV) (#mum); #DeltaD_{TCHE}",60,0.,300,80,-20.,20.);
+  addHisto2D("h2ScatDeltaDiscrTCHPvsDeltaXYPV","#Delta discrTCHP vs DeltaXYPV; #DeltaL_{xy}(PV) (#mum); #DeltaD_{TCHP}",60,0.,300,80,-20.,20.);
+  addHisto2D("h2ScatDeltaDiscrTCHEvsDeltaIP3dEta2Track","#Delta discrTCHE vs DeltaIP3dEta 2nd Track; #Delta#eta(2^{nd} track); #DeltaD_{TCHE}",30,-1.5,1.5,80,-20.,20.);
+  addHisto2D("h2ScatDeltaDiscrTCHPvsDeltaIP3dEta3Track","#Delta discrTCHP vs DeltaIP3dEta 3rd Track; #Delta#eta(3^{rd} track); #DeltaD_{TCHP}",30,-1.5,1.5,80,-20.,20.);
+  addHisto2D("h2ScatDeltaDiscrTCHEvsDeltaIP3dPhi2Track","#Delta discrTCHE vs DeltaIP3dPhi 2nd Track; #Delta#phi(2^{nd} track); #DeltaD_{TCHE}",30,-1.5,1.5,80,-20.,20.);
+  addHisto2D("h2ScatDeltaDiscrTCHPvsDeltaIP3dPhi3Track","#Delta discrTCHP vs DeltaIP3dPhi 3rd Track; #Delta#phi(3^{rd} track); #DeltaD_{TCHP}",30,-1.5,1.5,80,-20.,20.);
+  addHisto2D("h2ScatDeltaDiscrTCHEvsDeltaIP3dPt2Track","#Delta discrTCHE vs DeltaIP3dPt 2nd Track; #Deltap_{T}(2^{nd} track) (GeV); #DeltaD_{TCHE}",100,-150,150,80,-20.,20.);
+  addHisto2D("h2ScatDeltaDiscrTCHPvsDeltaIP3dPt3Track","#Delta discrTCHP vs DeltaIP3dPt 3rd Track; #Deltap_{T}(3^{rd} track) (GeV); #DeltaD_{TCHP}",100,-150,150,80,-20.,20.);
   
+  // not vs difference but versus variable
+  addHisto2D("h2ScatDeltaDiscrTCHEvsIP3dEta2Track","#Delta discrTCHE vs #eta 2nd Track;#eta(2^{nd} track); #DeltaD_{TCHE}",50,-2.5,2.5,80,-20.,20.);
+  addHisto2D("h2ScatDeltaDiscrTCHPvsIP3dEta3Track","#Delta discrTCHP vs #eta 3rd Track;#eta(3^{rd} track); #DeltaD_{TCHP}",50,-2.5,2.5,80,-20.,20.);
+  addHisto2D("h2ScatDeltaDiscrTCHEvsIP3dPhi2Track","#Delta discrTCHE vs #phi 2nd Track;#phi(2^{nd} track); #DeltaD_{TCHE}",100,-3.14,3.14,80,-20.,20.);
+  addHisto2D("h2ScatDeltaDiscrTCHPvsIP3dPhi3Track","#Delta discrTCHP vs #phi 3rd Track;#phi(3^{rd} track); #DeltaD_{TCHP}",100,-3.14,3.14,80,-20.,20.);
+  addHisto2D("h2ScatDeltaDiscrTCHEvsIP3dPt2Track" ,"#Delta discrTCHE vs p_{T} 2nd  Track;p_{T}(2^{nd} track) (GeV); #DeltaD_{TCHE}",50,0,150,80,-20.,20.);
+  addHisto2D("h2ScatDeltaDiscrTCHPvsIP3dPt3Track" ,"#Delta discrTCHP vs p_{T} 3rd  Track;p_{T}(3^{rd} track) (GeV); #DeltaD_{TCHP}",50,0,150,80,-20.,20.);
+
   // Histograms 2D (scatter plot for differences) SSVHE & SSVHP discriminants  
-  addHisto2D("h2ScatDeltaDiscrSSVHEvsSV3dDistance","#Delta discr SSVHE vs SV3dDistance;L_{3D}(SV) (cm); #DeltaD_{SSVHE}",150,-2.,14.,100,-3.1,3.1);
-  addHisto2D("h2ScatDeltaDiscrSSVHEvsSV3dDistanceError","#Delta discr SSVHE vs SV3dDistanceError;#sigma_{L_{3D}}(SV) (cm);#DeltaD_{SSVHE}",50,0.,2.5,100,-3.1,3.1);
-  addHisto2D("h2ScatDeltaDiscrSSVHEvsSV3dDistanceoverSV3dDistanceError","#Delta discr SSVHE vs SV3dDistanceoverSV3dDistanceError;SIP_{L_{3D}}(SV);#DeltaD_{SSVHE}",50,0.,100.,100,-3.1,3.1);
-  addHisto2D("h2ScatDeltaDiscrSSVHEvsSVMass","#Delta discr SSVHE vs SVMass;SV mass (GeV);#DeltaD_{SSVHE}",100,0.,15.,100,-3.1,3.1);
-  addHisto2D("h2ScatDeltaDiscrSSVHEvsSVtotCharge","#Delta discr SSVHE vs SVtotCharge; SV tot charge;#DeltaD_{SSVHE}",21,-10.5,10.5,100,-3.1,3.1);
-  
-  addHisto2D("h2ScatDeltaDiscrSSVHPvsSV3dDistance","#Delta discr SSVHP vs SV3dDistance;L_{3D}(SV) (cm); #DeltaD_{SSVHP}",150,-2.,14.,100,-3.1,3.1);
-  addHisto2D("h2ScatDeltaDiscrSSVHPvsSV3dDistanceError","#Delta discr SSVHP vs SV3dDistanceError;#sigma_{L_{3D}}(SV) (cm);#DeltaD_{SSVHP}",50,0.,2.5,100,-3.1,3.1);
-  addHisto2D("h2ScatDeltaDiscrSSVHPvsSV3dDistanceoverSV3dDistanceError","#Delta discr SSVHP vs SV3dDistanceoverSV3dDistanceError;SIP_{L_{3D}}(SV);#DeltaD_{SSVHP}",100,0.,100.,100,-3.1,3.1);
-  addHisto2D("h2ScatDeltaDiscrSSVHPvsSVMass","#Delta discr SSVHP vs SVMass;SV mass (GeV);#DeltaD_{SSVHP}",30,0.,15.,100,-3.1,3.1);
-  addHisto2D("h2ScatDeltaDiscrSSVHPvsSVtotCharge","#Delta discr SSVHE vs SVtotCharge; SV tot charge;#DeltaD_{SSVHE}",21,-10.5,10.5,100,-3.1,3.1);
+  addHisto2D("h2ScatDeltaDiscrSSVHEvsSV3dDistance","#Delta discrSSVHE vs SV3dDistance;L_{3D}(SV) (cm); #DeltaD_{SSVHE}",150,-2.,14.,100,-3.1,3.1);
+  addHisto2D("h2ScatDeltaDiscrSSVHEvsSV3dDistanceError","#Delta discrSSVHE vs SV3dDistanceError;#sigma_{L_{3D}}(SV) (cm);#DeltaD_{SSVHE}",50,0.,2.5,100,-3.1,3.1);
+  addHisto2D("h2ScatDeltaDiscrSSVHEvsSV3dDistanceoverSV3dDistanceError","#Delta discrSSVHE vs SIPSV3d;L_{3D}/#sigma_{L_{3D}}(SV) (cm);#DeltaD_{SSVHE}",50,0.,100.,100,-3.1,3.1);
+  addHisto2D("h2ScatDeltaDiscrSSVHEvsSVMass","#Delta discrSSVHE vs SVMass;SV mass (GeV);#DeltaD_{SSVHE}",100,0.,15.,100,-3.1,3.1);
+  addHisto2D("h2ScatDeltaDiscrSSVHEvsSVtotCharge","#Delta discrSSVHE vs SVtotCharge; SV tot charge;#DeltaD_{SSVHE}",21,-10.5,10.5,100,-3.1,3.1);
+  addHisto2D("h2ScatDeltaDiscrSSVHEvsDeltaPVz","#Delta discrSSVHE vs DeltaPVz; #DeltaZ_{PV} (#mum); #DeltaD_{SSVHE}",60,-300,300,100,-3.1,3.1);
+  addHisto2D("h2ScatDeltaDiscrSSVHEvsDelta3PV","#Delta discrSSVHE vs Delta3PV; #DeltaL_{3D}(PV) (#mum); #DeltaD_{SSVHE}",60,0.,300,100,-3.1,3.1);
+  addHisto2D("h2ScatDeltaDiscrSSVHEvsDeltaXYPV","#Delta discrSSVHE vs DeltaXYPV; #DeltaL_{xy}(PV) (#mum); #DeltaD_{SSVHE}",60,0.,300,100,-3.1,3.1);
+
+  addHisto2D("h2ScatDeltaDiscrSSVHPvsSV3dDistance","#Delta discrSSVHP vs SV3dDistance;L_{3D}(SV) (cm); #DeltaD_{SSVHP}",150,-2.,14.,100,-3.1,3.1);
+  addHisto2D("h2ScatDeltaDiscrSSVHPvsSV3dDistanceError","#Delta discrSSVHP vs SV3dDistanceError;#sigma_{L_{3D}}(SV) (cm);#DeltaD_{SSVHP}",50,0.,2.5,100,-3.1,3.1);
+  addHisto2D("h2ScatDeltaDiscrSSVHPvsSV3dDistanceoverSV3dDistanceError","#Delta discrSSVHP vs SIPSV3d;L_{3D}/#sigma_{L_{3D}}(SV) (cm);#DeltaD_{SSVHP}",100,0.,100.,100,-3.1,3.1);
+  addHisto2D("h2ScatDeltaDiscrSSVHPvsSVMass","#Delta discrSSVHP vs SVMass;SV mass (GeV);#DeltaD_{SSVHP}",100,0.,15.,100,-3.1,3.1);
+  addHisto2D("h2ScatDeltaDiscrSSVHPvsSVtotCharge","#Delta discrSSVHE vs SVtotCharge; SV tot charge;#DeltaD_{SSVHE}",21,-10.5,10.5,100,-3.1,3.1);
+  addHisto2D("h2ScatDeltaDiscrSSVHPvsDeltaPVz","#Delta discrSSVHP vs DeltaPVz; #DeltaZ_{PV} (#mum); #DeltaD_{SSVHP}",60,-300,300,100,-3.1,3.1);
+  addHisto2D("h2ScatDeltaDiscrSSVHPvsDelta3PV","#Delta discrSSVHP vs Delta3PV; #DeltaL_{3D}(PV) (#mum); #DeltaD_{SSVHP}",60,0.,300,100,-3.1,3.1);
+  addHisto2D("h2ScatDeltaDiscrSSVHPvsDeltaXYPV","#Delta discrSSVHP vs DeltaXYPV; #DeltaL_{xy}(PV) (#mum); #DeltaD_{SSVHP}",60,0.,300,100,-3.1,3.1);
     
   //Histograms 2D (scatter plot for differences) CSV discriminant
-  addHisto2D("h2ScatDeltaDiscrCSVvsSV3dDistance","#Delta discr CSV vs SV3dDistance;L_{3D}(SV) (cm);#DeltaD_{CSV}",150,-2.,14.,100,-1.1,1.1);
-  addHisto2D("h2ScatDeltaDiscrCSVvsSV3dDistanceError","#Delta discr CSV vs SV3dDistanceError;#sigma_{L_{3D}}(SV) (cm);#DeltaD_{CVS}",50,0.,2.5,100,-1.1,1.1);
-  addHisto2D("h2ScatDeltaDiscrCSVvsSV3dDistanceoverSV3dDistanceError","#Delta discr CSV vs SV3dDistanceoverSV3dDistanceError;SIP_{L_{3D}}(SV);#DeltaD_{SSVHP}",50,0.,100.,100,-1.1,1.1);
-  addHisto2D("h2ScatDeltaDiscrCSVvsDeltaPVz","#Delta discr CSV vs DeltaPVz;#DeltaZ_{PV} (cm);#DeltaD_{CVS}",60,-0.03,0.03,100,-1.1,1.1);
-  addHisto2D("h2ScatDeltaDiscrCSVvsDelta3PV","#Delta discr CSV vs Delta3PV;#DeltaL_{3D}(PV) (cm);#DeltaD_{CSV}",60,0,0.03,100,-1.1,1.1);
-  addHisto2D("h2ScatDeltaDiscrCSVvsDeltaXYPV","#Delta discr CSV vs DeltaXYPV;#DeltaL_{XY}(PV) (cm);#DeltaD_{CSV}",60,0.,0.03,100,-1.1,1.1);
+  addHisto2D("h2ScatDeltaDiscrCSVvsSV3dDistance","#Delta discrCSV vs SV3dDistance;L_{3D}(SV) (cm);#DeltaD_{CSV}",150,-2.,14.,100,-1.1,1.1);
+  addHisto2D("h2ScatDeltaDiscrCSVvsSV3dDistanceError","#Delta discrCSV vs SV3dDistanceError;#sigma_{L_{3D}}(SV) (cm);#DeltaD_{CSV}",50,0.,2.5,100,-1.1,1.1);
+  addHisto2D("h2ScatDeltaDiscrCSVvsSV3dDistanceoverSV3dDistanceError","#Delta discrCSV vs SIPSV3d;SIP_{L_{3D}}(SV);#DeltaD_{SSVHP}",50,0.,100.,100,-1.1,1.1);
+  addHisto2D("h2ScatDeltaDiscrCSVvsDeltaPVz","#Delta discrCSV vs DeltaPVz;d_{z}(PV) (#mum);#DeltaD_{CSV}",60,-300,300,100,-1.1,1.1);
+  addHisto2D("h2ScatDeltaDiscrCSVvsDelta3PV","#Delta discrCSV vs Delta3PV;d_{3D}(PV) (#mum);#DeltaD_{CSV}",60,0,300,100,-1.1,1.1);
+  addHisto2D("h2ScatDeltaDiscrCSVvsDeltaXYPV","#Delta discrCSV vs DeltaXYPV;d_{xy}(PV) (#mum);#DeltaD_{CSV}",60,0.,300,100,-1.1,1.1);
 
 }
 
@@ -134,7 +148,7 @@ void JetByJetComparisonHistos::AddHisto2D(std::string name, std::string title,TS
   char titlehisto[80];
   sprintf(titlehisto,"%s %s vs %s;%s - %s; %s -  %s",title.c_str(),firstCond.Data(),secondCond.Data(),title.c_str(),firstCond.Data(),title.c_str(),secondCond.Data());
 
-  std::cout<<"titlehisto:"<<titlehisto<<std::endl;
+  //  std::cout<<"titlehisto:"<<titlehisto<<std::endl;
 
   TH2F* h2 = new TH2F(name.c_str(),titlehisto,nbins,min,max,nbinsy,miny,maxy);
 
@@ -221,13 +235,14 @@ void JetByJetComparisonHistos::fillAllHistos(const JetInfo& ja, const JetInfo& j
   fillTH(findTH1("hDeltaPhi2TrackTCHE"),ja.tche,jb.tche,(ja.trk[1].phi)-(jb.trk[1].phi));
   fillTH(findTH1("hDeltaPhi3TrackTCHP"),jb.tchp,jb.tchp,(ja.trk[2].phi)-(jb.trk[2].phi));
      
-  float deltax = (ja.pv.PVx-jb.pv.PVx);
-  float deltay = (ja.pv.PVy-jb.pv.PVy);
-  float deltaz = (ja.pv.PVz-jb.pv.PVz);
+  float deltax = (ja.pv.PVx-jb.pv.PVx)*10000;
+  float deltay = (ja.pv.PVy-jb.pv.PVy)*10000;
+  float deltaz = (ja.pv.PVz-jb.pv.PVz)*10000;
 
   fillTH(findTH1("hDeltaZPVTCHE"),ja.tche,jb.tche,deltaz);
   fillTH(findTH1("hDeltaXYPVTCHE"),jb.tche,jb.tche,TMath::Sqrt(TMath::Power(deltax,2)+TMath::Power(deltay,2)));
 
+  // scatter plots of discr1 vs discr2
   fillTH(findTH2("h2ScatDiscrTCHE"),ja.tche,jb.tche,ja.tche,jb.tche);
   fillTH(findTH2("h2ScatDiscrTCHP"),ja.tchp,jb.tchp,ja.tchp,jb.tchp);
   fillTH(findTH2("h2ScatDiscrCSV"),ja.csv,jb.csv,ja.csv,jb.csv);
@@ -235,7 +250,8 @@ void JetByJetComparisonHistos::fillAllHistos(const JetInfo& ja, const JetInfo& j
   fillTH(findTH2("h2ScatDiscrJBP"),ja.jbp,jb.jbp,ja.jbp,jb.jbp);
   fillTH(findTH2("h2ScatDiscrSSVHE"),ja.ssvhe,jb.ssvhe,ja.ssvhe,jb.ssvhe);
   fillTH(findTH2("h2ScatDiscrSSVHP"),ja.ssvhp,jb.ssvhp,ja.ssvhp,jb.ssvhp);
-  
+ 
+  // filling TC plots
   fillTH(findTH2("h2ScatDeltaDiscrTCHEvsIP3d2"),ja.tche,jb.tche,jb.trk[1].IP3d,ja.tche-jb.tche);
   fillTH(findTH2("h2ScatDeltaDiscrTCHPvsIP3d3"),ja.tchp,jb.tchp,jb.trk[2].IP3d,ja.tchp-jb.tchp);
   fillTH(findTH2("h2ScatDeltaDiscrTCHEvsIP3d2Error"),ja.tche,jb.tche,jb.trk[1].IP3dError,ja.tche-jb.tche);
@@ -246,9 +262,8 @@ void JetByJetComparisonHistos::fillAllHistos(const JetInfo& ja, const JetInfo& j
   fillTH(findTH2("h2ScatDeltaDiscrTCHPvsEta"),ja.tchp,jb.tchp,jb.eta,ja.tchp-jb.tchp);
   fillTH(findTH2("h2ScatDeltaDiscrTCHEvsPhi"),ja.tche,jb.tche,jb.phi,ja.tche-jb.tche);
   fillTH(findTH2("h2ScatDeltaDiscrTCHPvsPhi"),ja.tchp,jb.tchp,jb.phi,ja.tchp-jb.tchp);
-  fillTH(findTH2("h2ScatDeltaDiscrTCHEvsDeltaPVz"),ja.tche,jb.tche,(ja.pv.PVz-jb.pv.PVz),ja.tche-jb.tche);
-  fillTH(findTH2("h2ScatDeltaDiscrTCHPvsDeltaPVz"),ja.tchp,jb.tchp,(ja.pv.PVz-jb.pv.PVz),ja.tchp-jb.tchp);
-  
+  fillTH(findTH2("h2ScatDeltaDiscrTCHEvsDeltaPVz"),ja.tche,jb.tche,deltaz,ja.tche-jb.tche);
+  fillTH(findTH2("h2ScatDeltaDiscrTCHPvsDeltaPVz"),ja.tchp,jb.tchp,deltaz,ja.tchp-jb.tchp);
   fillTH(findTH2("h2ScatDeltaDiscrTCHEvsDelta3PV"),ja.tche,jb.tche,TMath::Sqrt(TMath::Power(deltax,2)+TMath::Power(deltay,2)+TMath::Power(deltaz,2)),ja.tche-jb.tche);
   fillTH(findTH2("h2ScatDeltaDiscrTCHPvsDelta3PV"),ja.tchp,jb.tchp,TMath::Sqrt(TMath::Power(deltax,2)+TMath::Power(deltay,2)+TMath::Power(deltaz,2)),ja.tchp-jb.tchp);
   fillTH(findTH2("h2ScatDeltaDiscrTCHEvsDeltaXYPV"),ja.tche,jb.tche,TMath::Sqrt(TMath::Power(deltax,2)+TMath::Power(deltay,2)),ja.tche-jb.tche);
@@ -258,26 +273,40 @@ void JetByJetComparisonHistos::fillAllHistos(const JetInfo& ja, const JetInfo& j
   fillTH(findTH2("h2ScatDeltaDiscrTCHEvsDeltaIP3dPhi2Track"),ja.tche,jb.tche,(ja.trk[1].phi-jb.trk[1].phi),ja.tche-jb.tche);
   fillTH(findTH2("h2ScatDeltaDiscrTCHPvsDeltaIP3dPhi3Track"),ja.tchp,jb.tchp,(ja.trk[2].phi-jb.trk[2].phi),ja.tchp-jb.tchp);
   fillTH(findTH2("h2ScatDeltaDiscrTCHEvsDeltaIP3dPt2Track"),ja.tche,jb.tche,(ja.trk[1].pT-jb.trk[1].pT),ja.tche-jb.tche);
-  fillTH(findTH2("h2ScatDeltaDiscrTCHPvsDeltaIP3dPt3Track"),ja.tchp,jb.tchp,(ja.trk[2].pT-jb.trk[2].pT),ja.tchp-jb.tchp);           
-
+  fillTH(findTH2("h2ScatDeltaDiscrTCHPvsDeltaIP3dPt3Track"),ja.tchp,jb.tchp,(ja.trk[2].pT-jb.trk[2].pT),ja.tchp-jb.tchp);          
+  fillTH(findTH2("h2ScatDeltaDiscrTCHEvsIP3dEta2Track"),ja.tche,jb.tche,jb.trk[1].eta,ja.tche-jb.tche);
+  fillTH(findTH2("h2ScatDeltaDiscrTCHPvsIP3dEta3Track"),ja.tchp,jb.tchp,jb.trk[2].eta,ja.tchp-jb.tchp);
+  fillTH(findTH2("h2ScatDeltaDiscrTCHEvsIP3dPhi2Track"),ja.tche,jb.tche,jb.trk[1].phi,ja.tche-jb.tche);
+  fillTH(findTH2("h2ScatDeltaDiscrTCHPvsIP3dPhi3Track"),ja.tchp,jb.tchp,jb.trk[2].phi,ja.tchp-jb.tchp);
+  fillTH(findTH2("h2ScatDeltaDiscrTCHEvsIP3dPt2Track"),ja.tche,jb.tche ,jb.trk[1].pT,ja.tche-jb.tche);
+  fillTH(findTH2("h2ScatDeltaDiscrTCHPvsIP3dPt3Track"),ja.tchp,jb.tchp ,jb.trk[2].pT,ja.tchp-jb.tchp);          
+ 
+  // filling SSV plots
   fillTH(findTH2("h2ScatDeltaDiscrSSVHEvsSV3dDistance"),ja.ssvhe,jb.ssvhe,jb.sv.SV3dDistance,ja.ssvhe-jb.ssvhe);
   fillTH(findTH2("h2ScatDeltaDiscrSSVHEvsSV3dDistanceError"),ja.ssvhe,jb.ssvhe,jb.sv.SV3dDistanceError,ja.ssvhe-jb.ssvhe);
   fillTH(findTH2("h2ScatDeltaDiscrSSVHEvsSV3dDistanceoverSV3dDistanceError"),ja.ssvhe,jb.ssvhe,(jb.sv.SV3dDistance)/(jb.sv.SV3dDistanceError),ja.ssvhe-jb.ssvhe);
   fillTH(findTH2("h2ScatDeltaDiscrSSVHEvsSVMass"),ja.ssvhe,jb.ssvhe,jb.sv.SVMass,ja.ssvhe-jb.ssvhe);
   fillTH(findTH2("h2ScatDeltaDiscrSSVHEvsSVtotCharge"),ja.ssvhe,jb.ssvhe,jb.sv.SVtotCharge,ja.ssvhe-jb.ssvhe);
+  fillTH(findTH2("h2ScatDeltaDiscrSSVHEvsDeltaPVz"),ja.ssvhe,jb.ssvhe,deltaz,ja.ssvhe-jb.ssvhe);
+  fillTH(findTH2("h2ScatDeltaDiscrSSVHEvsDeltaXYPV"),ja.ssvhe,jb.ssvhe,TMath::Sqrt(TMath::Power(deltax,2)+TMath::Power(deltay,2)),ja.ssvhe-jb.ssvhe);
+  fillTH(findTH2("h2ScatDeltaDiscrSSVHEvsDelta3PV"),ja.ssvhe,jb.ssvhe,TMath::Sqrt(TMath::Power(deltax,2)+TMath::Power(deltay,2)+TMath::Power(deltaz,2)),ja.ssvhe-jb.ssvhe);
+
   fillTH(findTH2("h2ScatDeltaDiscrSSVHPvsSV3dDistance"),ja.ssvhp,jb.ssvhp,jb.sv.SV3dDistance,ja.ssvhp-jb.ssvhp);
   fillTH(findTH2("h2ScatDeltaDiscrSSVHPvsSV3dDistanceError"),ja.ssvhp,jb.ssvhp,jb.sv.SV3dDistanceError,ja.ssvhp-jb.ssvhp);
   fillTH(findTH2("h2ScatDeltaDiscrSSVHPvsSV3dDistanceoverSV3dDistanceError"),ja.ssvhp,jb.ssvhp,(jb.sv.SV3dDistance)/(jb.sv.SV3dDistanceError),ja.ssvhp-jb.ssvhp);
   fillTH(findTH2("h2ScatDeltaDiscrSSVHPvsSVMass"),ja.ssvhp,jb.ssvhp,jb.sv.SVMass,ja.ssvhp-jb.ssvhp);
   fillTH(findTH2("h2ScatDeltaDiscrSSVHPvsSVtotCharge"),ja.ssvhp,jb.ssvhp,jb.sv.SVtotCharge,ja.ssvhp-jb.ssvhp);
-  
+  fillTH(findTH2("h2ScatDeltaDiscrSSVHPvsDeltaXYPV"),ja.ssvhp,jb.ssvhp,TMath::Sqrt(TMath::Power(deltax,2)+TMath::Power(deltay,2)),ja.ssvhp-jb.ssvhp);
+  fillTH(findTH2("h2ScatDeltaDiscrSSVHPvsDelta3PV"),ja.ssvhp,jb.ssvhp,TMath::Sqrt(TMath::Power(deltax,2)+TMath::Power(deltay,2)+TMath::Power(deltaz,2)),ja.ssvhp-jb.ssvhp);
+  fillTH(findTH2("h2ScatDeltaDiscrSSVHPvsDeltaPVz"),ja.ssvhp,jb.ssvhp,deltaz,ja.ssvhp-jb.ssvhp);
+
   // filling CSV plots
   fillTH(findTH2("h2ScatDeltaDiscrCSVvsSV3dDistance"),ja.csv,jb.csv,jb.sv.SV3dDistance,ja.csv-jb.csv);
   fillTH(findTH2("h2ScatDeltaDiscrCSVvsSV3dDistanceError"),ja.csv,jb.csv,jb.sv.SV3dDistanceError,ja.csv-jb.csv);
   fillTH(findTH2("h2ScatDeltaDiscrCSVvsSV3dDistanceoverSV3dDistanceError"),ja.csv,jb.csv,(jb.sv.SV3dDistance)/(jb.sv.SV3dDistanceError),ja.csv-jb.csv);
   fillTH(findTH2("h2ScatDeltaDiscrCSVvsDelta3PV"),ja.csv,jb.csv,TMath::Sqrt(TMath::Power(deltax,2)+TMath::Power(deltay,2)+TMath::Power(deltaz,2)),ja.csv-jb.csv);
   fillTH(findTH2("h2ScatDeltaDiscrCSVvsDeltaXYPV"),ja.csv,jb.csv,TMath::Sqrt(TMath::Power(deltax,2)+TMath::Power(deltay,2)),ja.csv-jb.csv);
-  fillTH(findTH2("h2ScatDeltaDiscrCSVvsDeltaPVz"),ja.csv,jb.csv,(ja.pv.PVz-jb.pv.PVz),ja.csv-jb.csv);
+  fillTH(findTH2("h2ScatDeltaDiscrCSVvsDeltaPVz"),ja.csv,jb.csv,deltaz,ja.csv-jb.csv);
      
 }
 
@@ -360,7 +389,13 @@ void JetByJetComparisonHistos::drawNice2dHistos(TFile* fout)
   for(UInt_t h=0; h<h1vec.size(); h++){
     TCanvas *c = new TCanvas(h1vec[h]->GetName()+dirname,h1vec[h]->GetName(),600,600);
     c->cd()->SetLogy();
-    h1vec[h]->Draw();
+    h1vec[h]->SetMarkerColor(kBlack); 
+    h1vec[h]->SetMarkerStyle(20);
+    h1vec[h]->SetLineWidth(1.5); 
+    h1vec[h]->SetFillColor(393);
+    //h1vec[h]->SetFillStyle(3005);
+    h1vec[h]->Draw("hist");
+    h1vec[h]->Draw("e1same");
     c->Draw();
     
     statObj[h] = h1vec[h]->GetListOfFunctions()->FindObject("stats");
@@ -396,7 +431,7 @@ void JetByJetComparisonHistos::drawNice2dHistos(TFile* fout)
     TProfile *hpfx_tmp = (TProfile*) h2vec[h]->ProfileX("_pfx",1,-1,"o");
     hpfx_tmp->SetStats(kFALSE);
     hpfx_tmp->SetMarkerColor(kRed); 
-    hpfx_tmp->SetMarkerSize(1); 
+    hpfx_tmp->SetMarkerSize(1.2); 
     hpfx_tmp->SetMarkerStyle(20); 
     hpfx_tmp->Draw("psame");
 
@@ -422,14 +457,14 @@ void JetByJetComparisonHistos::cmsPrel(const double& intLumi) {
   latex->SetTextFont(42); //22
 
   latex->SetTextAlign(13);
-  //  latex->DrawLatex(0.12, 0.99, Form("CMS Preliminary 2011,     #sqrt{s} = 7 TeV,  L = %.2g pb^{ -1}",intLumi));
-  latex->DrawLatex(0.2,0.99,"CMS Simulation 2011, top-top #sqrt{s} = 7 TeV");
-
+  // latex->DrawLatex(0.12, 0.99, Form("CMS Preliminary 2011,     #sqrt{s} = 7 TeV,  L = %.2g pb^{ -1}",intLumi));
+  latex->DrawLatex(0.2,0.99,"CMS - MC Simulation 2011, #sqrt{s} = 7 TeV");
 
   TLatex *latex2 = new TLatex();
   latex2->SetNDC();
   latex2->SetTextSize(0.045);
   latex2->SetTextFont(72); //22
+  latex2->SetTextColor(); //22
   latex2->DrawLatex(0.20,0.85,obj1name_+" vs "+obj2name_);
 
 }
