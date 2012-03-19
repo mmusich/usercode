@@ -67,7 +67,8 @@ JetByJetComparison::JetByJetComparison(TString filename,TTree *tree)
   // used to generate this class and read the Tree.
   if (tree == 0) {
     // TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("JetByJetComparison_origVsnewgeom.root");
-    TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject(filename);
+    // TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject(filename);
+    TFile *f = TFile::Open(filename)
     if (!f) {
       //    f = new TFile("JetByJetComparison_origVsnewgeom.root");
       f = new TFile(filename);

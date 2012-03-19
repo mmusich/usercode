@@ -26,6 +26,10 @@ bool isB(int mctruth) {
 
 void JetByJetComparison::Loop()
 {
+
+  TStopwatch timer;
+  timer.Start();
+
   //   In a ROOT session, you can do:
   //      Root > .L JetByJetComparison.C
   //      Root > JetByJetComparison t
@@ -115,5 +119,8 @@ void JetByJetComparison::Loop()
   file_out->cd();
   file_out->Write();
   file_out->Close();
-  
+ 
+  timer.Stop();
+  timer.Print();
+
 }
