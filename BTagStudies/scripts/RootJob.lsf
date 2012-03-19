@@ -32,14 +32,15 @@ cat runAll_TEMPL.C | sed "s?FILE1TEMPLATE?${file1}?g" | sed "s?FILE2TEMPLATE?${f
 
 rm *.root
 
-root -b -q runAll.C
+root -b -q runAll.C > out.out
+mv out.out ${name1}Vs${name2}.out
  
 mv MatrixOfMatches.root MatrixOfMatches_${name1}Vs${name2}.root
-rfcp *.root $CASTOR_HOME/BTagging/AssociationTrees
+rfcp *.out $CASTOR_HOME/BTagging/AssociationTreesForEffVsPur
 
 foreach outputfile (`ls | grep root `)
     echo $outputfile
-    rfcp $outputfile  $CASTOR_HOME/BTagging/AssociationTrees
+    rfcp $outputfile  $CASTOR_HOME/BTagging/AssociationTreesForEffVsPur
 end
 
 
