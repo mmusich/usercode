@@ -1,6 +1,7 @@
 #include <cmath>
 #include <iostream>
 #include <vector>
+#include <TStopwatch.h>
 #include "TBranch.h"
 #include "TFile.h"
 #include "TGraphErrors.h"
@@ -42,6 +43,10 @@ Int_t GetJetID(Double_t nhf, Double_t nEF, Double_t nconstituents, Double_t chf,
 }
 
 void MatchTheTree(bool doTree, const TString& matrix_filename = "MatrixOfMatches.root",Int_t maxEvents=-1){
+
+  TStopwatch timer;
+  timer.Start();
+
   // input 
   TFile *file_of_matches = new TFile(matrix_filename,"READ");  
   cout << matrix_filename << " open" << endl;
@@ -348,7 +353,48 @@ void MatchTheTree(bool doTree, const TString& matrix_filename = "MatrixOfMatches
   TH1F* hDeltaDiscrCSV   = new TH1F("hDeltaDiscrCSV","#Delta DiscrCSV ;#Delta DiscrCSV ;jets",1000,-1,1);
   TH1F* hDeltaDiscrJP    = new TH1F("hDeltaDiscrJP","#Delta DiscrJP ;#Delta DiscrJP ;jets",1000,-1,1);
   TH1F* hDeltaDiscrJBP   = new TH1F("hDeltaDiscrJBP","#Delta DiscrJBP ;#Delta DiscrJBP ;jets",1000,-1,1);
-
+  
+  TH1F* hDiscr1TCHE_b    = new TH1F("hDiscr1TCHE_b","TCHE_b1 Discr1TCHE_b;jets",1000,-100,100);
+  TH1F* hDiscr2TCHE_b    = new TH1F("hDiscr2TCHE_b","TCHE_b2 Discr2TCHE_b;jets",1000,-100,100);
+  TH1F* hDiscr1SSVHE_b   = new TH1F("hDiscr1SSVHE_b","SSVHE_b1 Discr1SSVHE_b;jets",1000,-1,10);
+  TH1F* hDiscr2SSVHE_b   = new TH1F("hDiscr2SSVHE_b","SSVHE_b2 Discr2SSVHE_b;jets",1000,-1,10);
+  TH1F* hDiscr1SSVHP_b   = new TH1F("hDiscr1SSVHP_b","SSVHP_b1 Discr1SSVHP_b;jets",1000,-1,10);
+  TH1F* hDiscr2SSVHP_b   = new TH1F("hDiscr2SSVHP_b","SSVHE_b2 Discr1SSVHP_b;jets",1000,-1,10);
+  TH1F* hDiscr1CSV_b     = new TH1F("hDiscr1CSV_b","CSV_b1 Discr1CSV_b;jets",1000,-1,10);
+  TH1F* hDiscr2CSV_b     = new TH1F("hDiscr2CSV_b","CSV_b2 Discr2CSV_b;jets",1000,-1,10);
+  TH1F* hDiscr1JP_b      = new TH1F("hDiscr1JP_b","JP_b1 Discr1JP_b;jets",1000,-1,10);
+  TH1F* hDiscr2JP_b      = new TH1F("hDiscr2JP_b","JP_b1 Discr1JP_b;jets",1000,-1,10);
+  TH1F* hDiscr1TCHE_udsg    = new TH1F("hDiscr1TCHE_udsg","TCHE_udsg1 Discr1TCHE_udsg;jets",1000,-100,100);
+  TH1F* hDiscr2TCHE_udsg    = new TH1F("hDiscr2TCHE_udsg","TCHE_udsg2 Discr2TCHE_udsg;jets",1000,-100,100);
+  TH1F* hDiscr1SSVHE_udsg   = new TH1F("hDiscr1SSVHE_udsg","SSVHE_udsg1 Discr1SSVHE_udsg;jets",1000,-1,10);
+  TH1F* hDiscr2SSVHE_udsg   = new TH1F("hDiscr2SSVHE_udsg","SSVHE_udsg2 Discr2SSVHE_udsg;jets",1000,-1,10);
+  TH1F* hDiscr1SSVHP_udsg   = new TH1F("hDiscr1SSVHP_udsg","SSVHP_udsg1 Discr1SSVHP_udsg;jets",1000,-1,10);
+  TH1F* hDiscr2SSVHP_udsg   = new TH1F("hDiscr2SSVHP_udsg","SSVHE_udsg2 Discr1SSVHP_udsg;jets",1000,-1,10);
+  TH1F* hDiscr1CSV_udsg     = new TH1F("hDiscr1CSV_udsg","CSV_udsg1 Discr1CSV_udsg;jets",1000,-1,10);
+  TH1F* hDiscr2CSV_udsg     = new TH1F("hDiscr2CSV_udsg","CSV_udsg2 Discr2CSV_udsg;jets",1000,-1,10);
+  TH1F* hDiscr1JP_udsg      = new TH1F("hDiscr1JP_udsg","JP_udsg1 Discr1JP_udsg;jets",1000,-1,10);
+  TH1F* hDiscr2JP_udsg      = new TH1F("hDiscr2JP_udsg","JP_udsg2 Discr1JP_udsg;jets",1000,-1,10);
+  TH1F* hDiscr1TCHE_gsplit    = new TH1F("hDiscr1TCHE_g","TCHE_g1 Discr1TCHE_g;jets",1000,-100,100);
+  TH1F* hDiscr2TCHE_gsplit    = new TH1F("hDiscr2TCHE_g","TCHE_g2 Discr2TCHE_g;jets",1000,-100,100);
+  TH1F* hDiscr1SSVHE_gsplit   = new TH1F("hDiscr1SSVHE_g","SSVHE_g1 Discr1SSVHE_g;jets",1000,-1,10);
+  TH1F* hDiscr2SSVHE_gsplit   = new TH1F("hDiscr2SSVHE_g","SSVHE_g2 Discr2SSVHE_g;jets",1000,-1,10);
+  TH1F* hDiscr1SSVHP_gsplit   = new TH1F("hDiscr1SSVHP_g","SSVHP_g1 Discr1SSVHP_g;jets",1000,-1,10);
+  TH1F* hDiscr2SSVHP_gsplit   = new TH1F("hDiscr2SSVHP_g","SSVHE_g2 Discr1SSVHP_g;jets",1000,-1,10);
+  TH1F* hDiscr1CSV_gsplit     = new TH1F("hDiscr1CSV_g","CSV_g1 Discr1CSV_g;jets",1000,-1,10);
+  TH1F* hDiscr2CSV_gsplit     = new TH1F("hDiscr2CSV_g","CSV_g2 Discr2CSV_g;jets",1000,-1,10);
+  TH1F* hDiscr1JP_gsplit      = new TH1F("hDiscr1JP_g","JP_g1 Discr1JP_g;jets",1000,-1,10);
+  TH1F* hDiscr2JP_gsplit      = new TH1F("hDiscr2JP_g","JP_g2 Discr1JP_g;jets",1000,-1,10);
+  TH1F* hDiscr1TCHE_c         = new TH1F("hDiscr1TCHE_c","TCHE_c1 Discr1TCHE_c;jets",1000,-100,100);
+  TH1F* hDiscr2TCHE_c         = new TH1F("hDiscr2TCHE_c","TCHE_c2 Discr2TCHE_c;jets",1000,-100,100);
+  TH1F* hDiscr1SSVHE_c        = new TH1F("hDiscr1SSVHE_c","SSVHE_c1 Discr1SSVHE_c;jets",1000,-1,10);
+  TH1F* hDiscr2SSVHE_c        = new TH1F("hDiscr2SSVHE_c","SSVHE_c2 Discr2SSVHE_c;jets",1000,-1,10);
+  TH1F* hDiscr1SSVHP_c        = new TH1F("hDiscr1SSVHP_c","SSVHP_c1 Discr1SSVHP_c;jets",1000,-1,10);
+  TH1F* hDiscr2SSVHP_c        = new TH1F("hDiscr2SSVHP_c","SSVHE_c2 Discr1SSVHP_c;jets",1000,-1,10);
+  TH1F* hDiscr1CSV_c          = new TH1F("hDiscr1CSV_c","CSV_c1 Discr1CSV_c;jets",1000,-1,10);
+  TH1F* hDiscr2CSV_c          = new TH1F("hDiscr2CSV_c","CSV_c2 Discr2CSV_c;jets",1000,-1,10);
+  TH1F* hDiscr1JP_c           = new TH1F("hDiscr1JP_c","JP_c1 Discr1JP_c;jets",1000,-1,10);
+  TH1F* hDiscr2JP_c           = new TH1F("hDiscr2JP_c","JP_c2 Discr1JP_c;jets",1000,-1,10);
+ 
   // output TTree: event infos
   Int_t   Trun, Tlumi, Tevent;
   Float_t Tpthat, Tmcweight;
@@ -512,6 +558,65 @@ void MatchTheTree(bool doTree, const TString& matrix_filename = "MatrixOfMatches
  	hDeltaDiscrCSV->Fill(discrcsvglobal1[j1]-discrcsvglobal2[j2min]);
  	hDeltaDiscrJP->Fill(discrjpglobal1[j1]-discrjpglobal2[j2min]);
  	hDeltaDiscrJBP->Fill(discrjbpglobal1[j1]-discrjbpglobal2[j2min]);
+	 
+	//filling various discriminant for each flavour
+	// true b flavour
+	if( MCTrueFlavor1[j1] == 5 && MCTrueFlavor2[j2min] == 5 && m_isBGluonSplitting1 == false && m_isBGluonSplitting2== false ){ 	
+
+	  hDiscr1TCHE_b->Fill(discrtcheglobal1[j1]);
+	  hDiscr2TCHE_b->Fill(discrtcheglobal2[j2min]);
+	  hDiscr1SSVHE_b->Fill(discrssvheglobal1[j1]);
+	  hDiscr2SSVHE_b->Fill(discrssvheglobal2[j2min]);
+	  hDiscr1SSVHP_b->Fill(discrssvhpglobal1[j1]);
+	  hDiscr2SSVHP_b->Fill(discrssvhpglobal2[j2min]);
+	  hDiscr1CSV_b->Fill(discrcsvglobal1[j1]);
+	  hDiscr2CSV_b->Fill(discrcsvglobal2[j2min]);
+	  hDiscr1JP_b->Fill(discrjpglobal1[j1]);
+	  hDiscr2JP_b->Fill(discrjpglobal2[j2min]);
+
+	  // b form gsplit
+	}  else if( MCTrueFlavor1[j1] == 5 && MCTrueFlavor2[j2min] == 5 && m_isBGluonSplitting1 == true && m_isBGluonSplitting2 == true ){
+
+	  hDiscr1TCHE_gsplit->Fill(discrtcheglobal1[j1]);
+	  hDiscr2TCHE_gsplit->Fill(discrtcheglobal2[j2min]);
+	  hDiscr1SSVHE_gsplit->Fill(discrssvheglobal1[j1]);
+	  hDiscr2SSVHE_gsplit->Fill(discrssvheglobal2[j2min]);
+	  hDiscr1SSVHP_gsplit->Fill(discrssvhpglobal1[j1]);
+	  hDiscr2SSVHP_gsplit->Fill(discrssvhpglobal2[j2min]);
+	  hDiscr1CSV_gsplit->Fill(discrcsvglobal1[j1]);
+	  hDiscr2CSV_gsplit->Fill(discrcsvglobal2[j2min]);
+	  hDiscr1JP_gsplit->Fill(discrjpglobal1[j1]);
+	  hDiscr2JP_gsplit->Fill(discrjpglobal2[j2min]);
+	  
+	  // true c flavour
+	}  else if( MCTrueFlavor1[j1] == 4 && MCTrueFlavor2[j2min] == 4 && m_isCGluonSplitting1 == false && m_isCGluonSplitting2 == false ){
+	    
+	  hDiscr1TCHE_c->Fill(discrtcheglobal1[j1]);
+	  hDiscr2TCHE_c->Fill(discrtcheglobal2[j2min]);
+	  hDiscr1SSVHE_c->Fill(discrssvheglobal1[j1]);
+	  hDiscr2SSVHE_c->Fill(discrssvheglobal2[j2min]);
+	  hDiscr1SSVHP_c->Fill(discrssvhpglobal1[j1]);
+	  hDiscr2SSVHP_c->Fill(discrssvhpglobal2[j2min]);
+	  hDiscr1CSV_c->Fill(discrcsvglobal1[j1]);
+	  hDiscr2CSV_c->Fill(discrcsvglobal2[j2min]);
+	  hDiscr1JP_c->Fill(discrjpglobal1[j1]);
+	  hDiscr2JP_c->Fill(discrjpglobal2[j2min]);
+	
+	  // udsg flavours
+	}  else if( (MCTrueFlavor1[j1] < 4 || MCTrueFlavor1[j1]== 21) && (MCTrueFlavor1[j1] < 4 || MCTrueFlavor2[j2min]== 21) ){
+
+	  hDiscr1TCHE_udsg->Fill(discrtcheglobal1[j1]);
+	  hDiscr2TCHE_udsg->Fill(discrtcheglobal2[j2min]);
+	  hDiscr1SSVHE_udsg->Fill(discrssvheglobal1[j1]);
+	  hDiscr2SSVHE_udsg->Fill(discrssvheglobal2[j2min]);
+	  hDiscr1SSVHP_udsg->Fill(discrssvhpglobal1[j1]);
+	  hDiscr2SSVHP_udsg->Fill(discrssvhpglobal2[j2min]);
+	  hDiscr1CSV_udsg->Fill(discrcsvglobal1[j1]);
+	  hDiscr2CSV_udsg->Fill(discrcsvglobal2[j2min]);
+	  hDiscr1JP_udsg->Fill(discrjpglobal1[j1]);
+	  hDiscr2JP_udsg->Fill(discrjpglobal2[j2min]);
+
+	}
 
 	Trun   =m_runNumber1;
 	Tlumi  =m_lumiNumber1;
@@ -856,6 +961,9 @@ void MatchTheTree(bool doTree, const TString& matrix_filename = "MatrixOfMatches
   file_out->ls();
   file_out->Write();
   file_out->Close();
+
+  timer.Stop();
+  timer.Print();
 
 }
 
