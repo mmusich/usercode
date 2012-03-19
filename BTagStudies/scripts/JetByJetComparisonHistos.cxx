@@ -127,7 +127,7 @@ void JetByJetComparisonHistos::addAllHistos() {
   addHisto2D("h2ScatDeltaDiscrSSVHPvsSV3dDistanceError","#Delta discrSSVHP vs SV3dDistanceError;#sigma_{L_{3D}}(SV) (cm);#DeltaD_{SSVHP}",50,0.,2.5,100,-3.1,3.1);
   addHisto2D("h2ScatDeltaDiscrSSVHPvsSV3dDistanceoverSV3dDistanceError","#Delta discrSSVHP vs SIPSV3d;L_{3D}/#sigma_{L_{3D}}(SV) (cm);#DeltaD_{SSVHP}",100,0.,100.,100,-3.1,3.1);
   addHisto2D("h2ScatDeltaDiscrSSVHPvsSVMass","#Delta discrSSVHP vs SVMass;SV mass (GeV);#DeltaD_{SSVHP}",100,0.,15.,100,-3.1,3.1);
-  addHisto2D("h2ScatDeltaDiscrSSVHPvsSVtotCharge","#Delta discrSSVHE vs SVtotCharge; SV tot charge;#DeltaD_{SSVHE}",21,-10.5,10.5,100,-3.1,3.1);
+  addHisto2D("h2ScatDeltaDiscrSSVHPvsSVtotCharge","#Delta discrSSVHE vs SVtotCharge; SV tot charge;#DeltaD_{SSVHP}",21,-10.5,10.5,100,-3.1,3.1);
   addHisto2D("h2ScatDeltaDiscrSSVHPvsDeltaPVz","#Delta discrSSVHP vs DeltaPVz; #DeltaZ_{PV} (#mum); #DeltaD_{SSVHP}",60,-300,300,100,-3.1,3.1);
   addHisto2D("h2ScatDeltaDiscrSSVHPvsDelta3PV","#Delta discrSSVHP vs Delta3PV; #DeltaL_{3D}(PV) (#mum); #DeltaD_{SSVHP}",60,0.,300,100,-3.1,3.1);
   addHisto2D("h2ScatDeltaDiscrSSVHPvsDeltaXYPV","#Delta discrSSVHP vs DeltaXYPV; #DeltaL_{xy}(PV) (#mum); #DeltaD_{SSVHP}",60,0.,300,100,-3.1,3.1);
