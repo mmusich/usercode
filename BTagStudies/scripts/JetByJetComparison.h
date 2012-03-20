@@ -69,8 +69,9 @@ JetByJetComparison::JetByJetComparison(TString filename,TTree *tree)
     // TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("JetByJetComparison_origVsnewgeom.root");
     TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject(filename);
     if (!f) {
-      //    f = new TFile("JetByJetComparison_origVsnewgeom.root");
-      f = new TFile(filename);
+      // f = new TFile("JetByJetComparison_origVsnewgeom.root");
+      // f = new TFile(filename);
+      TFile *f = TFile::Open(filename);
     }
     tree = (TTree*)gDirectory->Get("JetByJetComparisonTree");
     
