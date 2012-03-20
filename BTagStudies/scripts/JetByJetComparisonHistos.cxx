@@ -31,7 +31,7 @@ JetByJetComparisonHistos::JetByJetComparisonHistos(const TString& s,TFile* fout)
   h1vec.clear();
   h2vec.clear();
   hprofvec.clear(); 
-   fout->cd(); 
+  fout->cd(); 
   fout->mkdir(dirname.Data()); 
   fout->cd(dirname.Data()); 
   TString foutname = fout->GetName();
@@ -49,6 +49,7 @@ JetByJetComparisonHistos::JetByJetComparisonHistos(const TString& s,TFile* fout)
   */
   
   addAllHistos();
+  addMigrPlotsHistos();
 
 }
 
@@ -127,7 +128,7 @@ void JetByJetComparisonHistos::addAllHistos() {
   addHisto2D("h2ScatDeltaDiscrSSVHPvsSV3dDistanceError","#Delta discrSSVHP vs SV3dDistanceError;#sigma_{L_{3D}}(SV) (cm);#DeltaD_{SSVHP}",50,0.,2.5,100,-3.1,3.1);
   addHisto2D("h2ScatDeltaDiscrSSVHPvsSV3dDistanceoverSV3dDistanceError","#Delta discrSSVHP vs SIPSV3d;L_{3D}/#sigma_{L_{3D}}(SV) (cm);#DeltaD_{SSVHP}",100,0.,100.,100,-3.1,3.1);
   addHisto2D("h2ScatDeltaDiscrSSVHPvsSVMass","#Delta discrSSVHP vs SVMass;SV mass (GeV);#DeltaD_{SSVHP}",100,0.,15.,100,-3.1,3.1);
-  addHisto2D("h2ScatDeltaDiscrSSVHPvsSVtotCharge","#Delta discrSSVHE vs SVtotCharge; SV tot charge;#DeltaD_{SSVHP}",21,-10.5,10.5,100,-3.1,3.1);
+  addHisto2D("h2ScatDeltaDiscrSSVHPvsSVtotCharge","#Delta discrSSVHE vs SVtotCharge; SV tot charge;#DeltaD_{SSVHE}",21,-10.5,10.5,100,-3.1,3.1);
   addHisto2D("h2ScatDeltaDiscrSSVHPvsDeltaPVz","#Delta discrSSVHP vs DeltaPVz; #DeltaZ_{PV} (#mum); #DeltaD_{SSVHP}",60,-300,300,100,-3.1,3.1);
   addHisto2D("h2ScatDeltaDiscrSSVHPvsDelta3PV","#Delta discrSSVHP vs Delta3PV; #DeltaL_{3D}(PV) (#mum); #DeltaD_{SSVHP}",60,0.,300,100,-3.1,3.1);
   addHisto2D("h2ScatDeltaDiscrSSVHPvsDeltaXYPV","#Delta discrSSVHP vs DeltaXYPV; #DeltaL_{xy}(PV) (#mum); #DeltaD_{SSVHP}",60,0.,300,100,-3.1,3.1);
@@ -140,6 +141,44 @@ void JetByJetComparisonHistos::addAllHistos() {
   addHisto2D("h2ScatDeltaDiscrCSVvsDelta3PV","#Delta discrCSV vs Delta3PV;d_{3D}(PV) (#mum);#DeltaD_{CSV}",60,0,300,100,-1.1,1.1);
   addHisto2D("h2ScatDeltaDiscrCSVvsDeltaXYPV","#Delta discrCSV vs DeltaXYPV;d_{xy}(PV) (#mum);#DeltaD_{CSV}",60,0.,300,100,-1.1,1.1);
 
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+void JetByJetComparisonHistos::addMigrPlotsHistos() {
+    
+  // migration matrix for default / not default
+  AddHisto2D("h2MigrationMatrixTCHE","D_{TCHE}",obj1name_,obj2name_,2,-0.5,1.5,2,-0.5,1.5);
+  AddHisto2D("h2MigrationMatrixTCHP","D_{TCHP}",obj1name_,obj2name_,2,-0.5,1.5,2,-0.5,1.5);
+  AddHisto2D("h2MigrationMatrixSSVHE","D_{SSVHE}",obj1name_,obj2name_,2,-0.5,1.5,2,-0.5,1.5);
+  AddHisto2D("h2MigrationMatrixSSVHP","D_{SSVHP}",obj1name_,obj2name_,2,-0.5,1.5,2,-0.5,1.5);
+  AddHisto2D("h2MigrationMatrixCSV","D_{CSV}",obj1name_,obj2name_,2,-0.5,1.5,2,-0.5,1.5);
+  AddHisto2D("h2MigrationMatrixJP","D_{JP}",obj1name_,obj2name_,2,-0.5,1.5,2,-0.5,1.5);
+  AddHisto2D("h2MigrationMatrixJBP","D_{JBP}",obj1name_,obj2name_,2,-0.5,1.5,2,-0.5,1.5);
+
+  TString MatrixBinLabels[2] = {"default","not-default"};
+  for(UInt_t bin=1;bin<=2; bin++){
+
+    findTH2("h2MigrationMatrixTCHE")->GetXaxis()->SetBinLabel(bin,MatrixBinLabels[bin-1]); 
+    findTH2("h2MigrationMatrixTCHE")->GetYaxis()->SetBinLabel(bin,MatrixBinLabels[bin-1]); 
+    
+    findTH2("h2MigrationMatrixTCHP")->GetXaxis()->SetBinLabel(bin,MatrixBinLabels[bin-1]); 
+    findTH2("h2MigrationMatrixTCHP")->GetYaxis()->SetBinLabel(bin,MatrixBinLabels[bin-1]); 
+    
+    findTH2("h2MigrationMatrixSSVHE")->GetXaxis()->SetBinLabel(bin,MatrixBinLabels[bin-1]); 
+    findTH2("h2MigrationMatrixSSVHE")->GetYaxis()->SetBinLabel(bin,MatrixBinLabels[bin-1]); 
+    
+    findTH2("h2MigrationMatrixSSVHP")->GetXaxis()->SetBinLabel(bin,MatrixBinLabels[bin-1]); 
+    findTH2("h2MigrationMatrixSSVHP")->GetYaxis()->SetBinLabel(bin,MatrixBinLabels[bin-1]); 
+    
+    findTH2("h2MigrationMatrixCSV")->GetXaxis()->SetBinLabel(bin,MatrixBinLabels[bin-1]); 
+    findTH2("h2MigrationMatrixCSV")->GetYaxis()->SetBinLabel(bin,MatrixBinLabels[bin-1]); 
+    
+    findTH2("h2MigrationMatrixJP")->GetXaxis()->SetBinLabel(bin,MatrixBinLabels[bin-1]); 
+    findTH2("h2MigrationMatrixJP")->GetYaxis()->SetBinLabel(bin,MatrixBinLabels[bin-1]); 
+    
+    findTH2("h2MigrationMatrixJBP")->GetXaxis()->SetBinLabel(bin,MatrixBinLabels[bin-1]); 
+    findTH2("h2MigrationMatrixJBP")->GetYaxis()->SetBinLabel(bin,MatrixBinLabels[bin-1]); 
+  }  
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -357,16 +396,16 @@ void JetByJetComparisonHistos::fillTH(TH1* p_h, float value1, float value2, floa
 	p_h->Fill(valueX,valueY);
       }
     }
-  } else if ( p_h->IsA()->InheritsFrom("TProfile") ) {               //opening if type TProfile
-    if (CondANotDef == false && CondBNotDef == true){               //opening else if condition on case Default-Non Default
+  } else if ( p_h->IsA()->InheritsFrom("TProfile") ) {                   //opening if type TProfile
+    if (CondANotDef == false && CondBNotDef == true){                    //opening else if condition on case Default-Non Default
       if(value1 == default_ && value2 != default_){                   
 	p_h->Fill(valueX,valueY);  
       }                          //opening if type TH1F 
     }
-    else if (CondANotDef == true && CondBNotDef == false ) {        //opening else if condition on case Not Default - Default 
+    else if (CondANotDef == true && CondBNotDef == false ) {             //opening else if condition on case Not Default - Default 
       if(value2 == default_ && value1 != default_) {                 
 	p_h->Fill(valueX,valueY);
-      }                                                             // closing else if condition on case Not Default - Default
+      }                                                                  // closing else if condition on case Not Default - Default
     }
     else if (CondANotDef == true && CondBNotDef == true){
       if(value1 != default_ && value2 != default_){
@@ -378,6 +417,46 @@ void JetByJetComparisonHistos::fillTH(TH1* p_h, float value1, float value2, floa
   }                                                                      // closing if another type
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////
+void JetByJetComparisonHistos::fillMigrationMatrix(TH1* p_h, float value1, float value2){
+
+  Float_t default_(0.);
+  TString tagger_;
+  
+  for(UInt_t disc=0; disc<5; disc++){                                    // opening loop on discriminant
+    if(((TString)p_h->GetName()).Contains(discriminators[disc])) {       // match dicriminator/histogram name
+      default_= defaultmap.find(discriminators[disc])->second;
+      tagger_ = defaultmap.find(discriminators[disc])->first;
+    }
+  }
+
+  if(value1 == default_ && value2 == default_){  
+    p_h->Fill(0.,0.);
+  } else if(value1 == default_ && value2 != default_){
+    p_h->Fill(0.,1.);
+  } else if(value1 != default_ && value2 == default_){
+    p_h->Fill(1.,0.);
+  } else if(value1 != default_ && value2 != default_){
+    p_h->Fill(1.,1.);
+  }  
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////
+void JetByJetComparisonHistos::fillAllMigrationMatrices(const JetInfo& ja, const JetInfo& jb, TFile* fout){
+
+  fout->cd(dirname.Data());
+ 
+  fillMigrationMatrix(findTH2("h2MigrationMatrixTCHE"),ja.tche,jb.tche);      		
+  fillMigrationMatrix(findTH2("h2MigrationMatrixTCHP"),ja.tchp,jb.tchp); 	     
+  fillMigrationMatrix(findTH2("h2MigrationMatrixSSVHE"),ja.ssvhe,jb.ssvhe);	      
+  fillMigrationMatrix(findTH2("h2MigrationMatrixSSVHP"),ja.ssvhp,jb.ssvhp);
+  fillMigrationMatrix(findTH2("h2MigrationMatrixCSV"),ja.csv,jb.csv);
+  fillMigrationMatrix(findTH2("h2MigrationMatrixJP"),ja.jp,jb.jp);
+  fillMigrationMatrix(findTH2("h2MigrationMatrixJBP"),ja.jbp,jb.jbp);
+
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////
 void JetByJetComparisonHistos::drawNice2dHistos(TFile* fout)
 {
   
@@ -424,25 +503,36 @@ void JetByJetComparisonHistos::drawNice2dHistos(TFile* fout)
     c->cd();
     gPad->SetTopMargin(0.08);
     gPad->SetRightMargin(0.15);
+    TString h2name = h2vec[h]->GetName();
     h2vec[h]->SetStats(kFALSE);
-    h2vec[h]->Draw("colz");
+    if(!h2name.Contains("Migration")) h2vec[h]->Draw("colz");
+    else{ 
+      h2vec[h]->SetMarkerSize(4);
+      h2vec[h]->SetMarkerColor(kBlack);
+      h2vec[h]->Draw("colz");
+      h2vec[h]->Draw("TEXTsame");
+    }
     // c->Draw();
 
     TProfile *hpfx_tmp = (TProfile*) h2vec[h]->ProfileX("_pfx",1,-1,"o");
     hpfx_tmp->SetStats(kFALSE);
-    hpfx_tmp->SetMarkerColor(kRed); 
+    hpfx_tmp->SetMarkerColor(kBlack);
+    // hpfx_tmp->SetMarkerColor(kRed);
     hpfx_tmp->SetMarkerSize(1.2); 
     hpfx_tmp->SetMarkerStyle(20); 
-    hpfx_tmp->Draw("psame");
-
+    
+    if(!h2name.Contains("Migration")){ 
+      hpfx_tmp->Draw("psame");
+    }
+    
     // c->Draw();
     fout->cd(dirname.Data()); 
     h2vec[h]->Write();
-    hpfx_tmp->Write();
+    if(!h2name.Contains("Migration")) hpfx_tmp->Write();
     cmsPrel(60.);
     
     TString canvName = h2vec[h]->GetName()+dirname;
-    c->cd()->SetLogz();
+    //c->cd()->SetLogz();
     c->SaveAs(canvName+".png");
     if ( hpfx_tmp!=0) delete hpfx_tmp;
     if ( h2vec[h]!=0) delete h2vec[h];

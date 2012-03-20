@@ -9,7 +9,6 @@
 #include <TCanvas.h>
 #include <iostream>
 
-
 using namespace std; 
 
 bool isMC(double mcweight){
@@ -26,10 +25,6 @@ bool isB(int mctruth) {
 
 void JetByJetComparison::Loop()
 {
-
-  TStopwatch timer;
-  timer.Start();
-
   //   In a ROOT session, you can do:
   //      Root > .L JetByJetComparison.C
   //      Root > JetByJetComparison t
@@ -67,6 +62,7 @@ void JetByJetComparison::Loop()
   // Flavour structure for MC
 
   if(isMC(JetInfoA->MCweight) && isMC(JetInfoB->MCweight)){
+
     JetByJetComparisonHistos jetbyjethistos_notdefnotdef_all("NotDefault_NotDefault_all",file_out);
     JetByJetComparisonHistos jetbyjethistos_notdefnotdef_b("NotDefault_NotDefault_b",file_out);
     JetByJetComparisonHistos jetbyjethistos_notdefnotdef_udsg("NotDefault_NotDefault_udsg",file_out);
@@ -74,14 +70,18 @@ void JetByJetComparison::Loop()
     for (Long64_t jentry=0; jentry<nentries;jentry++) {
       Long64_t ientry = LoadTree(jentry);
       if (ientry < 0) break;
-      if ( jentry%10000 == 0 )  cout << "JetByJetComprison Processing Event: " << jentry << endl;
+      if ( jentry%10000 == 0 )  cout << "JetByJetComprison Processing record: " << jentry << endl;
       nb = fChain->GetEntry(jentry);   nbytes += nb;
 
-      jetbyjethistos_notdefnotdef_all.fillAllHistos(*JetInfoA,*JetInfoB,file_out);      
+      jetbyjethistos_notdefnotdef_all.fillAllHistos(*JetInfoA,*JetInfoB,file_out);
+      jetbyjethistos_notdefnotdef_all.fillAllMigrationMatrices(*JetInfoA,*JetInfoB,file_out);
+      
       if (isB(JetInfoA->MCTrueFlavor) && isB(JetInfoB->MCTrueFlavor)) {
 	jetbyjethistos_notdefnotdef_b.fillAllHistos(*JetInfoA,*JetInfoB,file_out);
+	jetbyjethistos_notdefnotdef_b.fillAllMigrationMatrices(*JetInfoA,*JetInfoB,file_out);
       } else if (isUDSG(JetInfoA->MCTrueFlavor) && isUDSG(JetInfoB->MCTrueFlavor) ) {
 	jetbyjethistos_notdefnotdef_udsg.fillAllHistos(*JetInfoA,*JetInfoB,file_out);
+	jetbyjethistos_notdefnotdef_udsg.fillAllMigrationMatrices(*JetInfoA,*JetInfoB,file_out);
       }
       if (Cut(ientry) < 0) continue;
     }
@@ -119,8 +119,5 @@ void JetByJetComparison::Loop()
   file_out->cd();
   file_out->Write();
   file_out->Close();
- 
-  timer.Stop();
-  timer.Print();
-
+  
 }
