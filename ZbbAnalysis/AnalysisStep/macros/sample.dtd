@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<!ELEMENT SampleList (Sample)+ >
+<!ELEMENT Sample (InputRootFile,Label,Color,Lumi?,XSection) >
+
+<!ATTLIST Sample ID CDATA #REQUIRED >
+<!ATTLIST Sample IsMC (true|false) "false" >
+
+<!ELEMENT InputRootFile (#PCDATA) >
+<!ELEMENT Label         (#PCDATA) >
+<!ELEMENT Color         (#PCDATA) >
+<!ELEMENT Lumi          (#PCDATA) > <!-- lumi in 1/pb -->
+<!ELEMENT XSection      (#PCDATA) > <!-- x-sec in pb -->
+
