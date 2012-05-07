@@ -13,7 +13,6 @@ class zbbPlots:
     def __init__(self,isMC=False):
 #########################################
         self.root_output_file = ROOT.TFile("zbbPlots.root","RECREATE")
-        self.dir = self.root_output_file.mkdir("eventSelection")
 
         self.isMC = isMC
 
@@ -28,28 +27,22 @@ class zbbPlots:
 
     def beginJob(self):
 #########################################
-        #self.root_output_file.cd()
-        self.dir.cd()
+        self.root_output_file.cd()
 
         # lumi block plots
-        self.h1_eventCounters = ROOT.TH1F("EventCounter","Event Counters",6,-0.5,5.5)
+        self.h1_eventCounters = ROOT.TH1F("lumicounter","lumicounter",6,-0.5,5.5)
         for theCounterLabel in self.counterLabels:
-            self.h1_eventCounters.GetXaxis().SetBinLabel(self.counterLabels.index(theCounterLabel)+1,theCounterLabel)
+            self.h1_eventCounters.GetXaxis().SetBinLabel(self.counterLabels.index(theCounterLabel)+1,theCounterLabel);
+
 
         # muon plots
-        self.h1_muonPt  = ROOT.TH1F("muonPt", "muon pt; p_{T} (GeV)",    100,  0.,300.)
-        self.h1_muonEta = ROOT.TH1F("muonEta","muon #eta; #eta", 100, -3.,  3.)
-        self.h1_muonPhi = ROOT.TH1F("muonPhi","muon #phi; #phi (rad)", 100, -3.14, 3.14)
-
+        self.h1_muonPt  = ROOT.TH1F("muonPt", "pt",    100,  0.,300.)
+        self.h1_muonEta = ROOT.TH1F("muonEta","eta",   100, -3.,  3.)
+        self.h1_muonPhi = ROOT.TH1F("muonPhi","phi",   100, -5.,  5.)
 
         # trigger plots
-
-        self.h1_triggerSelection = ROOT.TH1F("triggerSelection","triggerSelection",2,0,2)
         self.h1_triggerBit = ROOT.TH1F("triggerBits","trigger bits",20,0,20)
-        for theTriggerLabel in ehf.triggers:
-            self.h1_triggerBit.GetXaxis().SetBinLabel(ehf.triggers.index(theTriggerLabel)+1,theTriggerLabel)
 
-    
         # create handle outside of loop        
         self.counterHandle      = Handle("edm::MergeableCounter")
         self.muonHandle         = Handle("std::vector<pat::Muon>")
@@ -110,15 +103,9 @@ class zbbPlots:
             event.getByLabel (self.triggerLabel, self.triggerEventHandle)
             if self.triggerEventHandle.isValid():                 
                 triggerEvent = self.triggerEventHandle.product()
-                selTriggers = ehf.selectedTriggers(triggerEvent,ehf.triggers)
+                selTriggers = ehf.selectedTriggers(triggerEvent)
                 for trigger,triggered in enumerate(selTriggers):
                     if triggered : self.h1_triggerBit.Fill(trigger)
-
-                #### list triggers fired    
-                #ehf.listTheTriggers(triggerEvent)    
-
-                self.h1_triggerSelection.Fill(ehf.isTriggerOK(triggerEvent,True,event.eventAuxiliary().run()))
-                #self.h1_triggerSelection.Fill(ehf.isTriggerOK(triggerEvent))
 
         except:        
             print "Trigger not found"
