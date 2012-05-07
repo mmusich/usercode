@@ -1,6 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 
-analyzeBJets = cms.EDAnalyzer("PatBJetTagAnalyzer_JetTags",
+analyzeBJets = cms.EDAnalyzer("PatBJetTagAnalyzer",
                               # input collections
                               isMC        = cms.bool(False),   
                               bTagAlgoWP  = cms.string('SSVHEM'), 
