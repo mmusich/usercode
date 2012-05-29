@@ -7,7 +7,6 @@
 #include "DataFormats/Math/interface/deltaPhi.h"
 #include "DataFormats/Math/interface/deltaR.h"
 #include "DataFormats/GeometryVector/interface/Phi.h"
-#include "DataFormats/BTauReco/interface/JetTag.h"
 
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
@@ -547,7 +546,7 @@ void ZbbCandidateNtuple::book(){
   ZbbNtuple->Branch("bjet",&bjet,"pT_bjet/F:eta_bjet:phi_bjet:dzDilept_bjet:frac2b_bjet:frac1_bjet:frac2_bjet:frac3_bjet");
   ZbbNtuple->Branch("jet2",&jet2,"pT_jet2/F:eta_jet2:phi_jet2:dzDilept_jet2:frac2b_jet2:frac1_jet2:frac2_jet2:frac3_jet2");
   ZbbNtuple->Branch("MET",&MET,"pT_MET/F:px_MET:py_MET");
-  ZbbNtuple->Branch("btagjets",&btagjets,"trueflavour_bjets[6]/I:pT_bjets[6]/F:eta_bjets[6]:phi_bjets[6]:ssvhediscr_bjets[6]:ssvhpdiscr_bjets[6]:csvdiscr_bjets[6]:jpdiscr_bjets[6]:jpdiscr_fromtags_bjets[6]:tchediscr_bjets[6]:tchpdiscr_bjets[6]:svmass_bjets[6]");
+  ZbbNtuple->Branch("btagjets",&btagjets,"trueflavour_bjets[6]/I:pT_bjets[6]/F:eta_bjets[6]:phi_bjets[6]:ssvhediscr_bjets[6]:ssvhpdiscr_bjets[6]:csvdiscr_bjets[6]:jpdiscr_bjets[6]:tchediscr_bjets[6]:tchpdiscr_bjets[6]:svmass_bjets[6]");
   
 }
 
@@ -581,11 +580,6 @@ void ZbbCandidateNtuple::fill(const EventCategory& ec_mu, const EventCategory& e
   const reco::Vertex& theZVertex = ec.theZvertex_;
   
   if ( !thecut_ ) return; // event not selected according to the right category
-
-  // Get b tag information (JP)
-  edm::Handle<reco::JetTagCollection> bTagHandleJP;
-  iEvent.getByLabel("MyJetProbabilityBJetTags", bTagHandleJP);
-  const reco::JetTagCollection & bTagsJP = *(bTagHandleJP.product());
 
   // create the list of jets for the JEC study
   Double_t sigcut = 4;
@@ -656,14 +650,12 @@ void ZbbCandidateNtuple::fill(const EventCategory& ec_mu, const EventCategory& e
     btagjets.ssvhediscr_bjets[k]  = theBTaggedJets[k].bDiscriminator("simpleSecondaryVertexHighEffBJetTags");
     btagjets.ssvhpdiscr_bjets[k]  = theBTaggedJets[k].bDiscriminator("simpleSecondaryVertexHighPurBJetTags");
 
-    btagjets.tchediscr_bjets[k]   = theBTaggedJets[k].bDiscriminator("trackCountingHighEffBJetTags");
-    btagjets.tchpdiscr_bjets[k]   = theBTaggedJets[k].bDiscriminator("trackCountingHighPurBJetTags");
+    btagjets.tchediscr_bjets[k]  = theBTaggedJets[k].bDiscriminator("trackCountingHighEffBJetTags");
+    btagjets.tchpdiscr_bjets[k]  = theBTaggedJets[k].bDiscriminator("trackCountingHighPurBJetTags");
 
     btagjets.csvdiscr_bjets[k]    = theBTaggedJets[k].bDiscriminator("combinedSecondaryVertexBJetTags");
-    btagjets.jpdiscr_bjets[k]   = theBTaggedJets[k].bDiscriminator("jetProbabilityBJetTags");
-   
-    btagjets.jpdiscr_fromtags_bjets[k] = ZbbUtils::getDiscriminatorFromTags(bTagsJP,theBTaggedJets[k]);
-   
+    btagjets.jpdiscr_bjets[k]     = theBTaggedJets[k].bDiscriminator("jetProbabilityBJetTags");
+    
     if ( ec.isMC() ) {
       btagjets.trueflavour_bjets[k] = theBTaggedJets[k].partonFlavour();
     }
@@ -746,6 +738,7 @@ void ZbbCandidateNtuple::fill(const EventCategory& ec_mu, const EventCategory& e
   for (UInt_t j = 0; j < theSortedJets.size(); ++j){ 
     if ( /*fabs(theSortedJets[j].pt() - bjet.pT_bjet) > 0.01*/ 
 	j!=theBjetIntex_ && VtxAssociatorsUtils::jetVertex(theZVertex,theSortedJets[j],4,sigcut,etcut)){ //ensure the jet is not the tagged one
+	//!=theBjetIntex_ && VtxAssociatorsUtils::beta(*jetcand,trackrefs_PV)<lCuts_.betaCut_){ //ensure the jet is not the tagged one
 
       //fill jet2 stuff
       jet2.eta_jet2 = theSortedJets[j].eta();

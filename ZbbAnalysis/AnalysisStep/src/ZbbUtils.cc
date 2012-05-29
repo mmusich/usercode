@@ -14,7 +14,6 @@
 #include <Math/VectorUtil.h>
 #include "TLorentzVector.h"
 #include "PhysicsTools/JetMCUtils/interface/CandMCTag.h"
-#include "DataFormats/BTauReco/interface/JetTag.h"
 
 using namespace ZbbUtils;
 
@@ -197,10 +196,11 @@ Bool_t ZbbUtils::isBJet(const pat::Jet& jet,TString theAlgoWP){
     isbjet = jet.bDiscriminator("combinedSecondaryVertexBJetTags")>0.679;
   } else if ( theAlgoWP=="CSVT" ) {
     isbjet = jet.bDiscriminator("combinedSecondaryVertexBJetTags")>0.898;
-  } else if ( theAlgoWP=="JPT" ) {
+  } else if  ( theAlgoWP=="JPT" ) {
     isbjet = jet.bDiscriminator("jetProbabilityBJetTags")>0.790;
-  } else {   
-    std::cout<<"isBJet: Error unforeseen algo or working point for b-tagging. Use SSVHEM/SSVHPT/TCHEM/TCHPT/CVSM/CVST "<<std::endl; 	   
+  } 
+  else {   
+    std::cout<<"isBJet: Error unforeseen algo or working point for b-tagging. Use SSVHEM/SSVHPT/TCHEM/TCHPT/CSVM/CSVT/JPT "<<std::endl; 	   
   } 	    
   return isbjet;
 }
@@ -262,62 +262,6 @@ Bool_t ZbbUtils::isBJetMCMatched(const pat::Jet& jet,edm::Handle<reco::GenPartic
 	}// end if distance gen jet - reco jet < 0.5
       }// ends if b-hadron is sensible
     }// ends if hasbottom
-  }// ends loop on genParticles 
-
-  return isbjetMcMatched_;
-}
-
-//______________________________________________________________________________
-Bool_t ZbbUtils::isJetPartonMatched(const pat::Jet& jet,edm::Handle<reco::GenParticleCollection> genParticlesCollection,const reco::GenJetCollection & genJets,Int_t thePdgId, Float_t dRMatch){
-  
-  Bool_t isbjetMcMatched_ = false;
-  
-  Bool_t isStatus1_,isStatus2_,isStatus3_,isRightFlavour_,hasHdaughter_;
-   
-  // loop over GEN particles
-  for( reco::GenParticleCollection::const_iterator genp = genParticlesCollection->begin();genp != genParticlesCollection->end(); ++ genp ) {  
-    const reco::Candidate* p = &(*genp);
-      
-    isStatus1_=false;
-    isStatus2_=false;
-    isStatus3_=false;
-    hasHdaughter_=false;
-    isRightFlavour_=false;
-
-    if (p->status()==1)isStatus1_=true;
-    if (p->status()==2)isStatus2_=true;
-    if (p->status()==3)isStatus3_=true;
-    if (fabs(p->pdgId()==thePdgId)) isRightFlavour_=true;
-    
-    for (size_t i=0;i<p->numberOfDaughters();i++){
-      if (fabs(p->daughter(i)->pdgId()) == 91 || fabs(p->daughter(i)->pdgId()) == 92) hasHdaughter_=true;
-    }
-      
-    // if b-hadron is sensible
-    if(isRightFlavour_ && (isStatus2_ || isStatus3_) && hasHdaughter_){
-      
-      math::XYZTLorentzVectorD p4HFGEN(p->px(),p->py(),p->pz(),p->energy());
-      std::pair<int,double> GenGenAssociation = std::make_pair(-1,9999.);
-      double minDeltaRGenGen(9999.);
-      int i(0);
-      for(std::vector<reco::GenJet>::const_iterator genjet_it=genJets.begin(); genjet_it!=genJets.end(); ++genjet_it){ 
-	if(ROOT::Math::VectorUtil::DeltaR(genjet_it->momentum(),p4HFGEN.Vect())<dRMatch) { 
-	  if(ROOT::Math::VectorUtil::DeltaR(genjet_it->momentum(),p4HFGEN.Vect())< minDeltaRGenGen){
-	    minDeltaRGenGen = ROOT::Math::VectorUtil::DeltaR(genjet_it->momentum(),p4HFGEN.Vect());
-	    GenGenAssociation.first  = i;
-	    GenGenAssociation.second = minDeltaRGenGen;
-	  } // end if minimum distance gen jet-parton 
-	} // ends if parton matched to gen jet
-	  //std::cout<<"i: "<<i<<" minDeltaR: "<<minDeltaRGenGen<<std::endl;
-	i++;
-      }// ends loop on gen jets
-      
-      if(GenGenAssociation.first == -1 ) continue;
-      
-      if(ROOT::Math::VectorUtil::DeltaR(genJets.at(GenGenAssociation.first).momentum(),jet.momentum())<dRMatch) {
-	isbjetMcMatched_=true;
-      }// end if distance gen jet - reco jet < dRMatch
-    }// ends if there is a parton of given flavour
   }// ends loop on genParticles 
 
   return isbjetMcMatched_;
@@ -455,6 +399,32 @@ std::vector<pat::Jet> ZbbUtils::sortJetsBypT(std::vector<pat::Jet> unsortedJets)
   }// i loop
 
   return sortedJets;
+
+}
+
+
+//______________________________________________________________________________
+template<class T>
+std::vector<T> ZbbUtils::sortObjectsBypT(std::vector<T> const& unsortedObj){
+
+  std::vector<T> sortedObj= unsortedObj;
+  std::vector<Float_t> pTObj;
+  UInt_t ObjSize=unsortedObj.size();
+  for (UInt_t n=0;n <ObjSize; ++n){
+    pTObj.push_back(unsortedObj[n].pt());
+  }
+
+  for (UInt_t i = 0; i < ObjSize; ++i){
+    for (UInt_t j = i+1; j < ObjSize; ++j){
+      if (pTObj[i] < pTObj[j]){
+	T auxObj = sortedObj[i];
+	sortedObj[i] = sortedObj[j];
+	sortedObj[j] = auxObj;
+      }// if
+    }// j loop
+  }// i loop
+
+  return sortedObj;
 
 }
 
@@ -1208,23 +1178,95 @@ std::pair<Double_t,Double_t> ZbbUtils::effCalc(const double& num, const double& 
 }
 
 //______________________________________________________________________________
-double ZbbUtils::getDiscriminatorFromTags(const reco::JetTagCollection & bTags, const pat::Jet& jet){
+std::vector<float> ZbbUtils::getPU(Bool_t getData){
 
-  std::pair<Int_t,Double_t> jetjetAssoc = std::make_pair(-1,9999.);
+  std::vector<float> dataPU(36);
+  std::vector<float> MCPU(36);
+
+  // from https://twiki.cern.ch/twiki/bin/view/CMS/VectorBosonPlusHeavyFlavor#Pile_up_reweighting
+  float data_2011_to_run173692_v3[36] ={
+    1.39818e+07,
+    5.70465e+07,
+    1.35101e+08,
+    2.2739e+08,
+    3.0301e+08,
+    3.39416e+08,
+    3.32104e+08,
+    2.91552e+08,
+    2.34186e+08,
+    1.74644e+08,
+    1.2225e+08,
+    8.0982e+07,
+    5.10706e+07,
+    3.07955e+07,
+    1.7812e+07,
+    9.90513e+06,
+    5.3052e+06,
+    2.74071e+06,
+    1.36736e+06,
+    659563,
+    307928,
+    139290,
+    61111.2,
+    26031.4,
+    10776.8,
+    4340.47,
+    1702.41,
+    650.858,
+    242.78,
+    88.4374,
+    31.4874,
+    10.9669,
+    3.73959,
+    1.24937,
+    0.600761,
+    0
+  };
   
-  // Loop over jets and study b tag info.
-  for (unsigned int i = 0; i != bTags.size(); ++i) {
-    
-    double dR_tmp= ROOT::Math::VectorUtil::DeltaR(bTags[i].first->momentum(),jet.momentum());
-    
-    if(dR_tmp < 0.1){
-      if(dR_tmp < jetjetAssoc.second){
-	jetjetAssoc.first  = i;
-	jetjetAssoc.second = dR_tmp;
-      }
-    }
-  }
-  
-  return bTags[jetjetAssoc.first].second; 
+  // from https://twiki.cern.ch/twiki/bin/view/CMS/VectorBosonPlusHeavyFlavor#Pile_up_reweighting
+  float MC_summer11_PUS4[36] ={
+    0.145346,   
+    0.0642802,		
+    0.0695255,	
+    0.0696747,
+    0.0692955,
+    0.0684997,
+    0.0669528,
+    0.0645515,
+    0.0609865,
+    0.0563323,
+    0.0507322,
+    0.0444681,
+    0.0379205,
+    0.0315131,
+    0.025422,
+    0.0200184,
+    0.0153776,
+    0.0115387,
+    0.00847608,
+    0.00608715,
+    0.00428255,
+    0.00297185,
+    0.00201918,
+    0.0013449,
+    0.000881587,
+    0.000569954,
+    0.000361493,
+    0.000228692,
+    0.000140791,
+    8.44606e-05,
+    5.10204e-05,
+    3.07802e-05,
+    1.81401e-05,
+    1.00201e-05,
+    5.80004e-06,
+    0
+  };
+
+  copy(data_2011_to_run173692_v3,data_2011_to_run173692_v3+36,dataPU.begin());
+  copy(MC_summer11_PUS4,MC_summer11_PUS4+36,MCPU.begin());
+
+  if(getData) return dataPU;
+  else return MCPU;
   
 }

@@ -169,36 +169,38 @@ def main():
     
     dySrc_MADGRAPH_5FS=[
         ## ok for inclusive studies
-        # 'rfio:/castor/cern.ch/user/e/emiglior/zbb/ZbbSkimSummer11_PAT42X_Sep11_V1/DYJetsToLL_TuneZ2_MADGRAPH_5FS/MergedOutputFile_1_1_lot.root',
-        # 'rfio:/castor/cern.ch/user/e/emiglior/zbb/ZbbSkimSummer11_PAT42X_Sep11_V1/DYJetsToLL_TuneZ2_MADGRAPH_5FS/MergedOutputFile_2_1_epd.root',
-        # 'rfio:/castor/cern.ch/user/e/emiglior/zbb/ZbbSkimSummer11_PAT42X_Sep11_V1/DYJetsToLL_TuneZ2_MADGRAPH_5FS/MergedOutputFile_3_1_2XE.root',
-        # 'rfio:/castor/cern.ch/user/e/emiglior/zbb/ZbbSkimSummer11_PAT42X_Sep11_V1/DYJetsToLL_TuneZ2_MADGRAPH_5FS/MergedOutputFile_4_1_71x.root',
-        # 'rfio:/castor/cern.ch/user/e/emiglior/zbb/ZbbSkimSummer11_PAT42X_Sep11_V1/DYJetsToLL_TuneZ2_MADGRAPH_5FS/MergedOutputFile_5_1_x1F.root',
-        # 'rfio:/castor/cern.ch/user/e/emiglior/zbb/ZbbSkimSummer11_PAT42X_Sep11_V1/DYJetsToLL_TuneZ2_MADGRAPH_5FS/MergedOutputFile_6_1_VYR.root',
-        # 'rfio:/castor/cern.ch/user/e/emiglior/zbb/ZbbSkimSummer11_PAT42X_Sep11_V1/DYJetsToLL_TuneZ2_MADGRAPH_5FS/MergedOutputFile_7_1_spv.root',
-        # 'rfio:/castor/cern.ch/user/e/emiglior/zbb/ZbbSkimSummer11_PAT42X_Sep11_V1/DYJetsToLL_TuneZ2_MADGRAPH_5FS/MergedOutputFile_8_1_uuy.root',
-        # 'rfio:/castor/cern.ch/user/e/emiglior/zbb/ZbbSkimSummer11_PAT42X_Sep11_V1/DYJetsToLL_TuneZ2_MADGRAPH_5FS/MergedOutputFile_9_1_Z8W.root',
-        # 'rfio:/castor/cern.ch/user/e/emiglior/zbb/ZbbSkimSummer11_PAT42X_Sep11_V1/DYJetsToLL_TuneZ2_MADGRAPH_5FS/MergedOutputFile_10_1_2R9.root',
-        # 'rfio:/castor/cern.ch/user/e/emiglior/zbb/ZbbSkimSummer11_PAT42X_Sep11_V1/DYJetsToLL_TuneZ2_MADGRAPH_5FS/MergedOutputFile_11_2_UeP.root',
-        # 'rfio:/castor/cern.ch/user/e/emiglior/zbb/ZbbSkimSummer11_PAT42X_Sep11_V1/DYJetsToLL_TuneZ2_MADGRAPH_5FS/MergedOutputFile_12_1_Bz5.root',
-        # 'rfio:/castor/cern.ch/user/e/emiglior/zbb/ZbbSkimSummer11_PAT42X_Sep11_V1/DYJetsToLL_TuneZ2_MADGRAPH_5FS/MergedOutputFile_13_1_bmU.root',
-        # 'rfio:/castor/cern.ch/user/e/emiglior/zbb/ZbbSkimSummer11_PAT42X_Sep11_V1/DYJetsToLL_TuneZ2_MADGRAPH_5FS/MergedOutputFile_14_1_tYE.root',
-        # 'rfio:/castor/cern.ch/user/e/emiglior/zbb/ZbbSkimSummer11_PAT42X_Sep11_V1/DYJetsToLL_TuneZ2_MADGRAPH_5FS/MergedOutputFile_15_1_dWa.root',
-        # 'rfio:/castor/cern.ch/user/e/emiglior/zbb/ZbbSkimSummer11_PAT42X_Sep11_V1/DYJetsToLL_TuneZ2_MADGRAPH_5FS/MergedOutputFile_16_1_1Yt.root',
-        # 'rfio:/castor/cern.ch/user/e/emiglior/zbb/ZbbSkimSummer11_PAT42X_Sep11_V1/DYJetsToLL_TuneZ2_MADGRAPH_5FS/MergedOutputFile_17_1_i5L.root',
-        # 'rfio:/castor/cern.ch/user/e/emiglior/zbb/ZbbSkimSummer11_PAT42X_Sep11_V1/DYJetsToLL_TuneZ2_MADGRAPH_5FS/MergedOutputFile_18_2_Pk3.root',
-        # 'rfio:/castor/cern.ch/user/e/emiglior/zbb/ZbbSkimSummer11_PAT42X_Sep11_V1/DYJetsToLL_TuneZ2_MADGRAPH_5FS/MergedOutputFile_19_1_Yl8.root',
-        # 'rfio:/castor/cern.ch/user/e/emiglior/zbb/ZbbSkimSummer11_PAT42X_Sep11_V1/DYJetsToLL_TuneZ2_MADGRAPH_5FS/MergedOutputFile_20_2_QIG.root',
-        # 'rfio:/castor/cern.ch/user/e/emiglior/zbb/ZbbSkimSummer11_PAT42X_Sep11_V1/DYJetsToLL_TuneZ2_MADGRAPH_5FS/MergedOutputFile_21_1_RVd.root',
-        # 'rfio:/castor/cern.ch/user/e/emiglior/zbb/ZbbSkimSummer11_PAT42X_Sep11_V1/DYJetsToLL_TuneZ2_MADGRAPH_5FS/MergedOutputFile_22_1_Ews.root',
-        # 'rfio:/castor/cern.ch/user/e/emiglior/zbb/ZbbSkimSummer11_PAT42X_Sep11_V1/DYJetsToLL_TuneZ2_MADGRAPH_5FS/MergedOutputFile_23_1_WVm.root',
-        # 'rfio:/castor/cern.ch/user/e/emiglior/zbb/ZbbSkimSummer11_PAT42X_Sep11_V1/DYJetsToLL_TuneZ2_MADGRAPH_5FS/MergedOutputFile_24_1_C9c.root',
-        # 'rfio:/castor/cern.ch/user/e/emiglior/zbb/ZbbSkimSummer11_PAT42X_Sep11_V1/DYJetsToLL_TuneZ2_MADGRAPH_5FS/MergedOutputFile_25_1_t2C.root',
-        # 'rfio:/castor/cern.ch/user/e/emiglior/zbb/ZbbSkimSummer11_PAT42X_Sep11_V1/DYJetsToLL_TuneZ2_MADGRAPH_5FS/MergedOutputFile_26_2_vp8.root',
-        # 'rfio:/castor/cern.ch/user/e/emiglior/zbb/ZbbSkimSummer11_PAT42X_Sep11_V1/DYJetsToLL_TuneZ2_MADGRAPH_5FS/MergedOutputFile_27_1_0i4.root',
-        # 'rfio:/castor/cern.ch/user/e/emiglior/zbb/ZbbSkimSummer11_PAT42X_Sep11_V1/DYJetsToLL_TuneZ2_MADGRAPH_5FS/MergedOutputFile_28_1_ToC.root',
-        # 'rfio:/castor/cern.ch/user/e/emiglior/zbb/ZbbSkimSummer11_PAT42X_Sep11_V1/DYJetsToLL_TuneZ2_MADGRAPH_5FS/MergedOutputFile_29_1_N0k.root'
-        
+        'rfio:/castor/cern.ch/user/e/emiglior/zbb/ZbbSkimSummer11_PAT42X_Sep11_V1/DYJetsToLL_TuneZ2_MADGRAPH_5FS/MergedOutputFile_1_1_lot.root',
+        'rfio:/castor/cern.ch/user/e/emiglior/zbb/ZbbSkimSummer11_PAT42X_Sep11_V1/DYJetsToLL_TuneZ2_MADGRAPH_5FS/MergedOutputFile_2_1_epd.root',
+        'rfio:/castor/cern.ch/user/e/emiglior/zbb/ZbbSkimSummer11_PAT42X_Sep11_V1/DYJetsToLL_TuneZ2_MADGRAPH_5FS/MergedOutputFile_3_1_2XE.root',
+        'rfio:/castor/cern.ch/user/e/emiglior/zbb/ZbbSkimSummer11_PAT42X_Sep11_V1/DYJetsToLL_TuneZ2_MADGRAPH_5FS/MergedOutputFile_4_1_71x.root',
+        'rfio:/castor/cern.ch/user/e/emiglior/zbb/ZbbSkimSummer11_PAT42X_Sep11_V1/DYJetsToLL_TuneZ2_MADGRAPH_5FS/MergedOutputFile_5_1_x1F.root',
+        'rfio:/castor/cern.ch/user/e/emiglior/zbb/ZbbSkimSummer11_PAT42X_Sep11_V1/DYJetsToLL_TuneZ2_MADGRAPH_5FS/MergedOutputFile_6_1_VYR.root',
+        'rfio:/castor/cern.ch/user/e/emiglior/zbb/ZbbSkimSummer11_PAT42X_Sep11_V1/DYJetsToLL_TuneZ2_MADGRAPH_5FS/MergedOutputFile_7_1_spv.root',
+        'rfio:/castor/cern.ch/user/e/emiglior/zbb/ZbbSkimSummer11_PAT42X_Sep11_V1/DYJetsToLL_TuneZ2_MADGRAPH_5FS/MergedOutputFile_8_1_uuy.root',
+        'rfio:/castor/cern.ch/user/e/emiglior/zbb/ZbbSkimSummer11_PAT42X_Sep11_V1/DYJetsToLL_TuneZ2_MADGRAPH_5FS/MergedOutputFile_9_1_Z8W.root',
+        'rfio:/castor/cern.ch/user/e/emiglior/zbb/ZbbSkimSummer11_PAT42X_Sep11_V1/DYJetsToLL_TuneZ2_MADGRAPH_5FS/MergedOutputFile_10_1_2R9.root',
+        'rfio:/castor/cern.ch/user/e/emiglior/zbb/ZbbSkimSummer11_PAT42X_Sep11_V1/DYJetsToLL_TuneZ2_MADGRAPH_5FS/MergedOutputFile_11_2_UeP.root',
+        'rfio:/castor/cern.ch/user/e/emiglior/zbb/ZbbSkimSummer11_PAT42X_Sep11_V1/DYJetsToLL_TuneZ2_MADGRAPH_5FS/MergedOutputFile_12_1_Bz5.root',
+        'rfio:/castor/cern.ch/user/e/emiglior/zbb/ZbbSkimSummer11_PAT42X_Sep11_V1/DYJetsToLL_TuneZ2_MADGRAPH_5FS/MergedOutputFile_13_1_bmU.root',
+        'rfio:/castor/cern.ch/user/e/emiglior/zbb/ZbbSkimSummer11_PAT42X_Sep11_V1/DYJetsToLL_TuneZ2_MADGRAPH_5FS/MergedOutputFile_14_1_tYE.root',
+        'rfio:/castor/cern.ch/user/e/emiglior/zbb/ZbbSkimSummer11_PAT42X_Sep11_V1/DYJetsToLL_TuneZ2_MADGRAPH_5FS/MergedOutputFile_15_1_dWa.root',
+        'rfio:/castor/cern.ch/user/e/emiglior/zbb/ZbbSkimSummer11_PAT42X_Sep11_V1/DYJetsToLL_TuneZ2_MADGRAPH_5FS/MergedOutputFile_16_1_1Yt.root',
+        'rfio:/castor/cern.ch/user/e/emiglior/zbb/ZbbSkimSummer11_PAT42X_Sep11_V1/DYJetsToLL_TuneZ2_MADGRAPH_5FS/MergedOutputFile_17_1_i5L.root',
+        'rfio:/castor/cern.ch/user/e/emiglior/zbb/ZbbSkimSummer11_PAT42X_Sep11_V1/DYJetsToLL_TuneZ2_MADGRAPH_5FS/MergedOutputFile_18_2_Pk3.root',
+        'rfio:/castor/cern.ch/user/e/emiglior/zbb/ZbbSkimSummer11_PAT42X_Sep11_V1/DYJetsToLL_TuneZ2_MADGRAPH_5FS/MergedOutputFile_19_1_Yl8.root',
+        'rfio:/castor/cern.ch/user/e/emiglior/zbb/ZbbSkimSummer11_PAT42X_Sep11_V1/DYJetsToLL_TuneZ2_MADGRAPH_5FS/MergedOutputFile_20_2_QIG.root',
+        'rfio:/castor/cern.ch/user/e/emiglior/zbb/ZbbSkimSummer11_PAT42X_Sep11_V1/DYJetsToLL_TuneZ2_MADGRAPH_5FS/MergedOutputFile_21_1_RVd.root',
+        'rfio:/castor/cern.ch/user/e/emiglior/zbb/ZbbSkimSummer11_PAT42X_Sep11_V1/DYJetsToLL_TuneZ2_MADGRAPH_5FS/MergedOutputFile_22_1_Ews.root',
+        'rfio:/castor/cern.ch/user/e/emiglior/zbb/ZbbSkimSummer11_PAT42X_Sep11_V1/DYJetsToLL_TuneZ2_MADGRAPH_5FS/MergedOutputFile_23_1_WVm.root',
+        'rfio:/castor/cern.ch/user/e/emiglior/zbb/ZbbSkimSummer11_PAT42X_Sep11_V1/DYJetsToLL_TuneZ2_MADGRAPH_5FS/MergedOutputFile_24_1_C9c.root',
+        'rfio:/castor/cern.ch/user/e/emiglior/zbb/ZbbSkimSummer11_PAT42X_Sep11_V1/DYJetsToLL_TuneZ2_MADGRAPH_5FS/MergedOutputFile_25_1_t2C.root',
+        'rfio:/castor/cern.ch/user/e/emiglior/zbb/ZbbSkimSummer11_PAT42X_Sep11_V1/DYJetsToLL_TuneZ2_MADGRAPH_5FS/MergedOutputFile_26_2_vp8.root',
+        'rfio:/castor/cern.ch/user/e/emiglior/zbb/ZbbSkimSummer11_PAT42X_Sep11_V1/DYJetsToLL_TuneZ2_MADGRAPH_5FS/MergedOutputFile_27_1_0i4.root',
+        'rfio:/castor/cern.ch/user/e/emiglior/zbb/ZbbSkimSummer11_PAT42X_Sep11_V1/DYJetsToLL_TuneZ2_MADGRAPH_5FS/MergedOutputFile_28_1_ToC.root',
+        'rfio:/castor/cern.ch/user/e/emiglior/zbb/ZbbSkimSummer11_PAT42X_Sep11_V1/DYJetsToLL_TuneZ2_MADGRAPH_5FS/MergedOutputFile_29_1_N0k.root'
+        ]
+
+    dySrc_MADGRAPH_5FS_forTemplates=[
         ## ok for template studies
         'rfio:/castor/cern.ch/user/m/musich/ZbbAnalysis/DY_forTemplateStudies/merged2/zbbPATSkim_Merge_Merged_1.root',
         'rfio:/castor/cern.ch/user/m/musich/ZbbAnalysis/DY_forTemplateStudies/merged2/zbbPATSkim_Merge_Merged_10.root',
@@ -377,51 +379,52 @@ def main():
            'rfio:/castor/cern.ch/user/e/emiglior/zbb/ZbbSkimSummer11_PAT42X_Sep11_V1/WZ_TuneZ2/MergedOutputFile_2_1_G9x.root' 
            ]
 
-# assign the  datasets
+    # assign the  datasets
     dySrc          = dySrc_MADGRAPH_5FS
+    dyTemplSrc     = dySrc_MADGRAPH_5FS_forTemplates
     zbbSrc         = zbbSrc_MADGRAPH_5FS
     zbbSherpaSrc   = zbbSrc_SHERPA_5FS
     zbbaMCatNLOSrc = zbbSrc_aMCATNLO_5FS
 
-    channels  = ["MC_Zb5fToLLaMCatNLO_OOB","MC_Zb5fToLLSherpa_OOB","MC_Zb5fToLL_OOB","MC_ZcToLL_OOB","MC_ZlJets_OOB","MC_TTJets_OOB","MC_ZtautauJets_OOB","MC_ZZ_OOB","MC_ZW_OOB", 
-                 "MC_Zb5fToLLaMCatNLO_PU" ,"MC_Zb5fToLLSherpa_PU" ,"MC_Zb5fToLL_PU" ,"MC_ZcToLL_PU" ,"MC_ZlJets_PU" ,"MC_TTJets_PU" ,"MC_ZtautauJets_PU", "MC_ZZ_PU", "MC_ZW_PU", 
-                 "MC_Zb5fToLLaMCatNLO_TNP","MC_Zb5fToLLSherpa_TNP","MC_Zb5fToLL_TNP","MC_ZcToLL_TNP","MC_ZlJets_TNP","MC_TTJets_TNP","MC_ZtautauJets_TNP","MC_ZZ_TNP","MC_ZW_TNP",
-                 "MC_Zb5fToLLaMCatNLO_All","MC_Zb5fToLLSherpa_All","MC_Zb5fToLL_All","MC_ZcToLL_All","MC_ZlJets_All","MC_TTJets_All","MC_ZtautauJets_All","MC_ZZ_All","MC_ZW_All"]
+    channels  = ["MC_Zb5fToLLaMCatNLO_OOB","MC_Zb5fToLLSherpa_OOB","MC_Zb5fToLL_OOB","MC_ZcToLL_OOB","MC_ZlJets_OOB","MC_ZcForTemplToLL_OOB","MC_ZlForTemplJets_OOB","MC_TTJets_OOB","MC_ZtautauJets_OOB","MC_ZZ_OOB","MC_ZW_OOB", 
+                 "MC_Zb5fToLLaMCatNLO_PU" ,"MC_Zb5fToLLSherpa_PU" ,"MC_Zb5fToLL_PU" ,"MC_ZcToLL_PU" ,"MC_ZlJets_PU" ,"MC_ZcForTemplToLL_PU" ,"MC_ZlForTemplJets_PU" ,"MC_TTJets_PU" ,"MC_ZtautauJets_PU", "MC_ZZ_PU", "MC_ZW_PU", 
+                 "MC_Zb5fToLLaMCatNLO_TNP","MC_Zb5fToLLSherpa_TNP","MC_Zb5fToLL_TNP","MC_ZcToLL_TNP","MC_ZlJets_TNP","MC_ZcForTemplToLL_TNP","MC_ZlForTemplJets_TNP","MC_TTJets_TNP","MC_ZtautauJets_TNP","MC_ZZ_TNP","MC_ZW_TNP",
+                 "MC_Zb5fToLLaMCatNLO_All","MC_Zb5fToLLSherpa_All","MC_Zb5fToLL_All","MC_ZcToLL_All","MC_ZlJets_All","MC_ZcForTemplToLL_All","MC_ZlForTemplJets_All","MC_TTJets_All","MC_ZtautauJets_All","MC_ZZ_All","MC_ZW_All"]
 
-    srcFiles  =  [zbbaMCatNLOSrc,zbbSherpaSrc,zbbSrc,dySrc,dySrc,ttSrc,dySrc,zzSrc,wzSrc,
-                  zbbaMCatNLOSrc,zbbSherpaSrc,zbbSrc,dySrc,dySrc,ttSrc,dySrc,zzSrc,wzSrc,
-                  zbbaMCatNLOSrc,zbbSherpaSrc,zbbSrc,dySrc,dySrc,ttSrc,dySrc,zzSrc,wzSrc,
-                  zbbaMCatNLOSrc,zbbSherpaSrc,zbbSrc,dySrc,dySrc,ttSrc,dySrc,zzSrc,wzSrc]
+    srcFiles  =  [zbbaMCatNLOSrc,zbbSherpaSrc,zbbSrc,dySrc,dySrc,dyTemplSrc,dyTemplSrc,ttSrc,dySrc,zzSrc,wzSrc,
+                  zbbaMCatNLOSrc,zbbSherpaSrc,zbbSrc,dySrc,dySrc,dyTemplSrc,dyTemplSrc,ttSrc,dySrc,zzSrc,wzSrc,
+                  zbbaMCatNLOSrc,zbbSherpaSrc,zbbSrc,dySrc,dySrc,dyTemplSrc,dyTemplSrc,ttSrc,dySrc,zzSrc,wzSrc,
+                  zbbaMCatNLOSrc,zbbSherpaSrc,zbbSrc,dySrc,dySrc,dyTemplSrc,dyTemplSrc,ttSrc,dySrc,zzSrc,wzSrc]
 
-    isData =   [False,False,False,False,False,False,False,False,False,
-                False,False,False,False,False,False,False,False,False,
-                False,False,False,False,False,False,False,False,False,
-                False,False,False,False,False,False,False,False,False]
+    isData =   [False,False,False,False,False,False,False,False,False,False,False,
+                False,False,False,False,False,False,False,False,False,False,False,
+                False,False,False,False,False,False,False,False,False,False,False,
+                False,False,False,False,False,False,False,False,False,False,False]
     
-    selections = ["Sample","Sample","Sample","Sample","Sample","Sample","Sample","Sample","Sample",
-                  "Sample","Sample","Sample","Sample","Sample","Sample","Sample","Sample","Sample",
-                  "Sample","Sample","Sample","Sample","Sample","Sample","Sample","Sample","Sample",
-                  "Sample","Sample","Sample","Sample","Sample","Sample","Sample","Sample","Sample"]
+    selections = ["Sample","Sample","Sample","Sample","Sample","Sample","Sample","Sample","Sample","Sample","Sample",
+                  "Sample","Sample","Sample","Sample","Sample","Sample","Sample","Sample","Sample","Sample","Sample",
+                  "Sample","Sample","Sample","Sample","Sample","Sample","Sample","Sample","Sample","Sample","Sample",
+                  "Sample","Sample","Sample","Sample","Sample","Sample","Sample","Sample","Sample","Sample","Sample"]
 
-    samples     = ["Zb5faMCatNLO","Zb5fSherpa","Zb5f","Zc","Zl","tt","Ztautau","zz","wz",
-                   "Zb5faMCatNLO","Zb5fSherpa","Zb5f","Zc","Zl","tt","Ztautau","zz","wz",
-                   "Zb5faMCatNLO","Zb5fSherpa","Zb5f","Zc","Zl","tt","Ztautau","zz","wz",
-                   "Zb5faMCatNLO","Zb5fSherpa","Zb5f","Zc","Zl","tt","Ztautau","zz","wz"]
+    samples     = ["Zb5faMCatNLO","Zb5fSherpa","Zb5f","Zc","Zl","Zc","Zl","tt","Ztautau","zz","wz",
+                   "Zb5faMCatNLO","Zb5fSherpa","Zb5f","Zc","Zl","Zc","Zl","tt","Ztautau","zz","wz",
+                   "Zb5faMCatNLO","Zb5fSherpa","Zb5f","Zc","Zl","Zc","Zl","tt","Ztautau","zz","wz",
+                   "Zb5faMCatNLO","Zb5fSherpa","Zb5f","Zc","Zl","Zc","Zl","tt","Ztautau","zz","wz"]
 
-    pusels      = ["False","False","False","False","False","False","False","False","False",
-                   "True" ,"True" ,"True" ,"True" ,"True" ,"True","True","True","True",
-                   "True" ,"True" ,"True" ,"True" ,"True" ,"True","True","True","True",
-                   "True" ,"True" ,"True" ,"True" ,"True" ,"True","True","True","True"]
-                                                                                                                                                      
-    tnpsels     = ["False","False","False","False","False","False","False", "False","False",
-                   "False","False","False","False","False","False","False","False","False",
-                   "True" ,"True" ,"True" ,"True" ,"True" ,"True","True","True","True",
-                   "True" ,"True" ,"True" ,"True" ,"True" ,"True","True","True","True"]
-                                                                                                                                                  
-    bsels       = ["False","False","False","False","False","False","False", "False","False",
-                   "False","False","False","False","False","False","False","False","False",
-                   "False","False","False","False","False","False","False","False","False",
-                   "True" ,"True" ,"True" ,"True" ,"True" ,"True","True","True","True"]
+    pusels      = ["False","False","False","False","False","False","False","False","False","False","False",
+                   "True" ,"True" ,"True" ,"True" ,"True" ,"True" ,"True" ,"True" ,"True" ,"True" ,"True",
+                   "True" ,"True" ,"True" ,"True" ,"True" ,"True" ,"True" ,"True" ,"True" ,"True" ,"True",
+                   "True" ,"True" ,"True" ,"True" ,"True" ,"True" ,"True" ,"True" ,"True" ,"True" ,"True"]
+                                                                                                                                                                      
+    tnpsels     = ["False","False","False","False","False","False","False","False","False","False","False",
+                   "False","False","False","False","False","False","False","False","False","False","False",
+                   "True" ,"True" ,"True" ,"True" ,"True" ,"True" ,"True" ,"True" ,"True" ,"True" ,"True",
+                   "True" ,"True" ,"True" ,"True" ,"True" ,"True" ,"True" ,"True" ,"True" ,"True" ,"True"]
+                                                                                                                                                                  
+    bsels       = ["False","False","False","False","False","False","False","False","False","False","False",
+                   "False","False","False","False","False","False","False","False","False","False","False",
+                   "False","False","False","False","False","False","False","False","False","False","False",
+                   "True" ,"True" ,"True" ,"True" ,"True" ,"True" ,"True" ,"True" ,"True" ,"True" ,"True"]
 
 # CMSSW section
     input_CMSSW_BASE = os.environ.get('CMSSW_BASE')
@@ -441,7 +444,7 @@ def main():
         output_file_list2.append("hadd ")
 
             
-        for jobN,theSrcFiles in enumerate(split(srcFiles[iChannel],3)):            
+        for jobN,theSrcFiles in enumerate(split(srcFiles[iChannel],4)):            
             aJob = Job(jobN,channels[iChannel],isData[iChannel],selections[iChannel],samples[iChannel],bsels[iChannel],pusels[iChannel],tnpsels[iChannel],input_CMSSW_BASE,AnalysisStep_dir)
             aJob.setCASTORout(castordir)
             aJob.createTheCfgFile(theSrcFiles)

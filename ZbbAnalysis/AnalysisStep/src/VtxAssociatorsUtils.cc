@@ -1,4 +1,8 @@
 #include "ZbbAnalysis/AnalysisStep/interface/VtxAssociatorsUtils.h"
+#include "DataFormats/VertexReco/interface/VertexFwd.h"
+#include "DataFormats/VertexReco/interface/Vertex.h"
+#include <list>
+
 
 using namespace VtxAssociatorsUtils;
 
@@ -231,7 +235,7 @@ VtxAssociatorsUtils::jetVertex_3(const reco::Vertex& vertex, const pat::Jet& jet
   }
 }
 
-
+///////////////////////////////////////////////////////////////
 Bool_t
 VtxAssociatorsUtils::jetVertex_2b(const reco::Vertex& vertex,const pat::Jet& jet,Double_t ptcut){
 
@@ -270,4 +274,191 @@ VtxAssociatorsUtils::jetVertex_2b(const reco::Vertex& vertex,const pat::Jet& jet
   } else{
     return false;
   }  
+}
+
+std::map<TString,Double_t> 
+VtxAssociatorsUtils::calculateJetVertexAssociation(const pat::Jet& jet, reco::Vertex vertex){
+
+  std::map<TString,Double_t> theJVFmap;
+
+  Double_t ptsum = 0.;
+  Double_t ptsumx = 0.;
+  Double_t ptsumy = 0.;
+  Double_t ptsumall = 0.;
+  Double_t ratio1 = 0;
+  Double_t ratio2 = 0;
+  Double_t ratio3 = 0;         
+  
+  Double_t ratio1b = 0;	      
+  Double_t ratio2b = 0;	      
+  Double_t ratio3b = 0;        
+
+  Double_t sigcut = 5;
+
+  UInt_t jet_constsize = jet.getPFConstituents().size();
+
+  for(UInt_t j=0; j< jet_constsize; j++){
+      
+    reco::PFCandidatePtr jetPFConst = jet.getPFConstituent(j);
+    
+    //make sure the object is usable
+    //the last condition is a fix if we miss muons and electrons in the file, for rare occurences... 
+    //apparently something in the vz() calculation.
+    
+    if (!(jetPFConst.isAvailable()) || (jetPFConst.isNull())){
+      continue;
+    }
+    if (jetPFConst->trackRef().isNull()){
+      continue;
+    }
+    if (jetPFConst->muonRef().isNonnull()  || jetPFConst->gsfTrackRef().isNonnull()  ){
+      continue;
+    }
+    
+    Double_t distance = (jetPFConst->vz() - vertex.z()); 
+    Double_t error = pow( (pow((jetPFConst->trackRef()->dzError()),2) + pow(vertex.zError(),2)),0.5);			
+    Double_t sig = distance/error;
+    
+    if( fabs(sig)<sigcut ){
+      ptsum  += jetPFConst->pt();
+      ptsumx += jetPFConst->px();
+      ptsumy += jetPFConst->py();
+    }
+    ptsumall += jetPFConst->pt();
+  }  
+  
+  // calculate the Jet Vertex fractions
+  ratio1 = ptsum/jet.et();    
+ 
+  if(ptsumall>0) {
+    ratio2 = ptsum/ptsumall;
+  } else{
+    ratio2 = -1;
+  }
+ 
+  ratio3 =  pow((pow(ptsumx,2)+pow(ptsumy,2)),0.5)/jet.et();
+
+  // fill the map
+  theJVFmap["1"]=ratio1;
+  theJVFmap["2"]=ratio2;
+  theJVFmap["3"]=ratio3;
+  
+  // reset the counters to zero
+  ptsum = 0.;	  
+  ptsumx = 0.;	  
+  ptsumy = 0.;	  
+  ptsumall = 0.; 
+
+  for(UInt_t j=0; j< jet_constsize; j++){
+    
+    reco::PFCandidatePtr jetPFConst = jet.getPFConstituent(j);
+    
+    if(jetPFConst->trackRef().isNull()){
+      continue;
+    }
+    
+    for( reco::Vertex::trackRef_iterator tk = vertex.tracks_begin(); tk<vertex.tracks_end(); tk++ ){
+      if(tk->key() == jetPFConst->trackRef().key()) {
+	ptsum    += jetPFConst->pt();
+	ptsumx   += jetPFConst->px();
+	ptsumy   += jetPFConst->py();
+      } // closes if tkref = pfcandidate 
+    } // closes loop on vertex tracks
+    ptsumall += jetPFConst->pt();
+  } // closes loop on pfconstituents
+
+  // calculate the Jet Vertex fractions
+  ratio1b = ptsum/jet.et();    
+   
+  if(ptsumall>0) {
+    ratio2b = ptsum/ptsumall;
+  } else{
+    ratio2b = -1;
+  }
+ 
+  ratio3b =  pow((pow(ptsumx,2)+pow(ptsumy,2)),0.5)/jet.et();
+  
+  // fill the map
+  theJVFmap["1b"]=ratio1b;
+  theJVFmap["2b"]=ratio2b;
+  theJVFmap["3b"]=ratio3b;
+  
+  return theJVFmap;
+
+}
+
+
+// ------------ method called to build the reference to track refs -------------
+std::list<int>
+VtxAssociatorsUtils::buildTrackRefs(edm::View<reco::Vertex> vertices,bool isPU){
+  
+  if(!isPU){
+    std::list<int> _trackrefs_PV;
+    // loop over the tracks making the PV, and store the keys
+    _trackrefs_PV.clear();
+    if(vertices.size()>0) {
+      const reco::Vertex pv = vertices.operator[](0);
+      for( reco::Vertex::trackRef_iterator tk = pv.tracks_begin(); tk < pv.tracks_end(); ++tk) {
+	_trackrefs_PV.push_back(tk->key());
+      }
+    }
+    return _trackrefs_PV;
+  } else {
+    std::list<int> _trackrefs_PU;
+    // loop over the tracks making the PU vertices, and store the keys
+    _trackrefs_PU.clear();
+    if(vertices.size()>1) {
+      for(edm::View<reco::Vertex>::const_iterator PUvertex = vertices.begin()+1; PUvertex<vertices.end(); ++PUvertex) {
+	for( reco::Vertex::trackRef_iterator tk = PUvertex->tracks_begin(); tk < PUvertex->tracks_end(); ++tk) {
+	  _trackrefs_PU.push_back(tk->key());
+	}
+      }
+    }
+    return _trackrefs_PU;
+  }
+}
+
+// ------------ method called to produce the beta  ------------
+float
+VtxAssociatorsUtils::beta(pat::Jet const& jet,std::list<int> _trackrefs_PV){
+  // definition of beta: ratio of charged pT from first vertex over the sum of all the charged pT in jet. 
+  // by definition, 0 if there is no primary vertex.
+  if(_trackrefs_PV.empty()) return 0.;
+  // now loop over the jet charged constituents, and count pt
+  float ptsum = 0.;
+  float ptsumall = 0.;
+  const std::vector< reco::PFCandidatePtr > constituents = jet.getPFConstituents();
+  for(std::vector< reco::PFCandidatePtr >::const_iterator jetconst = constituents.begin(); jetconst < constituents.end(); ++jetconst) {
+    if((*jetconst)->trackRef().isNull()) continue;
+    std::list<int>::const_iterator found = find(_trackrefs_PV.begin(), _trackrefs_PV.end(), (*jetconst)->trackRef().key());
+    if(found!=_trackrefs_PV.end()) {
+      ptsum += (*jetconst)->pt();
+    }
+    ptsumall += (*jetconst)->pt();
+   
+  }
+  if(ptsumall<0.001) // non-null: 0.001 is much lower than any pt cut at reco level.
+    return -1.;
+  return ptsum/ptsumall;
+}
+
+// ------------ method called to produce the beta*  -----------
+float
+VtxAssociatorsUtils::betaStar(pat::Jet const& jet, std::list<int> _trackrefs_PU){
+  // defined as the ratio of charged pT coming from good PU vertices over the sum of all charged pT in jet. 
+  // by definition, 0 if there is no PU vertex.
+  if(_trackrefs_PU.empty()) return 0.;
+  // now loop over the jet charged constituents, and count pt
+  float ptsum = 0.;
+  float ptsumall = 0.;
+  const std::vector< reco::PFCandidatePtr > constituents = jet.getPFConstituents();
+  for(std::vector< reco::PFCandidatePtr >::const_iterator jetconst = constituents.begin(); jetconst < constituents.end(); ++jetconst) {
+    if((*jetconst)->trackRef().isNull()) continue;
+    std::list<int>::const_iterator found = find(_trackrefs_PU.begin(), _trackrefs_PU.end(), (*jetconst)->trackRef().key());   
+    if(found!=_trackrefs_PU.end()) ptsum += (*jetconst)->pt();
+    ptsumall += (*jetconst)->pt();
+  }
+  if(ptsumall<0.001) // non-null: 0.001 is much lower than any pt cut at reco level.
+    return -1.;
+  return ptsum/ptsumall;
 }

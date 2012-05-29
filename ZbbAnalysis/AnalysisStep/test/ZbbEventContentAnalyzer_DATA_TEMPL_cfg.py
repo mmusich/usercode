@@ -36,17 +36,9 @@ process.GlobalTag.globaltag  = 'GR_R_42_V20::All'     # for the DATA in 4_2_X
 #process.GlobalTag.globaltag = 'GR_R_39X_V5::All'  # for the DATA in 3_9_X
 #process.GlobalTag.globaltag = 'START39_V8::All'   # for MC
 
-###################################################################
-# Additional JP calibration sequence
-###################################################################
-process.GlobalTag.toGet = cms.VPSet(
-    cms.PSet(record = cms.string("BTagTrackProbability2DRcd"),
-             tag = cms.string("TrackProbabilityCalibration_2D_2011Data_v1_offline"),
-             connect = cms.untracked.string("frontier://FrontierProd/CMS_COND_31X_BTAU")),
-    cms.PSet(record = cms.string("BTagTrackProbability3DRcd"),
-             tag = cms.string("TrackProbabilityCalibration_3D_2011Data_v1_offline"),
-             connect = cms.untracked.string("frontier://FrontierProd/CMS_COND_31X_BTAU"))
-    )
+process.maxEvents = cms.untracked.PSet(
+    input = cms.untracked.int32(options.maxEvents)
+)
 
 ###################################################################
 # Trigger Filter 
@@ -135,47 +127,6 @@ process.JetCleaningSeq = cms.Sequence(
      )
     #+ process.jetFilter                  # eventually filter on candidate jets 
     )
-
-####################################################################
-# Define the b-tag squences for offline reconstruction 
-####################################################################
-process.btagging = cms.Sequence()
-
-process.load("RecoJets.JetAssociationProducers.ak5JTA_cff")
-process.MyJetTracksAssociatorAtVertex = cms.EDProducer("JetTracksAssociatorAtVertex",
-                                                       process.j2tParametersVX,
-                                                       jets = cms.InputTag("cleanPatJets")
-                                                       )
-
-process.load("RecoBTag.ImpactParameter.impactParameter_cff")
-process.MyImpactParameterTagInfos = process.impactParameterTagInfos.clone(
-    jetTracks = "MyJetTracksAssociatorAtVertex"
-    )
-
-# re-run track counting b-tagging algorithm he
-process.MyTrackCountingHighEffBJetTags = process.trackCountingHighEffBJetTags.clone(
-    tagInfos = cms.VInputTag(cms.InputTag("MyImpactParameterTagInfos"))
-    )
-
-# re-run track counting b-tagging algorithm hp
-process.MyTrackCountingHighPurBJetTags = process.trackCountingHighPurBJetTags.clone(
-    tagInfos = cms.VInputTag(cms.InputTag("MyImpactParameterTagInfos"))
-    )
-
-# re-run track counting b-tagging algorithm jp
-process.MyJetProbabilityBJetTags = process.jetProbabilityBJetTags.clone(
-    tagInfos = cms.VInputTag(cms.InputTag("MyImpactParameterTagInfos"))
-    )
-
-# re-run btagging sequence
-process.btagging += cms.Sequence(process.MyJetTracksAssociatorAtVertex*
-                                 (process.MyImpactParameterTagInfos *
-                                  (process.MyTrackCountingHighEffBJetTags +
-                                   process.MyTrackCountingHighPurBJetTags +
-                                   process.MyJetProbabilityBJetTags 
-                                   )
-                                  )
-                                 )
 
 ###################################################################
 # PAT basic distributions after cleaning
@@ -291,9 +242,6 @@ process.source = cms.Source("PoolSource",
                             fileNames = readFiles ,
                             duplicateCheckMode = cms.untracked.string('checkAllFilesOpened')
                             )
-process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(options.maxEvents)
-    )
 
 process.TFileService = cms.Service("TFileService",
                                    fileName = outputRootFileName
@@ -303,7 +251,6 @@ process.TFileService = cms.Service("TFileService",
 ###################################################################
 process.AnalysisSequence = cms.Sequence(process.analyzePat+
                                         process.JetCleaningSeq+
-                                        process.btagging*
                                         process.analyzePatAfterCleaning+
                                         process.finaldistros)
 
