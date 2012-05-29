@@ -75,8 +75,7 @@ struct btagjets_info
   Float_t ssvhediscr_bjets[nMaxBjets]; 
   Float_t ssvhpdiscr_bjets[nMaxBjets];
   Float_t csvdiscr_bjets[nMaxBjets];
-  Float_t jpdiscr_bjets[nMaxBjets];   
-  Float_t jpdiscr_fromtags_bjets[nMaxBjets];
+  Float_t jpdiscr_bjets[nMaxBjets];      
   Float_t tchediscr_bjets[nMaxBjets];
   Float_t tchpdiscr_bjets[nMaxBjets];
   Float_t svmass_bjets[nMaxBjets];
@@ -84,7 +83,7 @@ struct btagjets_info
   void reset(){
     for(Int_t i=0;i<nMaxBjets;i++){
       pT_bjets[i]=-10;eta_bjets[i]=-10;phi_bjets[i]=-10;
-      ssvhediscr_bjets[i]=-1; ssvhpdiscr_bjets[i]=-1; csvdiscr_bjets[i]=-1; jpdiscr_bjets[i]=-1; jpdiscr_fromtags_bjets[i]=-1; svmass_bjets[i]=-1; tchediscr_bjets[i]=-100; tchpdiscr_bjets[i]=-100;	   	   
+      ssvhediscr_bjets[i]=-1; ssvhpdiscr_bjets[i]=-1; csvdiscr_bjets[i]=-1; jpdiscr_bjets[i]=-1; svmass_bjets[i]=-1; tchediscr_bjets[i]=-100; tchpdiscr_bjets[i]=-100;	   	   
       trueflavour_bjets[i]=-10;
     }
   }  

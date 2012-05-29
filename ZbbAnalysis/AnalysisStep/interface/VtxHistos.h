@@ -27,8 +27,11 @@ class TProfile;
 using namespace ZbbUtils;
 
 class VtxHistos{
+  
+  AcceptanceCuts lCuts_;
   TString N_;
     
+  // lepton and vertex miscellanea
   TH1F* h_nvertices_;  
   TH1F* h_vx_;         
   TH1F* h_vy_;         
@@ -40,44 +43,78 @@ class VtxHistos{
   TH1F* h_l1v_dz_;     
   TH1F* h_l2v_dz_;     
   TH1F* h_distance_;   
-  TH1F* h_sig_;        
+  TH1F* h_sig_;   
+  
+  // jet vertex association figures of merit
   TH1F* h_ratio1_;     
   TH1F* h_ratio2_;     
   TH1F* h_ratio3_;   
   TH1F* h_ratio1b_;   
   TH1F* h_ratio2b_;   
-  TH1F* h_ratio3b_;   
-
-  TH1F* h_ratio2b_antiBtag_;   
-  TH1F* h_ratio2b_Btag_;   
+  TH1F* h_ratio3b_;  
+  TH1F* h_beta_;
+  TH1F* h_betastar_;
   
+  // ============== beta association =============
+  // beta in bins of PU and asking or not b-tag
+  TH1F* h_beta_antiBtag_; 
+  TH1F* h_beta_Btag_;     
+  
+  TH1F* h_beta_inPUbins[25];
+  TH1F* h_beta_inPUbins_antiBtag[25];
+  TH1F* h_beta_inPUbins_btag[25];
+ 
+  // if the jet fails beta association
+  TH1F* h_PtJetFailsbetaAssoc_;
+  TH1F* h_EtaJetFailsbetaAssoc_;
+  TH1F* h_PtJetFailsbetaAssoc_inPUbins[25];
+  TH1F* h_EtaJetFailsbetaAssoc_inPUbins[25];
+  
+  // beta correlation with jet kinematics
+  TH2F *h_betaVsJetEta_;
+  TH2F *h_betaVsJetPt_;
+  TH2F *h_betaVsJetEta_inPUbins[25];
+  TH2F *h_betaVsJetPt_inPUbins[25];
+  
+  // beta vs PU
+  TH2F     *h_beta_vsPU_;
+  TProfile *p_beta_vsPU_;
+
+  // ============== betastar association ==========
+  // betastar in bins of PU and asking or not b-tag
+  TH1F* h_betastar_antiBtag_; 
+  TH1F* h_betastar_Btag_;
+ 
+  TH1F* h_betastar_inPUbins[25];
+  TH1F* h_betastar_inPUbins_antiBtag[25];
+  TH1F* h_betastar_inPUbins_btag[25];
+
+  // if the jet fails betastar association
+  TH1F* h_PtJetFailsbetastarAssoc_;
+  TH1F* h_EtaJetFailsbetastarAssoc_;
+  TH1F* h_PtJetFailsbetastarAssoc_inPUbins[25];
+  TH1F* h_EtaJetFailsbetastarAssoc_inPUbins[25];
+  
+  // betastar correlation with jet kinematics
+  TH2F *h_betastarVsJetEta_;
+  TH2F *h_betastarVsJetPt_;
+  TH2F *h_betastarVsJetEta_inPUbins[25];
+  TH2F *h_betastarVsJetPt_inPUbins[25];
+
+  // beta star vs PU
+  TH2F     *h_betastar_vsPU_;
+  TProfile *p_betastar_vsPU_;
+
+  // just my check
   TH1F* h_Delta3DVtx0VtxSel_;     
   TH1F* h_Delta3DVtxSelVtxEvtCat_;
 
-  TH1F* h_ratio2b_inPUbins[25];
-  TH1F* h_ratio2b_inPUbins_antiBtag[25];
-  TH1F* h_ratio2b_inPUbins_btag[25];
-
   TH1F* h_goodevent_;  
- 
-  TH1F* h_PtJetFails2bAssoc_;
-  TH1F* h_EtaJetFails2bAssoc_;
-  
-  TH2F *h_ratio2bVsJetEta_;
-  TH2F *h_ratio2bVsJetPt_;
- 
-  TH1F *h_PtJetFails2bAssoc_inPUbins[25];
-  TH1F *h_EtaJetFails2bAssoc_inPUbins[25];
-  
-  TH2F *h_ratio2bVsJetEta_inPUbins[25];
-  TH2F *h_ratio2bVsJetPt_inPUbins[25];
 
-  TH2F     *h_ratio2b_vsPU_;
-  TProfile *p_ratio2b_vsPU_;
-  
   public:
   
-  VtxHistos(const TString& name) : 
+  VtxHistos(const TString& name, AcceptanceCuts theCuts) : 
+    lCuts_(theCuts),
     N_(name){}
 
   void book();

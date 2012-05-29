@@ -8,7 +8,6 @@
 #include "ZbbAnalysis/AnalysisStep/interface/ZbbTypeDefs.h"
 #include "ZbbAnalysis/AnalysisStep/interface/AcceptanceCuts.h"
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
-#include "DataFormats/BTauReco/interface/JetTag.h"
 
 #include <vector>
 #include <TH1D.h>
@@ -34,10 +33,8 @@ namespace ZbbUtils {
   Bool_t isGoodJet(const pat::Jet& jet, const reco::CompositeCandidate& ZCand,const AcceptanceCuts& lCuts);
   // check if jet is btagged
   Bool_t isBJet(const pat::Jet& jet,TString theAlgoWP);
-  // check if b-tagged jet is MC matched (via B-hadron)
+  // check if b-tagged jet is MC matched
   Bool_t isBJetMCMatched(const pat::Jet& jet,edm::Handle<reco::GenParticleCollection> genParticlesCollection,const reco::GenJetCollection & genJets);
-  // check if b-tagged jet has a given flavour (via parton-to genJet - to reco Jet matching)
-  Bool_t isJetPartonMatched(const pat::Jet& jet,edm::Handle<reco::GenParticleCollection> genParticlesCollection,const reco::GenJetCollection & genJets,Int_t thePdgId, Float_t dRMatch);
   // check if the Z->ll is MC matched
   Bool_t isZLLCandidateMCMatched(const reco::CompositeCandidate& ZCand,edm::Handle<reco::GenParticleCollection> genParticlesCollection);
   // check met in the event
@@ -48,6 +45,8 @@ namespace ZbbUtils {
   std::vector<reco::CompositeCandidate> sortCandidatesByDifference(std::vector<reco::CompositeCandidate> unsortedCands);
   // sort jets by pT
   std::vector<pat::Jet> sortJetsBypT(std::vector<pat::Jet> unsortedJets);
+  // sort generic objects by pT
+  template<class T> std::vector<T> sortObjectsBypT(std::vector<T> const& unsortedObj);
 
   //Presel muon cut
   Bool_t isPreselMu(const pat::Muon& muon, const reco::Vertex& vertex,const AcceptanceCuts& lCuts);
@@ -91,9 +90,8 @@ namespace ZbbUtils {
 
   // get the parent code of a GenParticle
   int getParentCode(const reco::GenParticle* genLep);
-
-  // get the discriminator value not from the patJet but from a a JetTag Collection
-  double getDiscriminatorFromTags(const reco::JetTagCollection & bTags, const pat::Jet& jet);
-
+  
+  // function to get the distribution of true expected vertices (for PU reweighting)
+  std::vector<float> getPU(Bool_t getData);
 }
 #endif

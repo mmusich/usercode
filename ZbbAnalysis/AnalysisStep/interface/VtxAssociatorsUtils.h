@@ -7,9 +7,12 @@
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/PatCandidates/interface/MET.h"
 #include "ZbbAnalysis/AnalysisStep/interface/EventCategory.h"
+#include "DataFormats/VertexReco/interface/VertexFwd.h"
+#include "DataFormats/VertexReco/interface/Vertex.h"
 
 #include <TString.h>
 #include <vector>
+#include <list>
 
 namespace VtxAssociatorsUtils {
 
@@ -22,12 +25,18 @@ namespace VtxAssociatorsUtils {
   Bool_t tightzVertexEle(const pat::Electron& electron, Double_t cut,const reco::Vertex& vertex);
   
   Bool_t jetVertex(const reco::Vertex& vertex, const pat::Jet& jet, Int_t algo, Double_t sigmaCut, Double_t fraction);
-
+  
   Bool_t jetVertex_1 (const reco::Vertex& vertex, const pat::Jet& jet, Double_t sigcut, Double_t etcut);
   Bool_t jetVertex_2 (const reco::Vertex& vertex, const pat::Jet& jet, Double_t sigcut, Double_t ptcut);
   Bool_t jetVertex_3 (const reco::Vertex& vertex, const pat::Jet& jet, Double_t sigcut, Double_t etcut);
   Bool_t jetVertex_2b(const reco::Vertex& vertex, const pat::Jet& jet, Double_t ptcut);
   Bool_t muVertex_2b (const reco::Vertex& vertex, const pat::Muon& muon);
   Bool_t eleVertex_2b(const reco::Vertex& vertex, const pat::Electron& electron);
+
+  std::map<TString,Double_t>  calculateJetVertexAssociation(const pat::Jet& jet, reco::Vertex vertex);
+  std::list<int> buildTrackRefs(edm::View<reco::Vertex> vertices,bool isPU);
+  float beta(pat::Jet const& jet,std::list<int> _trackrefs_PV);
+  float betaStar(pat::Jet const& jet, std::list<int> _trackrefs_PU);
+  
 }
 #endif
