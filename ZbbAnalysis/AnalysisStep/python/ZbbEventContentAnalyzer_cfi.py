@@ -2,7 +2,7 @@ import FWCore.ParameterSet.Config as cms
 
 eventcontentanalyze = cms.EDAnalyzer("ZbbEventContentAnalyzer",
                                      OutfileName = cms.string("interestingevents.txt"),
-                                     doAllThePlotting = cms.bool(False),                                # true will make the plots for all categories
+                                     doAllThePlotting = cms.bool(False),                              # true will make the plots for all categories
                                      isMC        = cms.bool(False),                                   # MC switch
                                      applyMCweight = cms.bool(True),                                  # apply mc weight for SHERPA/ aMC@NLO
                                      isMCatNLO     = cms.bool(False),                                 # enables rule for NLO reweighting 
@@ -16,6 +16,8 @@ eventcontentanalyze = cms.EDAnalyzer("ZbbEventContentAnalyzer",
                                      jetPtCut    = cms.double(25),
                                      muonPtCut   = cms.double(20),
                                      elePtCut    = cms.double(25),
+                                     betaCut     = cms.double(0.15),
+                                     betaStarCut = cms.double(0.85),
                                      genPSrc     = cms.untracked.InputTag("genParticles"),            # MC truth
                                      genJetSrc   = cms.untracked.InputTag("patJets:genJets"), 
                                      electronSrc = cms.untracked.InputTag("patElectrons"),            # electrons
