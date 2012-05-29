@@ -1,5 +1,6 @@
 #include <utility>
 #include <map>
+#include <list>
 #include <string>
 #include <stdio.h>
 #include <iostream>
@@ -118,7 +119,7 @@ private:
   //defining acceptance cuts
   AcceptanceCuts lCuts_;
   bool unLockDefaults_; // to unlock default cuts
-  double jetEtaCut_,muonEtaCut_,eleEtaCut_,jetPtCut_,muonPtCut_,elePtCut_;
+  double jetEtaCut_,muonEtaCut_,eleEtaCut_,jetPtCut_,muonPtCut_,elePtCut_,betaCut_,betaStarCut_;
 
   //debug switch
   bool debug_;
@@ -303,6 +304,8 @@ ZbbEventContentAnalyzer::ZbbEventContentAnalyzer(const edm::ParameterSet& iConfi
   jetPtCut_(iConfig.getParameter<double>("jetPtCut")),
   muonPtCut_(iConfig.getParameter<double>("muonPtCut")),
   elePtCut_(iConfig.getParameter<double>("elePtCut")),
+  betaCut_(iConfig.getParameter<double>("betaCut")),
+  betaStarCut_(iConfig.getParameter<double>("betaStarCut")), 
   debug_(iConfig.getParameter<bool>("Debug")),  
   andOr_(iConfig.getParameter<bool>("andOr")),
   genPSrc_(iConfig.getUntrackedParameter<edm::InputTag>("genPSrc")),
@@ -371,7 +374,7 @@ ZbbEventContentAnalyzer::ZbbEventContentAnalyzer(const edm::ParameterSet& iConfi
   
   if(unLockDefaults_){
     lCuts_.clear();
-    lCuts_.set(jetEtaCut_,jetPtCut_,muonEtaCut_,muonPtCut_,eleEtaCut_,elePtCut_);
+    lCuts_.set(jetEtaCut_,jetPtCut_,muonEtaCut_,muonPtCut_,eleEtaCut_,elePtCut_,betaCut_,betaStarCut_);
   }
 
   // Preparing the names of trend histograms
@@ -955,14 +958,21 @@ ZbbEventContentAnalyzer::beginJob()
 
   // directly taken from UserCode/Torino/ZZAnalysis/plugins/ZZAnalyzer.cc
   if ( ismc_ ) {
-    std::vector<float> dataPU(36);
-    std::vector<float> MCPU(36);
+    
+    //std::vector<float> dataPU(36);
+    //std::vector<float> MCPU(36);
+    
     // for EPS analysis from ZZ analysis
     //copy(data_EPS11, data_EPS11+25, dataPU.begin());
     //copy(PoissonOneXDist, PoissonOneXDist+25, MCPU.begin());
+
     // for 2/fb analysis from https://twiki.cern.ch/twiki/bin/view/CMS/VectorBosonPlusHeavyFlavor#Pile_up_reweighting
-    copy(data_2011_to_run173692_v2,data_2011_to_run173692_v2+36,dataPU.begin());
-    copy(MC_summer11_PUS4,MC_summer11_PUS4+36,MCPU.begin());
+    //copy(data_2011_to_run173692_v2,data_2011_to_run173692_v2+36,dataPU.begin());
+    //copy(MC_summer11_PUS4,MC_summer11_PUS4+36,MCPU.begin());
+
+    std::vector<float> dataPU = ZbbUtils::getPU(true);
+    std::vector<float> MCPU   = ZbbUtils::getPU(false);
+
     theLumiWeights_ = new edm::LumiReWeighting(MCPU, dataPU);
   }
 
@@ -1287,17 +1297,17 @@ ZbbEventContentAnalyzer::beginJob()
 
   // vertex histograms 
   if( doAllThePlotting_){
-    VtxHistos_evcat5 = new VtxHistos("ZLL");
+    VtxHistos_evcat5 = new VtxHistos("ZLL",lCuts_);
     VtxHistos_evcat5->book();
     
-    VtxHistos_evcat6 = new VtxHistos("GoodJet");
+    VtxHistos_evcat6 = new VtxHistos("GoodJet",lCuts_);
     VtxHistos_evcat6->book();
     
-    VtxHistos_evcat7 = new VtxHistos("GoodJetAndVertexAssoc");
+    VtxHistos_evcat7 = new VtxHistos("GoodJetAndVertexAssoc",lCuts_);
     VtxHistos_evcat7->book();
   }
   
-  VtxHistos_evcat8 = new VtxHistos("JetBTag");
+  VtxHistos_evcat8 = new VtxHistos("JetBTag",lCuts_);
   VtxHistos_evcat8->book();
   
   //++++++++++++++++++++++++++++++++++++
@@ -1563,6 +1573,10 @@ ZbbEventContentAnalyzer::setEventCategory(const edm::Event& iEvent, const edm::E
   iEvent.getByLabel(theVertexSrc_, vertexCollection);
   edm::View<reco::Vertex> vertices = *(vertexCollection.product());
 
+  // lists of track refs necessary for PU/PV beta/betastar
+  std::list<int> trackrefs_PV = VtxAssociatorsUtils::buildTrackRefs(vertices,false);
+  std::list<int> trackrefs_PU = VtxAssociatorsUtils::buildTrackRefs(vertices,true);
+
   // get Z vertexes collection
   edm::Handle<edm::View<reco::Vertex> > ZvertexCollection;
   iEvent.getByLabel(theZVertexSrc_, ZvertexCollection);
@@ -1773,7 +1787,8 @@ ZbbEventContentAnalyzer::setEventCategory(const edm::Event& iEvent, const edm::E
     for(edm::View<pat::Jet>::const_iterator jetcand=jets->begin(); jetcand!=jets->end(); ++jetcand){
       if(ZbbUtils::isJetIdOk((*jetcand),jetcategory) && ZbbUtils::isGoodJet((*jetcand),iEvtCategory.bestZcandidate_,lCuts_)){
 	nJets++;
-	if(VtxAssociatorsUtils::jetVertex(iEvtCategory.theZvertex_,(*jetcand),4,4,0.15)){
+	// if(VtxAssociatorsUtils::jetVertex(iEvtCategory.theZvertex_,(*jetcand),4,4,0.15)){
+	if(VtxAssociatorsUtils::beta(*jetcand,trackrefs_PV)<lCuts_.betaCut_){
 	  nAssocJets++;  
 	}
 	if(ZbbUtils::isBJet((*jetcand),bTagAlgoWP_)){
@@ -1783,7 +1798,7 @@ ZbbEventContentAnalyzer::setEventCategory(const edm::Event& iEvent, const edm::E
 	    if(ZbbUtils::isBJetMCMatched((*jetcand),genParticlesCollection,genJets)){
 	      nBMcMatchedJets++; 
 	    }
-	  } 
+	  }// if is mc makes the matching  
 	} // close if b-tag
       } // close if good jet
     } // close the for on jets

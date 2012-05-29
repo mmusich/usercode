@@ -13,7 +13,7 @@
 //
 // Original Author:  Marco Musich,40 2-A16,+41227671519,
 //         Created:  Tue Nov 22 10:30:38 CET 2011
-// $Id: ZbbAcceptanceCalculator.cc,v 1.4 2011/12/07 09:49:44 emiglior Exp $
+// $Id: ZbbAcceptanceCalculator.cc,v 1.10 2012/05/14 16:04:34 musich Exp $
 //
 //
 
@@ -59,7 +59,6 @@
 #include "ZbbAnalysis/AnalysisStep/interface/ZbbUtils.h"
 #include "ZbbAnalysis/AnalysisStep/interface/AcceptanceCuts.h"
 #include "ZbbAnalysis/AnalysisStep/interface/ZbbTypeDefs.h"
-//#include "ZbbAnalysis/AnalysisStep/interface/PU.h"
 #include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h" 
 #include "Math/VectorUtil.h"
 #include "TLorentzVector.h"
@@ -82,12 +81,11 @@ struct EventProperties
 {
   
   Bool_t is_right_flavour_,is_gen_Z_yes_,is_gen_j_yes_,is_gen_b_yes_,is_gen_Zkin_yes_,is_rec_Zkin_yes_,is_rec_b_yes_,is_rec_j_yes_;
-  Bool_t is_rec_lep_idiso_yes_,is_rec_b_HE_yes_,is_rec_b_HP_yes_;            
+  Bool_t is_rec_lep_idiso_yes_,is_rec_b_HE_yes_,is_rec_b_HP_yes_, is_rec_b_CSVM_yes_,is_rec_b_CSVT_yes_;            
   Int_t nBFlavourJets_ , nOkBFlavouredJets_,nRecoJets_,nOkRecoJets_;
-  Float_t mLL_,evtWeight_,evtWeightSq_,lepIdIsoWeight_,lepIdIsoWeightSq_,bTagWeightHE_,bTagWeightHESq_,bTagWeightHP_,bTagWeightHPSq_;
+  Float_t mLL_,evtWeight_,evtWeightSq_,lepIdIsoWeight_,lepIdIsoWeightSq_,bTagWeightHE_,bTagWeightHESq_,bTagWeightHP_,bTagWeightHPSq_,bTagWeightCSVM_,bTagWeightCSVMSq_,bTagWeightCSVT_,bTagWeightCSVTSq_;
 								
   EventProperties() {
-    // std::cout<<"Event properties exist!"<<std::endl;
     this->reset();
   }
 
@@ -105,6 +103,8 @@ struct EventProperties
     is_rec_lep_idiso_yes_=false;
     is_rec_b_HE_yes_=false;
     is_rec_b_HP_yes_=false;
+    is_rec_b_CSVM_yes_=false;
+    is_rec_b_CSVT_yes_=false;
 
     nBFlavourJets_=0; 
     nOkBFlavouredJets_=0;
@@ -119,27 +119,81 @@ struct EventProperties
     bTagWeightHESq_=1;
     bTagWeightHP_=1;
     bTagWeightHPSq_=1;
-
-    //  if(!is_gen_Z_yes_)    std::cout<<"is_gen_Z_yes_    = false"<<std::endl;
-    //  if(!is_gen_b_yes_)    std::cout<<"is_gen_b_yes_    = false"<<std::endl;
-    //  if(!is_gen_Zkin_yes_) std::cout<<"is_gen_Zkin_yes_ = false"<<std::endl;
-    //  if(!is_rec_Zkin_yes_) std::cout<<"is_rec_Zkin_yes_ = false"<<std::endl;
-    //  if(!is_rec_b_yes_)    std::cout<<"is_rec_b_yes_    = false"<<std::endl;
+    bTagWeightCSVM_=1;
+    bTagWeightCSVMSq_=1;
+    bTagWeightCSVT_=1;
+    bTagWeightCSVTSq_=1;
+   
   }
 
   // getter methods
-  Bool_t isRightFlavour() const {return is_right_flavour_;}
-  Bool_t isGenZyes() const {return is_gen_Z_yes_;}
-  Bool_t isGenbyes() const {return is_gen_b_yes_;}
-  Bool_t isGenjetyes()    const {return is_gen_j_yes_;}
-  Bool_t isGen_Zkin_yes() const {return is_gen_Zkin_yes_;}
-  Bool_t isRec_Zkin_yes() const {return is_rec_Zkin_yes_;}
-  Bool_t isRecjet_yes()   const {return is_rec_j_yes_;}
-  Bool_t isRecb_yes()    const {return is_rec_b_yes_;}
+  Bool_t isRightFlavour()    const {return is_right_flavour_;}
+  Bool_t isGenZyes()         const {return is_gen_Z_yes_;}
+  Bool_t isGenbyes()         const {return is_gen_b_yes_;}
+  Bool_t isGenjetyes()       const {return is_gen_j_yes_;}
+  Bool_t isGen_Zkin_yes()    const {return is_gen_Zkin_yes_;}
+  Bool_t isRec_Zkin_yes()    const {return is_rec_Zkin_yes_;}
+  Bool_t isRecjet_yes()      const {return is_rec_j_yes_;}
+  Bool_t isRecb_yes()        const {return is_rec_b_yes_;}
   Bool_t isRecLepIdIso_yes() const {return is_rec_lep_idiso_yes_;}
-  Bool_t isRecbHE_yes() const {return is_rec_b_HE_yes_;}
-  Bool_t isRecbHP_yes() const {return is_rec_b_HP_yes_;}
+  Bool_t isRecbHE_yes()      const {return is_rec_b_HE_yes_;}
+  Bool_t isRecbHP_yes()      const {return is_rec_b_HP_yes_;}
+  Bool_t isRecbCSVM_yes()    const {return is_rec_b_CSVM_yes_;}
+  Bool_t isRecbCSVT_yes()    const {return is_rec_b_CSVT_yes_;}
 
+};
+
+//---------------------------------------------------------------------------------------------
+// struct for event efficiency calculation
+
+struct myEff
+{
+
+  // in variables
+  Double_t sumW_Num_,sumW_Den_,sumW2_Num_,sumW2_Den_;
+  // out variables
+  Double_t eff_, errCP_, errBin_, errImp_;
+
+  myEff(Double_t sumW_Num,Double_t sumW_Den,Double_t sumW2_Num,Double_t sumW2_Den){
+
+    // reset
+    this->reset();
+
+    // initialization
+    sumW_Num_ =sumW_Num;
+    sumW_Den_ =sumW_Den;
+    sumW2_Num_=sumW2_Num; 
+    sumW2_Den_=sumW2_Den;
+
+    // calculation
+    if(sumW_Den_==0 || sumW_Num_>=sumW_Den_){
+      std::cout<<"myEff::myEff("<<sumW_Num<<","<< sumW_Den <<","<<sumW2_Num <<","<< sumW2_Den <<") : WARNING --- Something wrong is going on ---"<<std::endl;
+      std::cout<<"WARNING --- Something wrong is going on ---"<<std::endl;
+    } else {
+      this->calculate();
+    }
+  }
+  
+  void reset(){
+    sumW_Num_=-1. ;
+    sumW_Den_=-1. ;
+    sumW2_Num_=-999.; 
+    sumW2_Den_=-999.; 
+    eff_=0.;errCP_=0.;errBin_=0.;errImp_=0.;    
+  }
+
+  void calculate(){
+       
+    eff_   = sumW_Num_/sumW_Den_; 
+    
+    TEfficiency theEff;
+    errCP_  = theEff.ClopperPearson(sumW_Den_+0.5,sumW_Num_+0.5,0.683,1)-eff_;
+    errBin_ = TMath::Sqrt((eff_*(1-eff_))/sumW_Den_);
+    
+    if(sumW2_Num_!=0 && sumW2_Den_!=0){
+      errImp_ = TMath::Sqrt(sumW2_Num_*(sumW_Den_-sumW_Num_)*(sumW_Den_-sumW_Num_)+(sumW2_Den_-sumW2_Num_)*sumW_Num_*sumW_Num_)/(sumW_Den_*sumW_Den_);
+    }
+  }
 };
 
 //
@@ -173,6 +227,7 @@ class ZbbAcceptanceCalculator : public edm::EDAnalyzer {
       template<class T, class U>  bool TemplDRCompare(std::pair<T,U> p1, std::pair<T,U> p2);
       virtual bool DRCompare(std::pair<const pat::Jet*,const reco::GenJet*>  p1, std::pair<const pat::Jet*,const reco::GenJet*>  p2);					    
       virtual std::vector<reco::CompositeCandidate> sortCandidatesByDifference(std::vector<reco::CompositeCandidate> unsortedCands);
+      virtual bool isHadron(const reco::Candidate &c); 
       virtual bool hasBottom(const reco::Candidate &c);
       virtual bool hasBottomIC(const reco::Candidate &c);
       virtual bool hasCharm(const reco::Candidate &c); 
@@ -204,6 +259,7 @@ class ZbbAcceptanceCalculator : public edm::EDAnalyzer {
   Double_t dRLeptons_;    
   Double_t dRJets_; 
   Double_t theBparticlePtCut_;
+  Double_t betaCut_,betaStarCut_;
 
   //defining acceptance cuts
   AcceptanceCuts lCuts_;
@@ -225,12 +281,19 @@ class ZbbAcceptanceCalculator : public edm::EDAnalyzer {
   // vpsets for effb (MC) maps	 
   edm::VParameterSet  effbcMC_SSVHE;
   edm::VParameterSet  effbcMC_SSVHP;
+  edm::VParameterSet  effbcMC_CSVM;
+  edm::VParameterSet  effbcMC_CSVT;
+
   // associative map for b-tag efficiency
   std::map<EffMCpair,std::vector<double> > theAssociativeMapEffbMCSSVHE_;
   std::map<EffMCpair,std::vector<double> > theAssociativeMapEffbMCSSVHP_;
   std::map<EffMCpair,std::vector<double> > theAssociativeMapEffcMCSSVHE_;
   std::map<EffMCpair,std::vector<double> > theAssociativeMapEffcMCSSVHP_;
-  
+  std::map<EffMCpair,std::vector<double> > theAssociativeMapEffbMCCSVM_;
+  std::map<EffMCpair,std::vector<double> > theAssociativeMapEffbMCCSVT_;
+  std::map<EffMCpair,std::vector<double> > theAssociativeMapEffcMCCSVM_;
+  std::map<EffMCpair,std::vector<double> > theAssociativeMapEffcMCCSVT_;
+
   // unweighted counters
   EventProperties myBools_;
 
@@ -243,6 +306,8 @@ class ZbbAcceptanceCalculator : public edm::EDAnalyzer {
   Double_t Epsilon_l_Num, Epsilon_l_Den, Epsilon_l_Num_alljets, Epsilon_l_Den_alljets;
   Double_t Epsilon_bHE_Num, Epsilon_bHE_Den; 
   Double_t Epsilon_bHP_Num, Epsilon_bHP_Den;  
+  Double_t Epsilon_bCSVM_Num, Epsilon_bCSVM_Den; 
+  Double_t Epsilon_bCSVT_Num, Epsilon_bCSVT_Den; 
 
   // weighted counters
   Double_t sumW_tot_events,sumW_right_flavour;
@@ -253,6 +318,8 @@ class ZbbAcceptanceCalculator : public edm::EDAnalyzer {
   Double_t sumW_Epsilon_l_Num, sumW_Epsilon_l_Den, sumW_Epsilon_l_Num_alljets, sumW_Epsilon_l_Den_alljets;
   Double_t sumW_Epsilon_bHE_Num, sumW_Epsilon_bHE_Den; 
   Double_t sumW_Epsilon_bHP_Num, sumW_Epsilon_bHP_Den;  
+  Double_t sumW_Epsilon_bCSVM_Num, sumW_Epsilon_bCSVM_Den; 
+  Double_t sumW_Epsilon_bCSVT_Num, sumW_Epsilon_bCSVT_Den;
 
   // weighted square counters
   Double_t sumW2_tot_events,sumW2_right_flavour;
@@ -263,7 +330,9 @@ class ZbbAcceptanceCalculator : public edm::EDAnalyzer {
   Double_t sumW2_Epsilon_l_Num, sumW2_Epsilon_l_Den, sumW2_Epsilon_l_Num_alljets, sumW2_Epsilon_l_Den_alljets;
   Double_t sumW2_Epsilon_bHE_Num, sumW2_Epsilon_bHE_Den;
   Double_t sumW2_Epsilon_bHP_Num, sumW2_Epsilon_bHP_Den;  
-
+  Double_t sumW2_Epsilon_bCSVM_Num, sumW2_Epsilon_bCSVM_Den; 
+  Double_t sumW2_Epsilon_bCSVT_Num, sumW2_Epsilon_bCSVT_Den;
+  
   // flavour selection
   bool isZEE, isZMM, isZTT;
   
@@ -338,6 +407,8 @@ ZbbAcceptanceCalculator::ZbbAcceptanceCalculator(const edm::ParameterSet& iConfi
   dRLeptons_         =iConfig.getParameter<double>("dRLeptonMatch");
   dRJets_            =iConfig.getParameter<double>("dRJetMatch");
   theBparticlePtCut_ =iConfig.getParameter<double>("BparticlePtCut");
+  betaCut_           =iConfig.getParameter<double>("betaCut");
+  betaStarCut_       =iConfig.getParameter<double>("betaStarCut"); 
 
   if(!unLockDefaults_){
     minMassCut_= 60.;    
@@ -350,6 +421,8 @@ ZbbAcceptanceCalculator::ZbbAcceptanceCalculator(const edm::ParameterSet& iConfi
     elePtCut_  = 25.;      
     dRLeptons_ = 0.3; 
     dRJets_    = 0.5;   
+    betaCut_   = 0.15;
+    betaStarCut_ = 0.85;
   }
 
   decay_chain_string_      = iConfig.getUntrackedParameter<std::string>("DecayChainSelection");
@@ -361,6 +434,9 @@ ZbbAcceptanceCalculator::ZbbAcceptanceCalculator(const edm::ParameterSet& iConfi
   partonLevel_             = iConfig.getUntrackedParameter<bool>("PartonLevel", false);
   effbcMC_SSVHE            = iConfig.getParameter<edm::VParameterSet>("EffbcMCSSVHE");
   effbcMC_SSVHP            = iConfig.getParameter<edm::VParameterSet>("EffbcMCSSVHP");
+  effbcMC_CSVM             = iConfig.getParameter<edm::VParameterSet>("EffbcMCCSVM");
+  effbcMC_CSVT             = iConfig.getParameter<edm::VParameterSet>("EffbcMCCSVT");
+
 
   // unweighted counters
   N_tot_events=0.; N_right_flavour=0.;
@@ -371,6 +447,8 @@ ZbbAcceptanceCalculator::ZbbAcceptanceCalculator(const edm::ParameterSet& iConfi
   Epsilon_l_Num=0; Epsilon_l_Den=0; Epsilon_l_Num_alljets=0; Epsilon_l_Den_alljets=0;
   Epsilon_bHE_Num=0; Epsilon_bHE_Den=0;
   Epsilon_bHP_Num=0; Epsilon_bHP_Den=0;
+  Epsilon_bCSVM_Num=0; Epsilon_bCSVM_Den=0;
+  Epsilon_bCSVT_Num=0; Epsilon_bCSVT_Den=0;
 
   // weighted counters
   sumW_tot_events=0.; sumW_right_flavour=0.;
@@ -381,6 +459,8 @@ ZbbAcceptanceCalculator::ZbbAcceptanceCalculator(const edm::ParameterSet& iConfi
   sumW_Epsilon_l_Num=0; sumW_Epsilon_l_Den=0; sumW_Epsilon_l_Num_alljets=0; sumW_Epsilon_l_Den_alljets=0;
   sumW_Epsilon_bHE_Num=0; sumW_Epsilon_bHE_Den=0;
   sumW_Epsilon_bHP_Num=0; sumW_Epsilon_bHP_Den=0;
+  sumW_Epsilon_bCSVM_Num=0; sumW_Epsilon_bCSVM_Den=0;
+  sumW_Epsilon_bCSVT_Num=0; sumW_Epsilon_bCSVT_Den=0;
 
   // squared weighted counters
   sumW2_tot_events=0.; sumW2_right_flavour=0.;
@@ -391,6 +471,8 @@ ZbbAcceptanceCalculator::ZbbAcceptanceCalculator(const edm::ParameterSet& iConfi
   sumW2_Epsilon_l_Num=0; sumW2_Epsilon_l_Den=0; sumW2_Epsilon_l_Num_alljets=0; sumW2_Epsilon_l_Den_alljets=0;
   sumW2_Epsilon_bHE_Num=0; sumW2_Epsilon_bHE_Den=0;
   sumW2_Epsilon_bHP_Num=0; sumW2_Epsilon_bHP_Den=0;
+  sumW2_Epsilon_bCSVM_Num=0; sumW2_Epsilon_bCSVM_Den=0;
+  sumW2_Epsilon_bCSVM_Num=0; sumW2_Epsilon_bCSVM_Den=0;
 
   //initialize the lumiweight
   theLumiWeights_=0;
@@ -446,12 +528,42 @@ ZbbAcceptanceCalculator::ZbbAcceptanceCalculator(const edm::ParameterSet& iConfi
     theAssociativeMapEffcMCSSVHP_[theEffcSSVHP_]=thePtRange_; 
   }
   
+  // b-tag MC efficiency CSVM tagger
+  EffMCpair theEffbCSVM_;
+  EffMCpair theEffcCSVM_;
+  for(edm::VParameterSet::const_iterator pset =  effbcMC_CSVM.begin(); pset != effbcMC_CSVM.end(); pset++){
+    std::vector<double> thePtRange_ = pset->getUntrackedParameter<std::vector<double> >("ptrange");
+    double theEffb_barrel_  = pset->getUntrackedParameter<double>("effb_barrel");
+    double theEffb_forward_ = pset->getUntrackedParameter<double>("effb_forward");
+    double theEffc_barrel_  = pset->getUntrackedParameter<double>("effc_barrel");
+    double theEffc_forward_ = pset->getUntrackedParameter<double>("effc_forward");
+    theEffbCSVM_ = std::make_pair(theEffb_barrel_,theEffb_forward_);
+    theEffcCSVM_ = std::make_pair(theEffc_barrel_,theEffc_forward_);
+    theAssociativeMapEffbMCCSVM_[theEffbCSVM_]=thePtRange_; 
+    theAssociativeMapEffcMCCSVM_[theEffcCSVM_]=thePtRange_; 
+  }
+
+  // b-tag MC efficiency CSVT tagger
+  EffMCpair theEffbCSVT_;
+  EffMCpair theEffcCSVT_;
+  for(edm::VParameterSet::const_iterator pset =  effbcMC_CSVT.begin(); pset != effbcMC_CSVT.end(); pset++){
+    std::vector<double> thePtRange_ = pset->getUntrackedParameter<std::vector<double> >("ptrange");
+    double theEffb_barrel_  = pset->getUntrackedParameter<double>("effb_barrel");
+    double theEffb_forward_ = pset->getUntrackedParameter<double>("effb_forward");
+    double theEffc_barrel_  = pset->getUntrackedParameter<double>("effc_barrel");
+    double theEffc_forward_ = pset->getUntrackedParameter<double>("effc_forward");
+    theEffbCSVT_ = std::make_pair(theEffb_barrel_,theEffb_forward_);
+    theEffcCSVT_ = std::make_pair(theEffc_barrel_,theEffc_forward_);
+    theAssociativeMapEffbMCCSVT_[theEffbCSVT_]=thePtRange_; 
+    theAssociativeMapEffcMCCSVT_[theEffcCSVT_]=thePtRange_; 
+  }
+
   //setting the offline cuts
   lCuts_.setDefault();
   
   if(unLockDefaults_){
     lCuts_.clear();
-    lCuts_.set(jetEtaCut_,jetPtCut_,muonEtaCut_,muonPtCut_,eleEtaCut_,elePtCut_);
+    lCuts_.set(jetEtaCut_,jetPtCut_,muonEtaCut_,muonPtCut_,eleEtaCut_,elePtCut_,betaCut_,betaStarCut_);
   }
 }
 
@@ -537,6 +649,8 @@ ZbbAcceptanceCalculator::analyze(const edm::Event& iEvent, const edm::EventSetup
   double wLepIdIso(1.);
   double wBtagHE(1.);
   double wBtagHP(1.);
+  double wBtagCSVM(1.);
+  double wBtagCSVT(1.);
 
   myBools_.reset();
 
@@ -630,6 +744,7 @@ ZbbAcceptanceCalculator::analyze(const edm::Event& iEvent, const edm::EventSetup
       // for each MC particle in turn  
 
       Bool_t foundAb(false);
+      Bool_t foundAparton(false);
       double dR_BpartBjet_(9999.);
 
       for (unsigned i = 0; i < mcparts.size (); i++) {
@@ -637,10 +752,13 @@ ZbbAcceptanceCalculator::analyze(const edm::Event& iEvent, const edm::EventSetup
 	if ( mcpart->pdgId() == -5 || mcpart->pdgId() == 5 ) {
 	  dR_BpartBjet_ = ROOT::Math::VectorUtil::DeltaR(genjet_it->momentum(), mcpart->momentum()); 
 	  foundAb=true;
+	  foundAparton=true;
 	  if(verbose_) std::cout<< "b parton found" <<std::endl;	  
 	  h_bparticlePt_->Fill(mcpart->pt(),wMC);
 	  h_bparticleEta_->Fill(mcpart->eta(),wMC);
 	  h_bparticleEnergyFraction_->Fill(mcpart->pt()/genjet_it->pt(),wMC); 
+	} else if ( fabs(mcpart->pdgId())== 21 || fabs(mcpart->pdgId())<= 6){
+	  foundAparton=true;
 	}
       }
 
@@ -653,6 +771,10 @@ ZbbAcceptanceCalculator::analyze(const edm::Event& iEvent, const edm::EventSetup
 	h_bjet_GenMass_->Fill(genjet_it->mass(),wMC);
 	the_b_flavour_genJets.push_back(&(*genjet_it));
       }
+      
+      if(foundAparton){
+	the_any_flavour_genJets.push_back(&(*genjet_it));
+      }
     }
   } else {
     // hadron level matching
@@ -663,7 +785,9 @@ ZbbAcceptanceCalculator::analyze(const edm::Event& iEvent, const edm::EventSetup
       
       // if b-hadrons
       if( hasBottomIC(*p) ){ 
-	
+
+	if(verbose_) std::cout<<"b hadron found!"<<std::endl;
+
 	// checks if all daughter are bottomless
 	Bool_t hasBottomedDaughter = false;
 	for(UInt_t i=0; i<p->numberOfDaughters(); i++){
@@ -672,6 +796,8 @@ ZbbAcceptanceCalculator::analyze(const edm::Event& iEvent, const edm::EventSetup
 	
 	// if last-bhadron
 	if(!hasBottomedDaughter &&  p->pt() > theBparticlePtCut_){
+	  
+	  if(verbose_) std::cout<<"good b hadron found!"<<std::endl;
 	  
 	  h_bparticlePt_->Fill(p->pt(),wMC);
 	  h_bparticleEta_->Fill(p->eta(),wMC);
@@ -716,12 +842,41 @@ ZbbAcceptanceCalculator::analyze(const edm::Event& iEvent, const edm::EventSetup
 	  } // pushes back vector of b-flavoured genJets	
 	} // if last b-hadron 
       } // if bottomed particle
+
+      if(isHadron(*p)){
+
+	math::XYZTLorentzVectorD p4GEN(p->px(),p->py(),p->pz(),p->energy());
+	  
+	// indices for b-hadron association
+	std::pair<int,double>  GenGenAssociation = std::make_pair(-1,9999.);
+	std::pair<const reco::GenJet*,double> GenJetAssociation;
+	if(genJets.size()>0) GenJetAssociation = std::make_pair(&genJets.at(0),9999.);
+	  
+	double minDeltaRGenGen(9999.);
+	int i(0);
+	
+	for(std::vector<reco::GenJet>::const_iterator genjet_it=genJets.begin(); genjet_it!=genJets.end(); ++genjet_it){ 
+	  double dR_tmp = ROOT::Math::VectorUtil::DeltaR(genjet_it->momentum(),p4GEN.Vect()); 
+	  if( dR_tmp<minDeltaRGenGen ){
+	    minDeltaRGenGen = dR_tmp;
+	    GenGenAssociation.first  = i;
+	    GenGenAssociation.second = minDeltaRGenGen;
+	    
+	    GenJetAssociation.first  = &(*genjet_it);
+	    GenJetAssociation.second = minDeltaRGenGen;
+	  } // end if minimum distance gen jet-parton
+	  i++;
+	}// ends loop on gen jets
+	
+	if( GenGenAssociation.first != -1 ){
+	  if(GenJetAssociation.second<dRJets_ ) { 
+	    the_any_flavour_genJets.push_back(GenJetAssociation.first);
+	  }
+	} // pushes back vector of any-flavoured genJets       
+      } //ends if the particle is an hadron 
     } // end second master loop on genParticles
   } // end case parton/hadron level corrections
   
-
-  if(verbose_) std::cout<<"before muon or electron case"<<std::endl;
-
   // ========================= Muons Case ===============================
   //Muon fix: we want the status 1 muons that we actually detect.  At this
   //point it is given that two status 3 muons were found, we replace these
@@ -827,19 +982,19 @@ ZbbAcceptanceCalculator::analyze(const edm::Event& iEvent, const edm::EventSetup
     }
   }
 
+  if(!myBools_.isRightFlavour()) return;  
+
   // ========================= study any flavour jets ===========================
-  if(verbose_) std::cout<<"before any flavour matching"<<std::endl;
   Int_t nOkJets(0);
   Int_t nJets(0);
-  for(std::vector<reco::GenJet>::const_iterator genjet_it=genJets.begin(); genjet_it!=genJets.end(); ++genjet_it){
+  for(std::vector<const reco::GenJet*>::const_iterator genjet_it= the_any_flavour_genJets.begin(); genjet_it!= the_any_flavour_genJets.end(); ++genjet_it){
     nJets++;
-    the_any_flavour_genJets.push_back(&(*genjet_it));
-    if(genjet_it->pt()>jetPtCut && TMath::Abs(genjet_it->eta())<jetEtaCut &&
-       ROOT::Math::VectorUtil::DeltaR(genjet_it->momentum(),pLpos.Vect())>dRJets_ &&
-       ROOT::Math::VectorUtil::DeltaR(genjet_it->momentum(),pLneg.Vect())>dRJets_
+    if((*genjet_it)->pt()>jetPtCut && TMath::Abs((*genjet_it)->eta())<jetEtaCut &&
+       ROOT::Math::VectorUtil::DeltaR((*genjet_it)->momentum(),pLpos.Vect())>dRJets_ &&
+       ROOT::Math::VectorUtil::DeltaR((*genjet_it)->momentum(),pLneg.Vect())>dRJets_
        ){
       nOkJets++;
-      the_filtered_any_flavour_genJets.push_back(&(*genjet_it));
+      the_filtered_any_flavour_genJets.push_back(*genjet_it);
     }
   }
 
@@ -848,7 +1003,6 @@ ZbbAcceptanceCalculator::analyze(const edm::Event& iEvent, const edm::EventSetup
   }
 
   // ========================= study b-flavoured jets ===========================
-  if(verbose_) std::cout<<"before b-flavour matching"<<std::endl;
   Int_t nOkBFlavouredJets(0);
   Int_t nBFlavourJets(0);
   for(std::vector<const reco::GenJet*>::const_iterator genjet_it=the_b_flavour_genJets.begin(); genjet_it!=the_b_flavour_genJets.end(); ++genjet_it){
@@ -876,11 +1030,10 @@ ZbbAcceptanceCalculator::analyze(const edm::Event& iEvent, const edm::EventSetup
   // ========================= study kinematics of Z leptons ====================
   Int_t nOkLeptons(0);
   
-  if(verbose_) std::cout<<"before Z kin ok"<<std::endl;
   if(pLpos.pt() > ptCut  && TMath::Abs(pLpos.eta()) < etaCut ) nOkLeptons++;
   if(pLneg.pt() > ptCut  && TMath::Abs(pLneg.eta()) < etaCut ) nOkLeptons++;
 
-  if(nOkLeptons ==2) myBools_.is_gen_Zkin_yes_=true;
+  if(nOkLeptons ==2 && myBools_.is_gen_Z_yes_) myBools_.is_gen_Zkin_yes_=true;
 
   // ========================= reco leptons matching ===========================
   // stored vector of lepton momenta
@@ -889,7 +1042,6 @@ ZbbAcceptanceCalculator::analyze(const edm::Event& iEvent, const edm::EventSetup
   Int_t nRecoMatchedLeptons(0);
   Int_t compositeCharge(1);
 
-  if(verbose_) std::cout<<"before reco leptons matching"<<std::endl;
   if(isZMM && myBools_.isRightFlavour()){
     
     // indices for b-hadron association
@@ -910,7 +1062,7 @@ ZbbAcceptanceCalculator::analyze(const edm::Event& iEvent, const edm::EventSetup
       h_mu_RecoPt_->Fill(muon->pt(),wMC);   
       h_mu_RecoEta_->Fill(muon->eta(),wMC);  
       double dR_tmp = ROOT::Math::VectorUtil::DeltaR(muon->momentum(),pLpos.Vect());
-      //  if( dR_tmp<dRLeptons_ ){
+
       if( dR_tmp<posMinDeltaRGenMuon ){
 	posMinDeltaRGenMuon = dR_tmp;
 	posGenMuonRecoMuonAssociation.first  = p;
@@ -919,7 +1071,7 @@ ZbbAcceptanceCalculator::analyze(const edm::Event& iEvent, const edm::EventSetup
 	posGenMuonAssociation.first  = (*muon);
 	posGenMuonAssociation.second = posMinDeltaRGenMuon;
       } // if gen-reco are matched
-	// } // loop on reco muons
+      
       p++;
     }
 
@@ -944,7 +1096,7 @@ ZbbAcceptanceCalculator::analyze(const edm::Event& iEvent, const edm::EventSetup
     //========================== matching for negative muon =============================
     for(edm::View<pat::Muon>::const_iterator muon=muons->begin(); muon!=muons->end(); ++muon){
       double dR_tmp = ROOT::Math::VectorUtil::DeltaR(muon->momentum(),pLneg.Vect());
-      //  if( dR_tmp<dRLeptons_ ){
+
 	if( dR_tmp<negMinDeltaRGenMuon ){
 	  negMinDeltaRGenMuon = ROOT::Math::VectorUtil::DeltaR(muon->momentum(),pLneg.Vect());
 	  negGenMuonRecoMuonAssociation.first  = n;
@@ -953,7 +1105,7 @@ ZbbAcceptanceCalculator::analyze(const edm::Event& iEvent, const edm::EventSetup
 	  negGenMuonAssociation.first  = (*muon);
 	  negGenMuonAssociation.second = negMinDeltaRGenMuon;
 	} // if gen-reco are matched
-	//} // loop on reco muons
+	
       n++;
     }
 
@@ -1014,8 +1166,8 @@ ZbbAcceptanceCalculator::analyze(const edm::Event& iEvent, const edm::EventSetup
       h_ele_RecoPt_->Fill(electron->pt(),wMC);  
       h_ele_RecoEta_->Fill(electron->eta(),wMC); 
       double dR_tmp=ROOT::Math::VectorUtil::DeltaR(electron->momentum(),pLpos.Vect());
-      //if( dR_tmp<dRLeptons_){
-      if( dR_tmp<posMinDeltaRGenElectron){
+      
+      if(dR_tmp<posMinDeltaRGenElectron){
 	posMinDeltaRGenElectron = dR_tmp;
 	posGenElectronRecoElectronAssociation.first  = p;
 	posGenElectronRecoElectronAssociation.second = posMinDeltaRGenElectron;
@@ -1023,7 +1175,7 @@ ZbbAcceptanceCalculator::analyze(const edm::Event& iEvent, const edm::EventSetup
 	posGenElectronAssociation.first  = (*electron);
 	posGenElectronAssociation.second = posMinDeltaRGenElectron;
       } // if gen-reco are matched
-      // } // loop on reco electrons
+
       p++;
     }
 
@@ -1048,7 +1200,7 @@ ZbbAcceptanceCalculator::analyze(const edm::Event& iEvent, const edm::EventSetup
     //========================== matching for negative electron =============================
     for(edm::View<pat::Electron>::const_iterator electron=electrons->begin(); electron!=electrons->end(); ++electron){
       double dR_tmp=ROOT::Math::VectorUtil::DeltaR(electron->momentum(),pLneg.Vect());
-      //   if( dR_tmp<dRLeptons_ ){
+      
       if( dR_tmp<negMinDeltaRGenElectron ){
 	negMinDeltaRGenElectron = dR_tmp;
 	negGenElectronRecoElectronAssociation.first  = n;
@@ -1057,7 +1209,7 @@ ZbbAcceptanceCalculator::analyze(const edm::Event& iEvent, const edm::EventSetup
 	negGenElectronAssociation.first  = (*electron);
 	negGenElectronAssociation.second = negMinDeltaRGenElectron;
       } // if gen-reco are matched
-	// } // loop on reco electrons
+      
       n++;
     }
 
@@ -1102,15 +1254,13 @@ ZbbAcceptanceCalculator::analyze(const edm::Event& iEvent, const edm::EventSetup
   } // ends electron case
 
   // ========================= filter the reco jets =================================
-
-  if(verbose_)std::cout<<"before reco jet matching: recoLeptonMomenta_.size()="<<recoLeptonMomenta_.size()<<" nRecoMatchedLeptons:"<<nRecoMatchedLeptons<<" compositeCharge: "<<compositeCharge<<std::endl;  
+  if(verbose_) std::cout<<"before reco jet matching: recoLeptonMomenta_.size()="<<recoLeptonMomenta_.size()<<" nRecoMatchedLeptons:"<<nRecoMatchedLeptons<<" compositeCharge: "<<compositeCharge<<std::endl;  
   std::vector<const pat::Jet*> the_filteredRecoJets; 
   std::vector<const pat::Jet*> all_the_RecoJets; 
 
   int nRecoJets(0);    
   int nOkRecoJets(0);  
 
-  if(verbose_) std::cout<<"is_rec_Zkin_yes!"<<std::endl;
   for(edm::View<pat::Jet>::const_iterator recojet_it=recoJets.begin(); recojet_it!=recoJets.end(); ++recojet_it){ 
     all_the_RecoJets.push_back(&(*recojet_it));
     nRecoJets++;
@@ -1145,7 +1295,6 @@ ZbbAcceptanceCalculator::analyze(const edm::Event& iEvent, const edm::EventSetup
   }
 
   // ========================= reco jets matching ====================================
-
   std::vector<std::pair<const pat::Jet*,const reco::GenJet*> > filtRecJGenJMatch = matchJetsByDr(the_filteredRecoJets,the_b_flavour_genJets,dRJets_,true,true);
   if (filtRecJGenJMatch.size() > 0 ) {
     myBools_.is_rec_b_yes_=true;
@@ -1180,8 +1329,7 @@ ZbbAcceptanceCalculator::analyze(const edm::Event& iEvent, const edm::EventSetup
   }
 
   // ========================= match all reco jets ====================================
-
-  std::vector<std::pair<const pat::Jet*,const reco::GenJet*> > recJGenJMatch = matchJetsByDr(all_the_RecoJets,the_b_flavour_genJets,10.,true,true);
+  std::vector<std::pair<const pat::Jet*,const reco::GenJet*> > recJGenJMatch = matchJetsByDr(all_the_RecoJets,the_b_flavour_genJets,dRJets_,true,true);
   std::vector<const pat::Jet*> vecRecJets;
   vecRecJets.resize(recJGenJMatch.size());
   std::vector<const reco::GenJet*> vecHadJets;
@@ -1215,7 +1363,7 @@ ZbbAcceptanceCalculator::analyze(const edm::Event& iEvent, const edm::EventSetup
   //     } // loop on gen b-flavoured jets 
   //   } // if ok reco jet
   
-  if(verbose_) std::cout<<"before access to struct "<<std::endl;
+  // if(verbose_) std::cout<<"before access to struct "<<std::endl;
   
   // ========================= Counters for acceptance and C_had ======================== 
 
@@ -1226,6 +1374,13 @@ ZbbAcceptanceCalculator::analyze(const edm::Event& iEvent, const edm::EventSetup
     sumW2_gen_Z_yes+=(wMC*wMC);
   } 
  
+  // is Gen j ok 
+  if(myBools_.isGenjetyes()){
+    N_gen_j_yes++;
+    sumW_gen_j_yes+=wMC;
+    sumW2_gen_j_yes+=(wMC*wMC);
+  }
+
   // is Gen B ok + gen Z ok
   if(myBools_.isGenbyes()){
     N_gen_b_yes++;
@@ -1239,7 +1394,7 @@ ZbbAcceptanceCalculator::analyze(const edm::Event& iEvent, const edm::EventSetup
     }
   }
 
-  // is Gen Z kin ok + gen b ok
+  // is Gen Z kin ok + gen b ok  // gen jet ok
   if(myBools_.isGen_Zkin_yes()){
     N_gen_Zkin_yes++;
     sumW_gen_Zkin_yes+=wMC;
@@ -1250,6 +1405,12 @@ ZbbAcceptanceCalculator::analyze(const edm::Event& iEvent, const edm::EventSetup
       sumW_Al_Num+=wMC;
       sumW2_Al_Num+=(wMC*wMC);
     }
+    
+    if(myBools_.isGenjetyes()){
+      Al_Num_alljets++;
+      sumW_Al_Num_alljets+=wMC;
+      sumW2_Al_Num_alljets+=(wMC*wMC);
+    } 
   }
   
   // is Rec Z ok 
@@ -1257,6 +1418,19 @@ ZbbAcceptanceCalculator::analyze(const edm::Event& iEvent, const edm::EventSetup
     N_rec_Zkin_yes++;
     sumW_rec_Zkin_yes+=wMC;
     sumW2_rec_Zkin_yes+=(wMC*wMC);
+  }
+
+  // is Rec j ok + Z kin ok 
+  if(myBools_.isRecjet_yes()){
+    N_rec_j_yes++;
+    sumW_rec_j_yes+=wMC;
+    sumW2_rec_j_yes+=(wMC*wMC);
+
+    if(myBools_.isRec_Zkin_yes()) {
+      CHad_Num_alljets++;
+      sumW_CHad_Num_alljets+=wMC;
+      sumW2_CHad_Num_alljets+=(wMC*wMC);
+    }
   }
 
   // is Rec b ok + Z kin ok
@@ -1277,7 +1451,7 @@ ZbbAcceptanceCalculator::analyze(const edm::Event& iEvent, const edm::EventSetup
   // ------------------------- epsilon_l
   Bool_t rec_yes_alljets = (myBools_.isRecjet_yes() && myBools_.isRec_Zkin_yes());
   Bool_t rec_yes = (myBools_.isRecb_yes() && myBools_.isRec_Zkin_yes());
-  if(rec_yes){
+  if(rec_yes || rec_yes_alljets){
     
     Epsilon_l_Den++;
     sumW_Epsilon_l_Den+=wMC;
@@ -1306,40 +1480,12 @@ ZbbAcceptanceCalculator::analyze(const edm::Event& iEvent, const edm::EventSetup
     }
   }
 
-  // all jets sample
-  if(rec_yes_alljets){
-    
-    Epsilon_l_Den_alljets++;
-    sumW_Epsilon_l_Den_alljets+=wMC;
-    sumW2_Epsilon_l_Den_alljets+=(wMC*wMC);
-
-    if (isZMM){
-      if(isTightZCandidate(recoZCand,beamSpot,true,lCuts_)){
-	myBools_.is_rec_lep_idiso_yes_=true;
-	Epsilon_l_Num_alljets++;
-	wLepIdIso*=getMuonScaleFactor(recoZCand);
-	myBools_.lepIdIsoWeight_=wLepIdIso;
-	myBools_.lepIdIsoWeightSq_=wLepIdIso*wLepIdIso;
-	sumW_Epsilon_l_Num_alljets+=(wMC*wLepIdIso);
-	sumW2_Epsilon_l_Num_alljets+=(wMC*wMC*wLepIdIso*wLepIdIso);
-      }
-    } else if (isZEE){
-      if(isTightZCandidate(recoZCand,beamSpot,false,lCuts_)){
-	myBools_.is_rec_lep_idiso_yes_=true;
-	Epsilon_l_Num_alljets++;
-	wLepIdIso*=getElectronScaleFactor(recoZCand);
-	myBools_.lepIdIsoWeight_=wLepIdIso;
-	myBools_.lepIdIsoWeightSq_=wLepIdIso*wLepIdIso;
-	sumW_Epsilon_l_Num_alljets+=(wMC*wLepIdIso);
-	sumW2_Epsilon_l_Num_alljets+=(wMC*wMC*wLepIdIso*wLepIdIso);
-      }
-    }
-  }
-
   // ------------------------- epsilon_b
   
   std::vector<pat::Jet> theBtaggedJetsHE;
   std::vector<pat::Jet> theBtaggedJetsHP;  
+  std::vector<pat::Jet> theBtaggedJetsCSVM;
+  std::vector<pat::Jet> theBtaggedJetsCSVT;
 
   if(myBools_.isRecLepIdIso_yes()){
     
@@ -1351,6 +1497,14 @@ ZbbAcceptanceCalculator::analyze(const edm::Event& iEvent, const edm::EventSetup
     sumW_Epsilon_bHP_Den+=(wMC*wLepIdIso);
     sumW2_Epsilon_bHP_Den+=(wMC*wMC*wLepIdIso*wLepIdIso);
 
+    Epsilon_bCSVM_Den++;
+    sumW_Epsilon_bCSVM_Den+=(wMC*wLepIdIso);
+    sumW2_Epsilon_bCSVM_Den+=(wMC*wMC*wLepIdIso*wLepIdIso);
+
+    Epsilon_bCSVT_Den++;
+    sumW_Epsilon_bCSVT_Den+=(wMC*wLepIdIso);
+    sumW2_Epsilon_bCSVT_Den+=(wMC*wMC*wLepIdIso*wLepIdIso);
+
     for (unsigned i = 0; i < filtVecHadJets.size(); ++i){ 
       if(ZbbUtils::isBJet(*filtVecRecJets[i],"SSVHEM")){
 	theBtaggedJetsHE.push_back(*filtVecRecJets[i]);
@@ -1359,6 +1513,14 @@ ZbbAcceptanceCalculator::analyze(const edm::Event& iEvent, const edm::EventSetup
       if(ZbbUtils::isBJet(*filtVecRecJets[i],"SSVHPT")){
 	theBtaggedJetsHP.push_back(*filtVecRecJets[i]);
 	myBools_.is_rec_b_HP_yes_=true;
+      }
+      if(ZbbUtils::isBJet(*filtVecRecJets[i],"CSVM")){
+	theBtaggedJetsCSVM.push_back(*vecRecJets[i]);
+	myBools_.is_rec_b_CSVM_yes_=true;
+      }
+      if(ZbbUtils::isBJet(*filtVecRecJets[i],"CSVT")){
+	theBtaggedJetsCSVT.push_back(*vecRecJets[i]);
+	myBools_.is_rec_b_CSVT_yes_=true;
       }
     }
 
@@ -1381,9 +1543,28 @@ ZbbAcceptanceCalculator::analyze(const edm::Event& iEvent, const edm::EventSetup
       sumW_Epsilon_bHP_Num+=(wMC*wBtagHP*wLepIdIso);
       sumW2_Epsilon_bHP_Num+=(wMC*wMC*wLepIdIso*wLepIdIso*wBtagHP*wBtagHP);
     }
+
+    // if CSVM tag in the event
+    if(myBools_.isRecbCSVM_yes()){
+      Epsilon_bCSVM_Num++;
+      wBtagCSVM=ZbbUtils::getbEffScaleFactorAR(theAssociativeMapEffbMCCSVM_,theAssociativeMapEffcMCCSVM_,theBtaggedJetsCSVM,iSetup,"BTAGCSVM","MISTAGCSVM",false,1,0,0); 
+      myBools_.bTagWeightCSVM_=wBtagCSVM;
+      myBools_.bTagWeightCSVMSq_=wBtagCSVM*wBtagCSVM;
+      sumW_Epsilon_bCSVM_Num+=(wMC*wBtagCSVM*wLepIdIso);
+      sumW2_Epsilon_bCSVM_Num+=(wMC*wMC*wLepIdIso*wLepIdIso*wBtagCSVM*wBtagCSVM);
+    }
+    
+    // if CSVT tag in the event
+    if(myBools_.isRecbCSVT_yes()){
+      Epsilon_bCSVT_Num++;
+      wBtagCSVT=ZbbUtils::getbEffScaleFactorAR(theAssociativeMapEffbMCCSVT_,theAssociativeMapEffcMCCSVT_,theBtaggedJetsCSVT,iSetup,"BTAGCSVT","MISTAGCSVT",false,1,0,0); 
+      myBools_.bTagWeightCSVT_=wBtagCSVT;
+      myBools_.bTagWeightCSVTSq_=wBtagCSVT*wBtagCSVT;
+      sumW_Epsilon_bCSVT_Num+=(wMC*wBtagCSVT*wLepIdIso);
+      sumW2_Epsilon_bCSVT_Num+=(wMC*wMC*wLepIdIso*wLepIdIso*wBtagCSVT*wBtagCSVT);
+    }
   }
 
-  
   Bool_t gen_yes = (myBools_.isGenZyes()  && myBools_.isGenbyes());
 
   //We now have everything we need to calculate c_hadron!
@@ -1468,95 +1649,21 @@ ZbbAcceptanceCalculator::analyze(const edm::Event& iEvent, const edm::EventSetup
 void 
 ZbbAcceptanceCalculator::beginJob()
 {
-  // from https://twiki.cern.ch/twiki/bin/view/CMS/VectorBosonPlusHeavyFlavor#Pile_up_reweighting
-  float data_2011_to_run173692_v3[36] ={
-    1.39818e+07,
-    5.70465e+07,
-    1.35101e+08,
-    2.2739e+08,
-    3.0301e+08,
-    3.39416e+08,
-    3.32104e+08,
-    2.91552e+08,
-    2.34186e+08,
-    1.74644e+08,
-    1.2225e+08,
-    8.0982e+07,
-    5.10706e+07,
-    3.07955e+07,
-    1.7812e+07,
-    9.90513e+06,
-    5.3052e+06,
-    2.74071e+06,
-    1.36736e+06,
-    659563,
-    307928,
-    139290,
-    61111.2,
-    26031.4,
-    10776.8,
-    4340.47,
-    1702.41,
-    650.858,
-    242.78,
-    88.4374,
-    31.4874,
-    10.9669,
-    3.73959,
-    1.24937,
-    0.600761,
-    0
-  };
-  
-  // from https://twiki.cern.ch/twiki/bin/view/CMS/VectorBosonPlusHeavyFlavor#Pile_up_reweighting
-  float MC_summer11_PUS4[36] ={
-    0.145346,   
-    0.0642802,		
-    0.0695255,	
-    0.0696747,
-    0.0692955,
-    0.0684997,
-    0.0669528,
-    0.0645515,
-    0.0609865,
-    0.0563323,
-    0.0507322,
-    0.0444681,
-    0.0379205,
-    0.0315131,
-    0.025422,
-    0.0200184,
-    0.0153776,
-    0.0115387,
-    0.00847608,
-    0.00608715,
-    0.00428255,
-    0.00297185,
-    0.00201918,
-    0.0013449,
-    0.000881587,
-    0.000569954,
-    0.000361493,
-    0.000228692,
-    0.000140791,
-    8.44606e-05,
-    5.10204e-05,
-    3.07802e-05,
-    1.81401e-05,
-    1.00201e-05,
-    5.80004e-06,
-    0
-  };
-  
-  std::vector<float> dataPU(36);
-  std::vector<float> MCPU(36);
+
+  using namespace std;
+ 
+  std::vector<float> dataPU = ZbbUtils::getPU(true);
+  std::vector<float> MCPU   = ZbbUtils::getPU(false);
+
   // for EPS analysis from ZZ analysis
   // copy(data_EPS11, data_EPS11+25, dataPU.begin());
   // copy(PoissonOneXDist, PoissonOneXDist+25, MCPU.begin());
+
   // for 2/fb analysis from https://twiki.cern.ch/twiki/bin/view/CMS/VectorBosonPlusHeavyFlavor#Pile_up_reweighting
-  copy(data_2011_to_run173692_v3,data_2011_to_run173692_v3+36,dataPU.begin());
-  copy(MC_summer11_PUS4,MC_summer11_PUS4+36,MCPU.begin());
-  theLumiWeights_ = new edm::LumiReWeighting(MCPU, dataPU);
+  // copy(data_2011_to_run173692_v3,data_2011_to_run173692_v3+36,dataPU.begin());
+  // copy(MC_summer11_PUS4,MC_summer11_PUS4+36,MCPU.begin());
+
+  theLumiWeights_ = new edm::LumiReWeighting(MCPU,dataPU);
   
   // ==================== Summary Text File =========================
 
@@ -1582,43 +1689,43 @@ ZbbAcceptanceCalculator::beginJob()
     particle_type_="hadron"; 
   }
 
-  h1UnwCategories_ =fs->make<TH1F>("h1UnwCategories","Events for each category; Category",10,-0.5,9.5);
-  h1WgtCategories_ =fs->make<TH1F>("h1WgtCategories","Events for each category; Category",10,-0.5,9.5);
+  h1UnwCategories_                 = fs->make<TH1F>("h1UnwCategories","Events for each category; Category",21,-0.5,20.5);
+  h1WgtCategories_                 = fs->make<TH1F>("h1WgtCategories","Events for each category; Category",21,-0.5,20.5);
 
-  h_GEN_mass_ZfromMuons_        = fs->make<TH1F>("GEN_mass_ZfromMuons","mass of #mu#mu (genParticles); GEN M_{#mu^{+}#mu^{-}} (GeV)",100.,0.,150.);
-  h_GEN_mass_ZfromElectrons_    = fs->make<TH1F>("GEN_mass_ZfromElectrons","mass of #it{ee} (genParticles); GEN M_{e^{+}e^{-}} (GeV)",100.,0.,150.);
+  h_GEN_mass_ZfromMuons_           = fs->make<TH1F>("GEN_mass_ZfromMuons","mass of #mu#mu (genParticles); GEN M_{#mu^{+}#mu^{-}} (GeV)",100.,0.,150.);
+  h_GEN_mass_ZfromElectrons_       = fs->make<TH1F>("GEN_mass_ZfromElectrons","mass of #it{ee} (genParticles); GEN M_{e^{+}e^{-}} (GeV)",100.,0.,150.);
 
-  h_GEN_nBflavouredJets_        = fs->make<TH1F>("GEN_nBflavouredJets","number of b flav genJets; n_{b-jets}",10,-0.5,9.5);
-  h_GEN_nOkBflavouredJets_      = fs->make<TH1F>("GEN_nOkBflavouredJets","number of b flav genJets; n^{sel}_{b-jets}",10,-0.5,9.5);
+  h_GEN_nBflavouredJets_           = fs->make<TH1F>("GEN_nBflavouredJets","number of b flav genJets; n_{b-jets}",10,-0.5,9.5);
+  h_GEN_nOkBflavouredJets_         = fs->make<TH1F>("GEN_nOkBflavouredJets","number of b flav genJets; n^{sel}_{b-jets}",10,-0.5,9.5);
 
-  h_GEN_GenbGenJetMinDeltaR_      = fs->make<TH1F>("GEN_GenbGenJetMinDeltaR","#DeltaR(B,j); #DeltaR(B,j)",100,0.,1.);
-  h_GEN_GenbGenJetMinDeltaRVsEta_ = fs->make<TH2F>("GEN_GenbGenJetMinDeltaR_vsJetEta","#DeltaR(B,j) vs jet #eta;"+particle_type_+" Jet #eta; #DeltaR(B,j)",60,-3.,3.,100,0.,1.);
-  h_GEN_GenbGenJetMinDeltaRVsPt_  = fs->make<TH2F>("GEN_GenbGenJetMinDeltaR_vsJetPt","#DeltaR(B,j) vs jet p_{T};"+particle_type_+" Jet p_{T} (GeV); #DeltaR(B,j)",100,0.,100.,100,0.,1.);
-  h_bparticlePt_                = fs->make<TH1F>("GEN_bparticle_Pt","b-particle p_{T};b-"+particle_type_+" p_{T} (GeV)",100,0.,100.);
-  h_bparticleEta_               = fs->make<TH1F>("GEN_bparticle_Eta","b-particle #eta;b-"+particle_type_+" #eta",100,-5.,5.);
-  h_bparticleEnergyFraction_    = fs->make<TH1F>("GEN_bparticle_EF","fraction of "+particle_type_+" jet p_{T} carried by b-particle #eta; p_{T}(b-particle)/p_{T} "+particle_type_+"jet",100,0.,1.);
+  h_GEN_GenbGenJetMinDeltaR_       = fs->make<TH1F>("GEN_GenbGenJetMinDeltaR","#DeltaR(B,j); #DeltaR(B,j)",100,0.,1.);
+  h_GEN_GenbGenJetMinDeltaRVsEta_  = fs->make<TH2F>("GEN_GenbGenJetMinDeltaR_vsJetEta","#DeltaR(B,j) vs jet #eta;"+particle_type_+" Jet #eta; #DeltaR(B,j)",60,-3.,3.,100,0.,1.);
+  h_GEN_GenbGenJetMinDeltaRVsPt_   = fs->make<TH2F>("GEN_GenbGenJetMinDeltaR_vsJetPt","#DeltaR(B,j) vs jet p_{T};"+particle_type_+" Jet p_{T} (GeV); #DeltaR(B,j)",100,0.,100.,100,0.,1.);
+  h_bparticlePt_                   = fs->make<TH1F>("GEN_bparticle_Pt","b-particle p_{T};b-"+particle_type_+" p_{T} (GeV)",100,0.,100.);
+  h_bparticleEta_                  = fs->make<TH1F>("GEN_bparticle_Eta","b-particle #eta;b-"+particle_type_+" #eta",100,-5.,5.);
+  h_bparticleEnergyFraction_       = fs->make<TH1F>("GEN_bparticle_EF","fraction of "+particle_type_+" jet p_{T} carried by b-particle #eta; p_{T}(b-particle)/p_{T} "+particle_type_+"jet",100,0.,1.);
 
-  h_bjet_GenPt_                 = fs->make<TH1F>("GEN_bjet_Pt",particle_type_+" Jet p_{T};"+particle_type_+" Jet p_{T} (GeV)",100,0.,100.);
-  h_bjet_GenEta_                = fs->make<TH1F>("GEN_bjet_Eta",particle_type_+" Jet #eta;"+particle_type_+" Jet #eta",100,-5.,5.);
-  h_bjet_GenMass_               = fs->make<TH1F>("GEN_bjet_Mass",particle_type_+" Jet mass;"+particle_type_+" Jet mass (GeV)",100,0.,40.);
+  h_bjet_GenPt_                    = fs->make<TH1F>("GEN_bjet_Pt",particle_type_+" Jet p_{T};"+particle_type_+" Jet p_{T} (GeV)",100,0.,100.);
+  h_bjet_GenEta_                   = fs->make<TH1F>("GEN_bjet_Eta",particle_type_+" Jet #eta;"+particle_type_+" Jet #eta",100,-5.,5.);
+  h_bjet_GenMass_                  = fs->make<TH1F>("GEN_bjet_Mass",particle_type_+" Jet mass;"+particle_type_+" Jet mass (GeV)",100,0.,40.);
 
-  h_bjet_GenMatchedPt_          = fs->make<TH1F>("GENMatched_bjet_Pt","reco matched "+particle_type_+" Jet p_{T};reco matched "+particle_type_+" Jet p_{T} (GeV)",100,0.,100.);
-  h_bjet_GenMatchedEta_         = fs->make<TH1F>("GENMatched_bjet_Eta","reco matched "+particle_type_+" Jet #eta;reco matched "+particle_type_+" Jet #eta",60,-3.,3.);
-  h_bjet_GenMatchedMass_        = fs->make<TH1F>("GENMatched_bjet_Mass","reco matched "+particle_type_+" Jet mass;reco matched "+particle_type_+" Jet mass (GeV)",100,0.,40.);
+  h_bjet_GenMatchedPt_             = fs->make<TH1F>("GENMatched_bjet_Pt","reco matched "+particle_type_+" Jet p_{T};reco matched "+particle_type_+" Jet p_{T} (GeV)",100,0.,100.);
+  h_bjet_GenMatchedEta_            = fs->make<TH1F>("GENMatched_bjet_Eta","reco matched "+particle_type_+" Jet #eta;reco matched "+particle_type_+" Jet #eta",60,-3.,3.);
+  h_bjet_GenMatchedMass_           = fs->make<TH1F>("GENMatched_bjet_Mass","reco matched "+particle_type_+" Jet mass;reco matched "+particle_type_+" Jet mass (GeV)",100,0.,40.);
     														  
-  h_bjet_RecoMatchedPt_         = fs->make<TH1F>("RECOMatched_bjet_Pt","gen matched reco Jet p_{T};gen-mathed reco Jet p_{T} (GeV)",100,0.,100.);
-  h_bjet_RecoMatchedEta_        = fs->make<TH1F>("RECOMatched_bjet_Eta","gen matched reco Jet #eta;gen-matched reco Jet #eta",60,-3.,3.);	  
-  h_bjet_RecoMatchedMass_       = fs->make<TH1F>("RECOMatched_bjet_Mass","gen matched reco Jet mass;gen-matched reco Jet mass (GeV)",100,0.,40.);
+  h_bjet_RecoMatchedPt_            = fs->make<TH1F>("RECOMatched_bjet_Pt","gen matched reco Jet p_{T};gen-mathed reco Jet p_{T} (GeV)",100,0.,100.);
+  h_bjet_RecoMatchedEta_           = fs->make<TH1F>("RECOMatched_bjet_Eta","gen matched reco Jet #eta;gen-matched reco Jet #eta",60,-3.,3.);	  
+  h_bjet_RecoMatchedMass_          = fs->make<TH1F>("RECOMatched_bjet_Mass","gen matched reco Jet mass;gen-matched reco Jet mass (GeV)",100,0.,40.);
   
-  h_selbjet_RecoMatchedPt_      = fs->make<TH1F>("RECOMatched_selbjet_Pt","gen matched reco Jet p_{T};selected reco Jet p_{T} (GeV)",100,0.,100.);
-  h_selbjet_RecoMatchedEta_     = fs->make<TH1F>("RECOMatched_selbjet_Eta","gen matched reco Jet #eta;selected reco Jet #eta",60,-3.,3.);	     
-  h_selbjet_RecoMatchedMass_    = fs->make<TH1F>("RECOMatched_selbjet_Mass","gen matched reco Jet mass;selected reco Jet mass (GeV)",100,0.,40.);
+  h_selbjet_RecoMatchedPt_         = fs->make<TH1F>("RECOMatched_selbjet_Pt","gen matched reco Jet p_{T};selected reco Jet p_{T} (GeV)",100,0.,100.);
+  h_selbjet_RecoMatchedEta_        = fs->make<TH1F>("RECOMatched_selbjet_Eta","gen matched reco Jet #eta;selected reco Jet #eta",60,-3.,3.);	     
+  h_selbjet_RecoMatchedMass_       = fs->make<TH1F>("RECOMatched_selbjet_Mass","gen matched reco Jet mass;selected reco Jet mass (GeV)",100,0.,40.);
   
-  h_bjet_GenRecoResponse_       = fs->make<TH1F>("bjetGenRecoResponse","Ratio of p_{T} of genJet/ p_{T} of recoJet; reco Jet p_{T} / "+particle_type_+" Jet p_{T};jets",40,0.,2.);
-  h_bjet_GenPtvsRecoPt_         = fs->make<TH2F>("GEN_bjet_GenPtvsRecoPt",particle_type_+" Jet p_{T} (GeV); reco Jet p_{T} (GeV);"+particle_type_+" Jet p_{T} (GeV)",100,0.,100.,100,0.,100);
-  h_bjet_GenReco_DeltaR_        = fs->make<TH1F>("GEN_bjet_GenReco_DeltaR","#DeltaR(bjet_{gen},bjet_{reco}) ; #DeltaR(bjet_{gen},bjet_{reco})",100,0.,1.);
-  h_bjet_GenReco_DeltaR_vsPt_   = fs->make<TH2F>("GEN_bjet_GenReco_DeltaR_vsPt","#DeltaR(bjet_{gen},bjet_{reco}) vs bjet p_{T};gen bjet p_{T} (GeV);#DeltaR(bjet_{gen},bjet_{reco})",200,0.,200.,100,0.,1.);
-  h_bjet_GenReco_DeltaR_vsEta_  = fs->make<TH2F>("GEN_bjet_GenReco_DeltaR_vsEta","#DeltaR(bjet_{gen},bjet_{reco}) vs bjet #eta;gen  bjet #eta (GeV);#DeltaR(bjet_{gen},bjet_{reco})",100,-3.,3.,100,0.,1.);
+  h_bjet_GenRecoResponse_          = fs->make<TH1F>("bjetGenRecoResponse","Ratio of p_{T} of genJet/ p_{T} of recoJet; reco Jet p_{T} / "+particle_type_+" Jet p_{T};jets",40,0.,2.);
+  h_bjet_GenPtvsRecoPt_            = fs->make<TH2F>("GEN_bjet_GenPtvsRecoPt",particle_type_+" Jet p_{T} (GeV); reco Jet p_{T} (GeV);"+particle_type_+" Jet p_{T} (GeV)",100,0.,100.,100,0.,100);
+  h_bjet_GenReco_DeltaR_           = fs->make<TH1F>("GEN_bjet_GenReco_DeltaR","#DeltaR(bjet_{gen},bjet_{reco}) ; #DeltaR(bjet_{gen},bjet_{reco})",100,0.,1.);
+  h_bjet_GenReco_DeltaR_vsPt_      = fs->make<TH2F>("GEN_bjet_GenReco_DeltaR_vsPt","#DeltaR(bjet_{gen},bjet_{reco}) vs bjet p_{T};gen bjet p_{T} (GeV);#DeltaR(bjet_{gen},bjet_{reco})",200,0.,200.,100,0.,1.);
+  h_bjet_GenReco_DeltaR_vsEta_     = fs->make<TH2F>("GEN_bjet_GenReco_DeltaR_vsEta","#DeltaR(bjet_{gen},bjet_{reco}) vs bjet #eta;gen  bjet #eta (GeV);#DeltaR(bjet_{gen},bjet_{reco})",100,-3.,3.,100,0.,1.);
 
   h_selbjet_GenRecoResponse_       = fs->make<TH1F>("selbjetGenRecoResponse","Ratio of p_{T} of genJet/ p_{T} of recoJet; reco Jet p_{T} / "+particle_type_+" Jet p_{T};jets",40,0.,2.);
   h_selbjet_GenPtvsRecoPt_         = fs->make<TH2F>("GEN_selbjet_GenPtvsRecoPt",particle_type_+" Jet p_{T} (GeV); reco Jet p_{T} (GeV);"+particle_type_+" Jet p_{T} (GeV)",100,0.,100.,100,0.,100);
@@ -1626,36 +1733,36 @@ ZbbAcceptanceCalculator::beginJob()
   h_selbjet_GenReco_DeltaR_vsPt_   = fs->make<TH2F>("GEN_selbjet_GenReco_DeltaR_vsPt","#DeltaR(bjet_{gen},bjet_{reco}) vs bjet p_{T};gen bjet p_{T} (GeV);#DeltaR(bjet_{gen},bjet_{reco})",200,0.,200.,100,0.,1.);
   h_selbjet_GenReco_DeltaR_vsEta_  = fs->make<TH2F>("GEN_selbjet_GenReco_DeltaR_vsEta","#DeltaR(bjet_{gen},bjet_{reco}) vs bjet #eta;gen  bjet #eta (GeV);#DeltaR(bjet_{gen},bjet_{reco})",100,-3.,3.,100,0.,1.);
 
-  h_mu_GenReco_DeltaR_          = fs->make<TH1F>("GEN_muon_GenReco_DeltaR","#DeltaR(#mu_{gen},#mu_{reco}) ; #DeltaR(#mu_{gen},#mu_{reco})",100,0.,0.5);
-  h_mu_GenReco_DeltaR_vsPt_     = fs->make<TH2F>("GEN_muon_GenReco_DeltaR_vsPt","#DeltaR(#mu_{gen},#mu_{reco}) vs muon p_{T}; gen muon p_{T} (GeV);#DeltaR(#mu_{gen},#mu_{reco})",200,0.,200.,100,0.,0.5);
-  h_mu_GenReco_DeltaR_vsEta_    = fs->make<TH2F>("GEN_muon_GenReco_DeltaR_vsEta","#DeltaR(#mu_{gen},#mu_{reco}) vs muon #eta; gen muon #eta (GeV);#DeltaR(#mu_{gen},#mu_{reco})",100,-3.,3.,100,0.,0.5);
+  h_mu_GenReco_DeltaR_             = fs->make<TH1F>("GEN_muon_GenReco_DeltaR","#DeltaR(#mu_{gen},#mu_{reco}) ; #DeltaR(#mu_{gen},#mu_{reco})",100,0.,0.5);
+  h_mu_GenReco_DeltaR_vsPt_        = fs->make<TH2F>("GEN_muon_GenReco_DeltaR_vsPt","#DeltaR(#mu_{gen},#mu_{reco}) vs muon p_{T}; gen muon p_{T} (GeV);#DeltaR(#mu_{gen},#mu_{reco})",200,0.,200.,100,0.,0.5);
+  h_mu_GenReco_DeltaR_vsEta_       = fs->make<TH2F>("GEN_muon_GenReco_DeltaR_vsEta","#DeltaR(#mu_{gen},#mu_{reco}) vs muon #eta; gen muon #eta (GeV);#DeltaR(#mu_{gen},#mu_{reco})",100,-3.,3.,100,0.,0.5);
   
-  h_ele_GenReco_DeltaR_         = fs->make<TH1F>("GEN_electron_GenReco_DeltaR","#DeltaR(e_{gen},e_{reco}); #DeltaR(e_{gen},e_{reco})",100,0.,0.5);
-  h_ele_GenReco_DeltaR_vsPt_    = fs->make<TH2F>("GEN_electron_GenReco_DeltaR_vsPt","#DeltaR(e_{gen},e_{reco}) vs electron p_{T}; gen electron p_{T} (GeV);#DeltaR(e_{gen},e_{reco})",200,0.,200.,100,0.,0.5);
-  h_ele_GenReco_DeltaR_vsEta_   = fs->make<TH2F>("GEN_electron_GenReco_DeltaR_vsEta","#DeltaR(e_{gen},e_{reco}) vs electron #eta; gen electron #eta (GeV);#DeltaR(e_{gen},e_{reco})",100,-3.,3.,100,0.,0.5);
+  h_ele_GenReco_DeltaR_            = fs->make<TH1F>("GEN_electron_GenReco_DeltaR","#DeltaR(e_{gen},e_{reco}); #DeltaR(e_{gen},e_{reco})",100,0.,0.5);
+  h_ele_GenReco_DeltaR_vsPt_       = fs->make<TH2F>("GEN_electron_GenReco_DeltaR_vsPt","#DeltaR(e_{gen},e_{reco}) vs electron p_{T}; gen electron p_{T} (GeV);#DeltaR(e_{gen},e_{reco})",200,0.,200.,100,0.,0.5);
+  h_ele_GenReco_DeltaR_vsEta_      = fs->make<TH2F>("GEN_electron_GenReco_DeltaR_vsEta","#DeltaR(e_{gen},e_{reco}) vs electron #eta; gen electron #eta (GeV);#DeltaR(e_{gen},e_{reco})",100,-3.,3.,100,0.,0.5);
 
-  h_ele_GenPt_                  = fs->make<TH1F>("GEN_electron_Pt","gen Electron p_{T};gen Electron p_{T} (GeV)",100,0.,100.);
-  h_ele_GenEta_                 = fs->make<TH1F>("GEN_electron_Eta","gen Electron #eta;gen Electron #eta (GeV)",80,-4.,4.);
-  h_ele_RecoPt_                 = fs->make<TH1F>("RECO_electron_Pt","reco Electron p_{T};reco Electron p_{T} (GeV)",100,0.,100.);
-  h_ele_RecoEta_                = fs->make<TH1F>("RECO_electron_Eta","reco Electron #eta;reco Electron #eta (GeV)",70,-3.5,3.5);
+  h_ele_GenPt_                     = fs->make<TH1F>("GEN_electron_Pt","gen Electron p_{T};gen Electron p_{T} (GeV)",100,0.,100.);
+  h_ele_GenEta_                    = fs->make<TH1F>("GEN_electron_Eta","gen Electron #eta;gen Electron #eta (GeV)",80,-4.,4.);
+  h_ele_RecoPt_                    = fs->make<TH1F>("RECO_electron_Pt","reco Electron p_{T};reco Electron p_{T} (GeV)",100,0.,100.);
+  h_ele_RecoEta_                   = fs->make<TH1F>("RECO_electron_Eta","reco Electron #eta;reco Electron #eta (GeV)",70,-3.5,3.5);
   
-  h_mu_GenPt_                   = fs->make<TH1F>("GEN_muon_Pt","gen Muon p_{T};gen Muon p_{T} (GeV)",100,0.,100.);				     	                             
-  h_mu_GenEta_                  = fs->make<TH1F>("GEN_muon_Eta","gen Muon #eta;gen Muon #eta (GeV)",70,-3.5,3.5);	  			   	
-  h_mu_RecoPt_                  = fs->make<TH1F>("RECO_muon_Pt","reco Muon p_{T};reco Muon p_{T} (GeV)",100,0.,100.);		       
-  h_mu_RecoEta_                 = fs->make<TH1F>("RECO_muon_Eta","reco Muon #eta;reco Muon #eta (GeV)",70,-3.5,3.5);
+  h_mu_GenPt_                      = fs->make<TH1F>("GEN_muon_Pt","gen Muon p_{T};gen Muon p_{T} (GeV)",100,0.,100.);				     	                             
+  h_mu_GenEta_                     = fs->make<TH1F>("GEN_muon_Eta","gen Muon #eta;gen Muon #eta (GeV)",70,-3.5,3.5);	  			   	
+  h_mu_RecoPt_                     = fs->make<TH1F>("RECO_muon_Pt","reco Muon p_{T};reco Muon p_{T} (GeV)",100,0.,100.);		       
+  h_mu_RecoEta_                    = fs->make<TH1F>("RECO_muon_Eta","reco Muon #eta;reco Muon #eta (GeV)",70,-3.5,3.5);
 
-  h_eleMatched_GenPt_           = fs->make<TH1F>("GENMatched_electron_Pt","gen matched Electron p_{T};gen matched Electron p_{T} (GeV)",100,0.,100.);
-  h_eleMatched_GenEta_          = fs->make<TH1F>("GENMatched_electron_Eta","gen matched Electron #eta;gen matched Electron #eta (GeV)",70,-3.5,3.5);
-  h_eleMatched_RecoPt_          = fs->make<TH1F>("RECOMatched_electron_Pt","reco matched Electron p_{T};reco matched Electron p_{T} (GeV)",100,0.,100.);
-  h_eleMatched_RecoEta_         = fs->make<TH1F>("RECOMatched_electron_Eta","reco matched Electron #eta;reco matched Electron #eta (GeV)",70,-3.5,3.5);
+  h_eleMatched_GenPt_              = fs->make<TH1F>("GENMatched_electron_Pt","gen matched Electron p_{T};gen matched Electron p_{T} (GeV)",100,0.,100.);
+  h_eleMatched_GenEta_             = fs->make<TH1F>("GENMatched_electron_Eta","gen matched Electron #eta;gen matched Electron #eta (GeV)",70,-3.5,3.5);
+  h_eleMatched_RecoPt_             = fs->make<TH1F>("RECOMatched_electron_Pt","reco matched Electron p_{T};reco matched Electron p_{T} (GeV)",100,0.,100.);
+  h_eleMatched_RecoEta_            = fs->make<TH1F>("RECOMatched_electron_Eta","reco matched Electron #eta;reco matched Electron #eta (GeV)",70,-3.5,3.5);
   
-  h_muMatched_GenPt_            = fs->make<TH1F>("GENMatched_muon_Pt","gen matched Muon p_{T};gen matched Muon p_{T} (GeV)",100,0.,100.);				     	                             
-  h_muMatched_GenEta_           = fs->make<TH1F>("GENMatched_muon_Eta","gen matched Muon #eta;gen matched Muon #eta (GeV)",70,-3.5,3.5);	  			   	
-  h_muMatched_RecoPt_           = fs->make<TH1F>("RECOMatched_muon_Pt","reco matched Muon p_{T};reco matched Muon p_{T} (GeV)",100,0.,100.);		       
-  h_muMatched_RecoEta_          = fs->make<TH1F>("RECOMatched_muon_Eta","reco matched Muon #eta;reco matched Muon #eta (GeV)",70,-3.5,3.5);
+  h_muMatched_GenPt_               = fs->make<TH1F>("GENMatched_muon_Pt","gen matched Muon p_{T};gen matched Muon p_{T} (GeV)",100,0.,100.);				     	                             
+  h_muMatched_GenEta_              = fs->make<TH1F>("GENMatched_muon_Eta","gen matched Muon #eta;gen matched Muon #eta (GeV)",70,-3.5,3.5);	  			   	
+  h_muMatched_RecoPt_              = fs->make<TH1F>("RECOMatched_muon_Pt","reco matched Muon p_{T};reco matched Muon p_{T} (GeV)",100,0.,100.);		       
+  h_muMatched_RecoEta_             = fs->make<TH1F>("RECOMatched_muon_Eta","reco matched Muon #eta;reco matched Muon #eta (GeV)",70,-3.5,3.5);
 
-  h_RECO_mass_ZfromMuons_       = fs->make<TH1F>("RECO_mass_ZfromMuons","mass of #mu#mu; RECO M_{#mu^{+}#mu^{-}} (GeV)",100.,0.,150.);
-  h_RECO_mass_ZfromElectrons_   = fs->make<TH1F>("RECO_mass_ZfromElectrons","mass of #it{ee}; RECO M_{e^{+}e^{-}} (GeV)",100.,0.,150.);
+  h_RECO_mass_ZfromMuons_          = fs->make<TH1F>("RECO_mass_ZfromMuons","mass of #mu#mu; RECO M_{#mu^{+}#mu^{-}} (GeV)",100.,0.,150.);
+  h_RECO_mass_ZfromElectrons_      = fs->make<TH1F>("RECO_mass_ZfromElectrons","mass of #it{ee}; RECO M_{e^{+}e^{-}} (GeV)",100.,0.,150.);
 
   TString genMatrixTitle    = "gen Acceptance Matrix";
   TString genKinMatrixTitle = "kin Acceptance Matrix";
@@ -1691,9 +1798,9 @@ ZbbAcceptanceCalculator::beginJob()
     h_RECOMatrix_->GetYaxis()->SetBinLabel(bin,recoMatrixYBinLabels[bin-1]);  
   }
 
-  TString BinLabels[10]  ={"Tot evts","Sel Flav","genZ","genb","genZkin","genZkin+genb","genZ+genb","recZkin","recb","recZkin+recb"};
+  TString BinLabels[21]  ={"Tot evts","Sel Flav","genZ","genj","genb","genZkin","genZkin+genj","genZ+genb","genZkin+genb","recZkin","recj","recb","recZkin+recj","recZkin+recb","recZkin(ID)+recj","recZkin(ID)+recb","recZkin(ID)+recb(HE)","recZkin(ID)+recb(HP)","recZkin(ID)+recb(CSVM)","recZkin(ID)+recb(CSVT)"};
   
-  for(UInt_t bin=1; bin<=10; bin++){
+  for(UInt_t bin=1; bin<=21; bin++){
     h1UnwCategories_->GetXaxis()->SetBinLabel(bin,BinLabels[bin-1]); 
     h1WgtCategories_->GetXaxis()->SetBinLabel(bin,BinLabels[bin-1]); 
   }
@@ -1702,7 +1809,6 @@ ZbbAcceptanceCalculator::beginJob()
 
   if(saveNTuple_){
     myNTuple_ = fs->make<TTree>("T","Data for Acceptance");
-    //  myNTuple_->Branch("Acceptance",&myBools_.is_gen_Z_yes,"isgenZyes/O:isgenbyes:isgenZkinyes:isrecZkinyes:isrecbyes");
     myNTuple_->Branch("isRightFlavour",&(myBools_.is_right_flavour_),"isRightFlavour/O");
     myNTuple_->Branch("isgenZyes",&(myBools_.is_gen_Z_yes_),"isgenZyes/O");
     myNTuple_->Branch("isgenbyes",&(myBools_.is_gen_b_yes_),"isgenbyes/O");
@@ -1712,6 +1818,10 @@ ZbbAcceptanceCalculator::beginJob()
     myNTuple_->Branch("isrecbyes",&(myBools_.is_rec_b_yes_),"isrecbyes/O");
     myNTuple_->Branch("isrecjetyes",&(myBools_.is_rec_j_yes_),"isrecjetyes/O");
     myNTuple_->Branch("isreclepidiso_yes",&(myBools_.is_rec_lep_idiso_yes_),"isreclepidiso_yes/O");
+    myNTuple_->Branch("isrecbHE_yes",&(myBools_.is_rec_b_HE_yes_),"isrec_b_HE_yes/O");
+    myNTuple_->Branch("isrecbHP_yes",&(myBools_.is_rec_b_HP_yes_),"isrec_b_HP_yes/O");
+    myNTuple_->Branch("isrecbCSVM_yes",&(myBools_.is_rec_b_CSVM_yes_),"isrec_b_CSVM_yes/O");
+    myNTuple_->Branch("isrecbCSVT_yes",&(myBools_.is_rec_b_CSVT_yes_),"isrec_b_CSVT_yes/O");
     myNTuple_->Branch("nbgenJets",&(myBools_.nBFlavourJets_),"nbgenJets/I");
     myNTuple_->Branch("nFilteredBgenJets", &(myBools_.nOkBFlavouredJets_),"nFilteredBgenJets/I");
     myNTuple_->Branch("nrecoJets",&(myBools_.nRecoJets_),"nrecoJets/I");
@@ -1725,9 +1835,11 @@ ZbbAcceptanceCalculator::beginJob()
     myNTuple_->Branch("bTagWeightHESq",&(myBools_.bTagWeightHESq_),"bTagWeightHESq/F");
     myNTuple_->Branch("bTagWeightHP",&(myBools_.bTagWeightHP_ )," bTagWeightHP/F");  
     myNTuple_->Branch("bTagWeightHPSq",&(myBools_.bTagWeightHPSq_),"bTagWeightHPSq/F");
-    myNTuple_->Branch("isreclepidiso_yes",&(myBools_.is_rec_lep_idiso_yes_),"isreclepidiso_yes/O");
-    myNTuple_->Branch("isrecbHE_yes",&(myBools_.is_rec_b_HE_yes_),"isrec_b_HE_yes/O");
-    myNTuple_->Branch("isrecbHP_yes",&(myBools_.is_rec_b_HP_yes_),"isrec_b_HP_yes/O");
+    myNTuple_->Branch("bTagWeightCSVM",&(myBools_.bTagWeightCSVM_)," bTagWeightCSVM/F");  
+    myNTuple_->Branch("bTagWeightCSVMSq",&(myBools_.bTagWeightCSVMSq_),"bTagWeightCSVMSq/F");
+    myNTuple_->Branch("bTagWeightCSVT",&(myBools_.bTagWeightCSVT_ )," bTagWeightCSVT/F");  
+    myNTuple_->Branch("bTagWeightCSVTSq",&(myBools_.bTagWeightCSVTSq_),"bTagWeightCSVTSq/F");
+
   }
 }
 
@@ -1736,6 +1848,8 @@ void
 ZbbAcceptanceCalculator::endJob() 
 {
 
+  using namespace std;
+    
   h1UnwCategories_->SetBinContent(1,N_tot_events);
   h1WgtCategories_->SetBinContent(1,sumW_tot_events);
 
@@ -1745,267 +1859,376 @@ ZbbAcceptanceCalculator::endJob()
   h1UnwCategories_->SetBinContent(3,N_gen_Z_yes);
   h1WgtCategories_->SetBinContent(3,sumW_gen_Z_yes);
 
-  h1UnwCategories_->SetBinContent(4,N_gen_b_yes);
-  h1WgtCategories_->SetBinContent(4,sumW_gen_b_yes);
+  h1UnwCategories_->SetBinContent(4,N_gen_j_yes);
+  h1WgtCategories_->SetBinContent(4,sumW_gen_j_yes);
 
-  h1UnwCategories_->SetBinContent(5,N_gen_Zkin_yes);
-  h1WgtCategories_->SetBinContent(5,sumW_gen_Zkin_yes);
+  h1UnwCategories_->SetBinContent(5,N_gen_b_yes);
+  h1WgtCategories_->SetBinContent(5,sumW_gen_b_yes);
 
-  h1UnwCategories_->SetBinContent(6,Al_Num);
-  h1WgtCategories_->SetBinContent(6,sumW_Al_Num);
+  h1UnwCategories_->SetBinContent(6,N_gen_Zkin_yes);
+  h1WgtCategories_->SetBinContent(6,sumW_gen_Zkin_yes);
 
-  h1UnwCategories_->SetBinContent(7,Al_Den);
-  h1WgtCategories_->SetBinContent(7,sumW_Al_Den);
+  h1UnwCategories_->SetBinContent(7,Al_Num_alljets);
+  h1WgtCategories_->SetBinContent(7,sumW_Al_Num_alljets);
 
-  h1UnwCategories_->SetBinContent(8,N_rec_Zkin_yes);
-  h1WgtCategories_->SetBinContent(8,sumW_rec_Zkin_yes);
+  h1UnwCategories_->SetBinContent(8,Al_Den);
+  h1WgtCategories_->SetBinContent(8,sumW_Al_Den);
 
-  h1UnwCategories_->SetBinContent(9,N_rec_b_yes);
-  h1WgtCategories_->SetBinContent(9,sumW_rec_b_yes);
+  h1UnwCategories_->SetBinContent(9,Al_Num);
+  h1WgtCategories_->SetBinContent(9,sumW_Al_Num);
 
-  h1UnwCategories_->SetBinContent(10,CHad_Num);
-  h1WgtCategories_->SetBinContent(10,sumW_CHad_Num);
+  h1UnwCategories_->SetBinContent(10,N_rec_Zkin_yes);
+  h1WgtCategories_->SetBinContent(10,sumW_rec_Zkin_yes);
 
-  // Definition of correction factors
+  h1UnwCategories_->SetBinContent(11,N_rec_j_yes);
+  h1WgtCategories_->SetBinContent(11,sumW_rec_j_yes);
 
-  Double_t UnwAl    =  (Al_Num/Al_Den);
-  Double_t UnwCHad  =  (CHad_Num/Al_Num);
-  Double_t UnwEpsilon_l = (Epsilon_l_Num/Epsilon_l_Den);
-  Double_t UnwEpsilon_bHE = (Epsilon_bHE_Num/Epsilon_bHE_Den); 
-  Double_t UnwEpsilon_bHP = (Epsilon_bHP_Num/Epsilon_bHP_Den); 
+  h1UnwCategories_->SetBinContent(12,N_rec_b_yes);
+  h1WgtCategories_->SetBinContent(12,sumW_rec_b_yes);
 
-  Double_t Al   = (sumW_Al_Num/sumW_Al_Den); 
-  Double_t CHad = (sumW_CHad_Num/sumW_Al_Num);
-  Double_t Epsilon_l = (sumW_Epsilon_l_Num/sumW_Epsilon_l_Den);
-  Double_t Epsilon_bHE = (sumW_Epsilon_bHE_Num/sumW_Epsilon_bHE_Den); 
-  Double_t Epsilon_bHP = (sumW_Epsilon_bHP_Num/sumW_Epsilon_bHP_Den); 
+  h1UnwCategories_->SetBinContent(13,CHad_Num_alljets);
+  h1WgtCategories_->SetBinContent(13,sumW_CHad_Num_alljets);
+
+  h1UnwCategories_->SetBinContent(14,CHad_Num);
+  h1WgtCategories_->SetBinContent(14,sumW_CHad_Num);
+
+  h1UnwCategories_->SetBinContent(15,Epsilon_l_Num_alljets);                      // epsilon l num (all jets)
+  h1WgtCategories_->SetBinContent(15,sumW_Epsilon_l_Num_alljets);
+ 
+  h1UnwCategories_->SetBinContent(16,Epsilon_l_Num);                              // epsilon l num
+  h1WgtCategories_->SetBinContent(16,sumW_Epsilon_l_Num);
+
+  h1UnwCategories_->SetBinContent(17,Epsilon_bHE_Num);                            // epsilon b ssvhe
+  h1WgtCategories_->SetBinContent(17,sumW_Epsilon_bHE_Num);
+
+  h1UnwCategories_->SetBinContent(18,Epsilon_bHP_Num);                            // epsilon b ssvhe
+  h1WgtCategories_->SetBinContent(18,sumW_Epsilon_bHP_Num);
+
+  h1UnwCategories_->SetBinContent(19,Epsilon_bCSVM_Num);                          // epsilon b ssvhe
+  h1WgtCategories_->SetBinContent(19,sumW_Epsilon_bCSVM_Num);
+  
+  h1UnwCategories_->SetBinContent(20,Epsilon_bCSVT_Num);                          // epsilon b ssvhe
+  h1WgtCategories_->SetBinContent(20,sumW_Epsilon_bCSVT_Num);
 
 
+  // Definition of efficiencies objects
+  myEff Al_unw(Al_Num,Al_Den,0.,0.);
+  myEff Al_wgt(sumW_Al_Num,sumW_Al_Den,sumW2_Al_Num,sumW2_Al_Den);
+
+  myEff Chad_unw(CHad_Num,Al_Num,0.,0.);
+  myEff Chad_wgt(sumW_CHad_Num,sumW_Al_Num,sumW_CHad_Num,sumW_Al_Num);
+  
+  myEff ChadAny_unw(CHad_Num_alljets,Al_Num_alljets,0.,0.);
+  myEff ChadAny_wgt(sumW_CHad_Num_alljets,sumW_Al_Num_alljets,sumW2_CHad_Num_alljets,sumW2_Al_Num_alljets);
+
+  myEff Epsilonl_unw(Epsilon_l_Num,Epsilon_l_Den,0.,0.);    
+  myEff Epsilonl_wgt(sumW_Epsilon_l_Num,sumW_Epsilon_l_Den,sumW2_Epsilon_l_Num,sumW2_Epsilon_l_Den);  
+
+  myEff EpsilonlAny_unw(Epsilon_l_Num_alljets,Epsilon_l_Den_alljets,0.,0.);    
+  myEff EpsilonlAny_wgt(sumW_Epsilon_l_Num_alljets,sumW_Epsilon_l_Den_alljets,sumW2_Epsilon_l_Num_alljets,sumW2_Epsilon_l_Den_alljets);    
+
+  myEff EpsilonbHE_unw(Epsilon_bHE_Num,Epsilon_bHE_Den,0.,0.);
+  myEff EpsilonbHE_wgt(sumW_Epsilon_bHE_Num,sumW_Epsilon_bHE_Den,sumW2_Epsilon_bHE_Num,sumW2_Epsilon_bHE_Den);
+
+  myEff EpsilonbHP_unw(Epsilon_bHP_Num,Epsilon_bHP_Den,0.,0.);
+  myEff EpsilonbHP_wgt(sumW_Epsilon_bHP_Num,sumW_Epsilon_bHP_Den,sumW2_Epsilon_bHP_Num,sumW2_Epsilon_bHP_Den);
+
+  myEff EpsilonbCSVM_unw(Epsilon_bCSVM_Num,Epsilon_bCSVM_Den,0.,0.);
+  myEff EpsilonbCSVM_wgt(sumW_Epsilon_bCSVM_Num,sumW_Epsilon_bCSVM_Den,sumW2_Epsilon_bCSVM_Num,sumW2_Epsilon_bCSVM_Den);
+  
+  myEff EpsilonbCSVT_unw(Epsilon_bCSVT_Num,Epsilon_bCSVT_Den,0.,0.);
+  myEff EpsilonbCSVT_wgt(sumW_Epsilon_bCSVT_Num,sumW_Epsilon_bCSVT_Den,sumW2_Epsilon_bCSVT_Num,sumW2_Epsilon_bCSVT_Den);
+  
+  // Definition of correction factors (unweighted)
+  Double_t UnwAl            = Al_unw.eff_;
+  Double_t UnwCHad          = Chad_unw.eff_;
+  Double_t UnwCHad_Any      = ChadAny_unw.eff_;
+  Double_t UnwEpsilon_l     = Epsilonl_unw.eff_;
+  Double_t UnwEpsilon_l_Any = EpsilonlAny_unw.eff_;
+  Double_t UnwEpsilon_bHE   = EpsilonbHE_unw.eff_; 
+  Double_t UnwEpsilon_bHP   = EpsilonbHP_unw.eff_; 
+  Double_t UnwEpsilon_bCSVM = EpsilonbCSVM_unw.eff_; 
+  Double_t UnwEpsilon_bCSVT = EpsilonbCSVT_unw.eff_; 
+
+  // Definition of correction factors (weighted)
+  Double_t Al               = Al_wgt.eff_;
+  Double_t CHad             = Chad_wgt.eff_;
+  Double_t CHad_Any         = ChadAny_wgt.eff_;
+  Double_t Epsilon_l        = Epsilonl_wgt.eff_;
+  Double_t Epsilon_l_Any    = EpsilonlAny_wgt.eff_;
+  Double_t Epsilon_bHE      = EpsilonbHE_wgt.eff_; 
+  Double_t Epsilon_bHP      = EpsilonbHP_wgt.eff_; 
+  Double_t Epsilon_bCSVM    = EpsilonbCSVM_wgt.eff_; 
+  Double_t Epsilon_bCSVT    = EpsilonbCSVT_wgt.eff_; 
+  
+  // Initialization of errors
   Double_t ErrUnwAl(-1.), ErrAl(-1.);  
   Double_t ErrUnwCHad(-1.), ErrCHad(-1.);
+  Double_t ErrUnwCHad_Any(-1.), ErrCHad_Any(-1.);
   Double_t ErrUnwEpsilonl(-1.), ErrEpsilonl(-1.);
+  Double_t ErrUnwEpsilonlAny(-1.), ErrEpsilonlAny(-1.);
   Double_t ErrUnwEpsilonbHE(-1.), ErrEpsilonbHE(-1.);
   Double_t ErrUnwEpsilonbHP(-1.), ErrEpsilonbHP(-1.);
-
-  // trivial error (not taking into account weights)
-
-  //Double_t Al =  sumW_Al_Num/sumW_Al_Den;
-  //Double_t CHad =  sumW_CHad_Num/sumW_Al_Num;
-
-  //Double_t ErrAl   = TMath::Sqrt((Al*(1-Al))/sumW_Al_Den);
-  //Double_t ErrCHad = TMath::Sqrt((CHad*(1-CHad))/sumW_Al_Num);
-
+  Double_t ErrUnwEpsilonbCSVM(-1.), ErrEpsilonbCSVM(-1.);
+  Double_t ErrUnwEpsilonbCSVT(-1.), ErrEpsilonbCSVT(-1.);
+  
   if(useClopperPearsonErrors_){
     
-    TEfficiency eff;
+    ErrUnwAl       = Al_unw.errCP_;
+    ErrUnwCHad     = Chad_unw.errCP_;
+    ErrUnwCHad_Any = ChadAny_unw.errCP_;
+    			 
+    ErrAl       = Al_wgt.errCP_;
+    ErrCHad     = Chad_wgt.errCP_;
+    ErrCHad_Any = ChadAny_wgt.errCP_;
     
-    ErrUnwAl =   (eff.ClopperPearson(Al_Den+0.5,Al_Num+0.5,0.683 ,1)-UnwAl);
-    ErrUnwCHad = (eff.ClopperPearson(Al_Num+0.5,CHad_Num+0.5,0.683 ,1)-UnwCHad);
-    ErrUnwEpsilonl = (eff.ClopperPearson(Epsilon_l_Den+0.5,Epsilon_l_Num+0.5,0.683,1)-UnwEpsilon_l);
-    ErrUnwEpsilonbHE = (eff.ClopperPearson(Epsilon_bHE_Den+0.5,Epsilon_bHE_Num+0.5,0.683,1)-UnwEpsilon_bHE);
-    ErrUnwEpsilonbHP = (eff.ClopperPearson(Epsilon_bHP_Den+0.5,Epsilon_bHP_Num+0.5,0.683,1)-UnwEpsilon_bHP);
-
-    ErrAl =   (eff.ClopperPearson(sumW_Al_Den+0.5,sumW_Al_Num+0.5,0.683 ,1)-Al);
-    ErrCHad = (eff.ClopperPearson(sumW_Al_Num+0.5,sumW_CHad_Num+0.5,0.683 ,1)-CHad);
-    ErrEpsilonl = (eff.ClopperPearson(sumW_Epsilon_l_Den+0.5,sumW_Epsilon_l_Num+0.5,0.683,1)-Epsilon_l); 
-    ErrEpsilonbHE = (eff.ClopperPearson(sumW_Epsilon_bHE_Den+0.5,sumW_Epsilon_bHE_Num+0.5,0.683,1)-Epsilon_bHE);
-    ErrEpsilonbHP = (eff.ClopperPearson(sumW_Epsilon_bHP_Den+0.5,sumW_Epsilon_bHP_Num+0.5,0.683,1)-Epsilon_bHP);
+    ErrUnwEpsilonl    = Epsilonl_unw.errCP_;	
+    ErrUnwEpsilonlAny = EpsilonlAny_unw.errCP_; 
+    ErrUnwEpsilonbHE  = EpsilonbHE_unw.errCP_; 
+    ErrUnwEpsilonbHP  = EpsilonbHP_unw.errCP_;
+    ErrUnwEpsilonbCSVM  = EpsilonbCSVM_unw.errCP_; 
+    ErrUnwEpsilonbCSVT  = EpsilonbCSVT_unw.errCP_;
+   
+    ErrEpsilonl    = Epsilonl_wgt.errCP_;
+    ErrEpsilonlAny = EpsilonlAny_wgt.errCP_;
+    ErrEpsilonbHE  = EpsilonbHE_wgt.errCP_;
+    ErrEpsilonbHP  = EpsilonbHP_wgt.errCP_;
+    ErrEpsilonbCSVM  = EpsilonbCSVM_wgt.errCP_;
+    ErrEpsilonbCSVT  = EpsilonbCSVT_wgt.errCP_;
 
   } else{
-    
-    // simple binomial errors
-    
-    ErrUnwAl   = TMath::Sqrt((UnwAl*(1-UnwAl))/Al_Den);
-    ErrUnwCHad = TMath::Sqrt((UnwCHad*(1-UnwCHad))/Al_Num);
-    ErrUnwEpsilonl = TMath::Sqrt((UnwEpsilon_l*(1-UnwEpsilon_l))/Epsilon_l_Den);
-    ErrUnwEpsilonbHE = TMath::Sqrt((UnwEpsilon_bHE*(1-UnwEpsilon_bHE))/Epsilon_bHE_Den);
-    ErrUnwEpsilonbHP = TMath::Sqrt((UnwEpsilon_bHP*(1-UnwEpsilon_bHP))/Epsilon_bHP_Den);
 
-    // actual formula taking into account the weights in the errors detailed in here:  www.desy.de/~blist/notes/effic.ps.gz
-    // errEff = sqrt(sumw2_pass * (sumW_fail)^2 + (sumW2_fail) * (sumW_pass)^2) / (sumW_all)^2 
+    ErrUnwAl       = Al_unw.errBin_;	 
+    ErrUnwCHad     = Chad_unw.errBin_;	 
+    ErrUnwCHad_Any = ChadAny_unw.errBin_;
+    		     	 	   
+    ErrAl       = Al_wgt.errImp_;	 
+    ErrCHad     = Chad_wgt.errImp_;	 
+    ErrCHad_Any = ChadAny_wgt.errImp_;
 
-    ErrAl   =  TMath::Sqrt(sumW2_Al_Num*(sumW_Al_Den-sumW_Al_Num)*(sumW_Al_Den-sumW_Al_Num) + (sumW2_Al_Den - sumW2_Al_Num)*sumW_Al_Num*sumW_Al_Num)/(sumW_Al_Den*sumW_Al_Den);
-    ErrCHad =  TMath::Sqrt(sumW2_CHad_Num*(sumW_Al_Num-sumW_CHad_Num)*(sumW_Al_Num-sumW_CHad_Num) + (sumW2_Al_Num - sumW2_CHad_Num)*sumW_CHad_Num*sumW_CHad_Num)/(sumW_Al_Num*sumW_Al_Num);
-    ErrEpsilonl = TMath::Sqrt(sumW2_Epsilon_l_Num*(sumW_Epsilon_l_Den-sumW_Epsilon_l_Num)*(sumW_Epsilon_l_Den-sumW_Epsilon_l_Num) + (sumW2_Epsilon_l_Den - sumW2_Epsilon_l_Num)*sumW_Epsilon_l_Num*sumW_Epsilon_l_Num)/(sumW_Epsilon_l_Den*sumW_Epsilon_l_Den);
-    ErrEpsilonbHE = TMath::Sqrt(sumW2_Epsilon_bHE_Num*(sumW_Epsilon_bHE_Den-sumW_Epsilon_bHE_Num)*(sumW_Epsilon_bHE_Den-sumW_Epsilon_bHE_Num) + (sumW2_Epsilon_bHE_Den - sumW2_Epsilon_bHE_Num)*sumW_Epsilon_bHE_Num*sumW_Epsilon_bHE_Num)/(sumW_Epsilon_bHE_Den*sumW_Epsilon_bHE_Den);
-    ErrEpsilonbHP = TMath::Sqrt(sumW2_Epsilon_bHP_Num*(sumW_Epsilon_bHP_Den-sumW_Epsilon_bHP_Num)*(sumW_Epsilon_bHP_Den-sumW_Epsilon_bHP_Num) + (sumW2_Epsilon_bHP_Den - sumW2_Epsilon_bHP_Num)*sumW_Epsilon_bHP_Num*sumW_Epsilon_bHP_Num)/(sumW_Epsilon_bHP_Den*sumW_Epsilon_bHP_Den);
+    ErrUnwEpsilonl    = Epsilonl_unw.errBin_;
+    ErrUnwEpsilonlAny = EpsilonlAny_unw.errBin_; 
+    ErrUnwEpsilonbHE  = EpsilonbHE_unw.errBin_; 
+    ErrUnwEpsilonbHP  = EpsilonbHP_unw.errBin_; 
+    ErrUnwEpsilonbCSVM  = EpsilonbCSVM_unw.errBin_; 
+    ErrUnwEpsilonbCSVT  = EpsilonbCSVT_unw.errBin_; 
+
+    ErrEpsilonl    = Epsilonl_wgt.errImp_;
+    ErrEpsilonlAny = EpsilonlAny_wgt.errImp_;
+    ErrEpsilonbHE  = EpsilonbHE_wgt.errImp_;
+    ErrEpsilonbHP  = EpsilonbHP_wgt.errImp_;
+    ErrEpsilonbCSVM  = EpsilonbCSVM_wgt.errImp_;
+    ErrEpsilonbCSVT  = EpsilonbCSVT_wgt.errImp_;
+    
   }
 
   // ================================= write on  screen ======================
 
-  std::cout<<"================================================================="<<std::endl;
-  std::cout<<"Summary of selected events:  ";
+  cout<<"================================================================="<<endl;
+  cout<<"Summary of selected events:  ";
   if( isZMM ) {
-    std::cout<<"| Selected Z->mm channel"<<std::endl;
+    cout<<"| Selected Z->mm channel"<<endl;
   } else if( isZEE ) {
-    std::cout<<"| Selected Z->ee channel"<<std::endl;
+    cout<<"| Selected Z->ee channel"<<endl;
   }
-  std::cout<<"---------------------------Selection cuts-----------------------"<<std::endl;
+  cout<<"---------------------------Selection cuts-----------------------"<<endl;
   if( isZEE ) {
-    std::cout<<"ele pT<" << elePtCut_  <<" ele |eta|< " << eleEtaCut_;
+    cout<<"ele pT<" << elePtCut_  <<" ele |eta|< " << eleEtaCut_;
   } else if ( isZMM ){
-    std::cout<<"mu pT< " << muonPtCut_ <<" mu  |eta|< " << muonEtaCut_;
+    cout<<"mu pT< " << muonPtCut_ <<" mu  |eta|< " << muonEtaCut_;
   }
-  std::cout<<" jet pT<"  << jetPtCut_  <<" jet |eta|< " << jetEtaCut_  <<std::endl;
-  std::cout<< minMassCut_ <<" < m(ll)< " << maxMassCut_<<" dR(l,l) <" << dRLeptons_ <<" dR(j,j) < "<< dRJets_ <<std::endl;
-  std::cout<<"================================================================="<<std::endl;
-  std::cout<<"N(Tot events):                "<<N_tot_events<<std::endl;	  
-  std::cout<<"SumW(Tot events):             "<<sumW_tot_events<<std::endl;	  
-  std::cout<<"SumW2(Tot events):            "<<sumW2_tot_events<<std::endl;
-  std::cout<<"================================================================="<<std::endl;
-  std::cout<<"N(Sel Flav):                  "<<N_right_flavour<<"\t | "<< (N_right_flavour/N_tot_events)*100.<<"% of total"<<std::endl;	  
-  std::cout<<"SumW(Sel Flav):               "<<sumW_right_flavour<<"\t | "<< (sumW_right_flavour/sumW_tot_events)*100.<<"% of total"<<std::endl;	   
-  std::cout<<"SumW2(Sel Flav):              "<<sumW2_right_flavour<<std::endl;
-  std::cout<<"================================================================="<<std::endl;  
-  std::cout<<"N(Gen Z):                     "<<N_gen_Z_yes<<" \t | "<< (N_gen_Z_yes/N_tot_events)*100.<<"% of total"<<" \t | "<< (N_gen_Z_yes/N_right_flavour)*100.<<"% of Sel Flav"<<std::endl;  
-  std::cout<<"SumW(Gen Z):                  "<<sumW_gen_Z_yes<<"\t | "<< (sumW_gen_Z_yes/sumW_tot_events)*100.<<"% of total"<<std::endl;
-  std::cout<<"SumW2(Gen Z):                 "<<sumW2_gen_Z_yes<<std::endl;	  
-  std::cout<<"================================================================="<<std::endl;
-  std::cout<<"N(Gen b):                     "<<N_gen_b_yes<<" \t | "<< (N_gen_b_yes/N_tot_events)*100.<<"% of total"<<" \t | "<< (N_gen_b_yes/N_right_flavour)*100.<<"% of Sel Flav"<<std::endl;
-  std::cout<<"SumW(Gen b):                  "<<sumW_gen_b_yes<<"\t | "<< (sumW_gen_b_yes/sumW_tot_events)*100.<<"% of total"<<std::endl;
-  std::cout<<"SumW2(Gen b):                 "<<sumW2_gen_b_yes<<std::endl;	  
-  std::cout<<"================================================================="<<std::endl;
-  std::cout<<"N(Gen Z kin):                 "<<N_gen_Zkin_yes<<" \t | "<< (N_gen_Zkin_yes/N_tot_events)*100.<<"% of total"<<" \t | "<< (N_gen_Zkin_yes/N_right_flavour)*100.<<"% of Sel Flav"<<std::endl;
-  std::cout<<"SumW(Gen Z kin):              "<<sumW_gen_Zkin_yes<<"\t | "<< (sumW_gen_Zkin_yes/sumW_tot_events)*100.<<"% of total"<<std::endl;	  
-  std::cout<<"SumW2(Gen Z kin):             "<<sumW2_gen_Zkin_yes<<std::endl;	  
-  std::cout<<"================================================================="<<std::endl;
-  std::cout<<"N(Gen Z kin && Gen b ):       "<<Al_Num<<" \t | "<< (Al_Num/N_tot_events)*100.<<"% of total"<<" \t | "<< (Al_Num/N_right_flavour)*100.<<"% of Sel Flav"<<std::endl;	  
-  std::cout<<"SumW(Gen Z kin && Gen b):     "<<sumW_Al_Num<<"\t | "<< (sumW_Al_Num/sumW_tot_events)*100.<<"% of total"<<std::endl;
-  std::cout<<"SumW2(Gen Z kin && Gen b):    "<<sumW2_Al_Num<<std::endl;	  
-  std::cout<<"================================================================="<<std::endl;
-  std::cout<<"N(Gen Z && Gen b):            "<<Al_Den<<" \t | "<< (Al_Den/N_tot_events)*100.<<"% of total"<<" \t | "<< (Al_Den/N_right_flavour)*100.<<"% of Sel Flav"<<std::endl;
-  std::cout<<"Sumw(Gen Z && Gen b):         "<<sumW_Al_Den<<"\t | "<< (sumW_Al_Den/sumW_tot_events)*100.<<"% of total"<<std::endl;
-  std::cout<<"Sumw2(Gen Z && Gen b):        "<<sumW2_Al_Den<<std::endl;
-  std::cout<<"================================================================="<<std::endl;
-  std::cout<<"N(Reco Z kin):                "<<N_rec_Zkin_yes<<" \t | "<< (N_rec_Zkin_yes/N_tot_events)*100.<<"% of total"<<" \t | "<< (N_rec_Zkin_yes/N_right_flavour)*100.<<"% of Sel Flav"<<std::endl;  	  
-  std::cout<<"Sumw(Reco Z kin):             "<<sumW_rec_Zkin_yes<<"\t | "<< (sumW_rec_Zkin_yes/sumW_tot_events)*100.<<"% of total"<<std::endl; 
-  std::cout<<"Sumw2(Reco Z kin):            "<<sumW2_rec_Zkin_yes<<std::endl;
-  std::cout<<"================================================================="<<std::endl;
-  std::cout<<"N(Reco b):                    "<<N_rec_b_yes<<" \t | "<< (N_rec_b_yes/N_tot_events)*100.<<"% of total"<<" \t | "<< (N_rec_b_yes/N_right_flavour)*100.<<"% of Sel Flav"<<std::endl;
-  std::cout<<"SumW(Reco b):                 "<<sumW_rec_b_yes<<"\t | "<< (sumW_rec_b_yes/sumW_tot_events)*100.<<"% of total"<<std::endl;
-  std::cout<<"SumW2(Reco b):                "<<sumW2_rec_b_yes<<std::endl;
-  std::cout<<"================================================================="<<std::endl;
-  std::cout<<"N(Reco Z kin && Reco b):      "<<CHad_Num<<" \t | "<< (CHad_Num/N_tot_events)*100.<<"% of total"<<" \t | "<< (CHad_Num/N_right_flavour)*100.<<"% of Sel Flav"<<std::endl;
-  std::cout<<"SumW(Reco Z kin && Reco b) :  "<<sumW_CHad_Num<<"\t | "<< (sumW_CHad_Num/sumW_tot_events)*100.<<"% of total"<<std::endl;
-  std::cout<<"SumW2(Reco Z kin && Reco b):  "<<sumW2_CHad_Num<<std::endl;
+  cout<<" jet pT<"  << jetPtCut_  <<" jet |eta|< " << jetEtaCut_  <<endl;
+  cout<< minMassCut_ <<" < m(ll)< " << maxMassCut_<<" dR(l,l) <" << dRLeptons_ <<" dR(j,j) < "<< dRJets_ <<endl;
+  cout<<"================================================================="<<endl;
+  cout<<"N(Tot events)                "<<N_tot_events<<endl;	  
+  cout<<"SumW(Tot events)             "<<sumW_tot_events<<endl;	  
+  cout<<"SumW2(Tot events)            "<<sumW2_tot_events<<endl;
+  cout<<"================================================================="<<endl;
+  cout<<"N(Sel Flav)                  "<<N_right_flavour<<"\t | "<< (N_right_flavour/N_tot_events)*100.<<"% of total"<<endl;	  
+  cout<<"SumW(Sel Flav)               "<<sumW_right_flavour<<"\t | "<< (sumW_right_flavour/sumW_tot_events)*100.<<"% of total"<<endl;	   
+  cout<<"SumW2(Sel Flav)              "<<sumW2_right_flavour<<endl;
+  cout<<"================================================================="<<endl;  
+  cout<<"N(Gen Z)                     "<<N_gen_Z_yes<<" \t | "<< (N_gen_Z_yes/N_tot_events)*100.<<"% of total"<<" \t | "<< (N_gen_Z_yes/N_right_flavour)*100.<<"% of Sel Flav"<<endl;  
+  cout<<"SumW(Gen Z)                  "<<sumW_gen_Z_yes<<"\t | "<< (sumW_gen_Z_yes/sumW_tot_events)*100.<<"% of total"<<endl;
+  cout<<"SumW2(Gen Z)                 "<<sumW2_gen_Z_yes<<endl;	  
+  cout<<"================================================================="<<endl;
+  cout<<"N(Gen b)                     "<<N_gen_b_yes<<" \t | "<< (N_gen_b_yes/N_tot_events)*100.<<"% of total"<<" \t | "<< (N_gen_b_yes/N_right_flavour)*100.<<"% of Sel Flav"<<endl;
+  cout<<"SumW(Gen b)                  "<<sumW_gen_b_yes<<"\t | "<< (sumW_gen_b_yes/sumW_tot_events)*100.<<"% of total"<<endl;
+  cout<<"SumW2(Gen b)                 "<<sumW2_gen_b_yes<<endl;	  
+  cout<<"================================================================="<<endl;
+  cout<<"N(Gen Z kin)                 "<<N_gen_Zkin_yes<<" \t | "<< (N_gen_Zkin_yes/N_tot_events)*100.<<"% of total"<<" \t | "<< (N_gen_Zkin_yes/N_right_flavour)*100.<<"% of Sel Flav"<<endl;
+  cout<<"SumW(Gen Z kin)              "<<sumW_gen_Zkin_yes<<"\t | "<< (sumW_gen_Zkin_yes/sumW_tot_events)*100.<<"% of total"<<endl;	  
+  cout<<"SumW2(Gen Z kin)             "<<sumW2_gen_Zkin_yes<<endl;	  
+  cout<<"================================================================="<<endl;
+  cout<<"N(Gen Z kin && Gen b )       "<<Al_Num<<" \t | "<< (Al_Num/N_tot_events)*100.<<"% of total"<<" \t | "<< (Al_Num/N_right_flavour)*100.<<"% of Sel Flav"<<endl;	  
+  cout<<"SumW(Gen Z kin && Gen b)     "<<sumW_Al_Num<<"\t | "<< (sumW_Al_Num/sumW_tot_events)*100.<<"% of total"<<endl;
+  cout<<"SumW2(Gen Z kin && Gen b)    "<<sumW2_Al_Num<<endl;	  
+  cout<<"================================================================="<<endl;
+  cout<<"N(Gen Z && Gen b)            "<<Al_Den<<" \t | "<< (Al_Den/N_tot_events)*100.<<"% of total"<<" \t | "<< (Al_Den/N_right_flavour)*100.<<"% of Sel Flav"<<endl;
+  cout<<"Sumw(Gen Z && Gen b)         "<<sumW_Al_Den<<"\t | "<< (sumW_Al_Den/sumW_tot_events)*100.<<"% of total"<<endl;
+  cout<<"Sumw2(Gen Z && Gen b)        "<<sumW2_Al_Den<<endl;
+  cout<<"================================================================="<<endl;
+  cout<<"N(Reco Z kin)                "<<N_rec_Zkin_yes<<" \t | "<< (N_rec_Zkin_yes/N_tot_events)*100.<<"% of total"<<" \t | "<< (N_rec_Zkin_yes/N_right_flavour)*100.<<"% of Sel Flav"<<endl;  	  
+  cout<<"Sumw(Reco Z kin)             "<<sumW_rec_Zkin_yes<<"\t | "<< (sumW_rec_Zkin_yes/sumW_tot_events)*100.<<"% of total"<<endl; 
+  cout<<"Sumw2(Reco Z kin)            "<<sumW2_rec_Zkin_yes<<endl;
+  cout<<"================================================================="<<endl;
+  cout<<"N(Reco b)                    "<<N_rec_b_yes<<" \t | "<< (N_rec_b_yes/N_tot_events)*100.<<"% of total"<<" \t | "<< (N_rec_b_yes/N_right_flavour)*100.<<"% of Sel Flav"<<endl;
+  cout<<"SumW(Reco b)                 "<<sumW_rec_b_yes<<"\t | "<< (sumW_rec_b_yes/sumW_tot_events)*100.<<"% of total"<<endl;
+  cout<<"SumW2(Reco b)                "<<sumW2_rec_b_yes<<endl;
+  cout<<"================================================================="<<endl;
+  cout<<"N(Reco Z kin && Reco b)      "<<CHad_Num<<" \t | "<< (CHad_Num/N_tot_events)*100.<<"% of total"<<" \t | "<< (CHad_Num/N_right_flavour)*100.<<"% of Sel Flav"<<endl;
+  cout<<"SumW(Reco Z kin && Reco b)   "<<sumW_CHad_Num<<"\t | "<< (sumW_CHad_Num/sumW_tot_events)*100.<<"% of total"<<endl;
+  cout<<"SumW2(Reco Z kin && Reco b)  "<<sumW2_CHad_Num<<endl;
   if ( !partonLevel_ ) {
-	 std::cout<<"================================================================="<<std::endl;
-         std::cout<<"Final acceptance (A_l) & hadron correction factor (C_had) "<<std::endl;
- 	 std::cout<<"================================================================="<<std::endl;
-         std::cout<<"Unweighted A_l   :          "<< std::setprecision (3) << UnwAl*100.          <<" +/- "<< std::setprecision (2) << ErrUnwAl*100.  <<"%"<<std::endl;
-         std::cout<<"Weighted A_l     :          "<< std::setprecision (3) << Al*100.             <<" +/- "<< std::setprecision (2) << ErrAl*100.     <<"%"<<std::endl;
-         std::cout<<"Unweighted C_had :          "<< std::setprecision (3) << UnwCHad*100.        <<" +/- "<< std::setprecision (2) << ErrUnwCHad*100.<<"%"<<std::endl;
-         std::cout<<"Weighted C_had   :          "<< std::setprecision (3) << CHad*100.           <<" +/- "<< std::setprecision (2) << ErrCHad*100.   <<"%"<<std::endl;
-	 std::cout<<"Unweighted Epsilon_l :      "<< std::setprecision (3) << UnwEpsilon_l*100.   <<" +/- "<< std::setprecision (2) << ErrUnwEpsilonl*100.<<"%"<<std::endl;
-         std::cout<<"Weighted Epsilon_l   :      "<< std::setprecision (3) << Epsilon_l*100.      <<" +/- "<< std::setprecision (2) << ErrEpsilonl*100.   <<"%"<<std::endl; 
-	 std::cout<<"Unweighted Epsilon_b (HE) : "<< std::setprecision (3) << UnwEpsilon_bHE*100. <<" +/- "<< std::setprecision (2) << ErrUnwEpsilonbHE*100.<<"%"<<std::endl;
-         std::cout<<"Weighted Epsilon_b (HE)   : "<< std::setprecision (3) << Epsilon_bHE*100.    <<" +/- "<< std::setprecision (2) << ErrEpsilonbHE*100.   <<"%"<<std::endl;
-	 std::cout<<"Unweighted Epsilon_b (HP) : "<< std::setprecision (3) << UnwEpsilon_bHP*100. <<" +/- "<< std::setprecision (2) << ErrUnwEpsilonbHP*100.<<"%"<<std::endl;
-         std::cout<<"Weighted Epsilon_b (HP)   : "<< std::setprecision (3) << Epsilon_bHP*100.    <<" +/- "<< std::setprecision (2) << ErrEpsilonbHP*100.   <<"%"<<std::endl; 
+	 cout<<"================================================================="<<endl;
+         cout<<"Final acceptance (A_l) & hadron correction factor (C_had) "<<endl;
+ 	 cout<<"================================================================="<<endl;
+         cout<<"Unweighted A_l              "<< setprecision (3) << UnwAl*100.          <<" +/- "<< setprecision (2) << ErrUnwAl*100.  <<"%"<<endl;
+         cout<<"Weighted A_l                "<< setprecision (3) << Al*100.             <<" +/- "<< setprecision (2) << ErrAl*100.     <<"%"<<endl;
+         cout<<"Unweighted C_had            "<< setprecision (3) << UnwCHad*100.        <<" +/- "<< setprecision (2) << ErrUnwCHad*100.<<"%"<<endl;
+         cout<<"Weighted C_had              "<< setprecision (3) << CHad*100.           <<" +/- "<< setprecision (2) << ErrCHad*100.   <<"%"<<endl;
+	 cout<<"Unweighted C_had (any)      "<< setprecision (3) << UnwCHad_Any*100.    <<" +/- "<< setprecision (2) << ErrUnwCHad_Any*100.<<"%"<<endl;
+	 cout<<"Weighted C_had (any)        "<< setprecision (3) << CHad_Any*100.       <<" +/- "<< setprecision (2) << ErrCHad_Any*100.   <<"%"<<endl;
+	 cout<<"Unweighted Epsilon_l        "<< setprecision (3) << UnwEpsilon_l*100.   <<" +/- "<< setprecision (2) << ErrUnwEpsilonl*100.<<"%"<<endl;
+         cout<<"Weighted Epsilon_l          "<< setprecision (3) << Epsilon_l*100.      <<" +/- "<< setprecision (2) << ErrEpsilonl*100.   <<"%"<<endl; 
+	 cout<<"Unweighted Epsilon_l (any)  "<< setprecision (3) << UnwEpsilon_l_Any*100.<<" +/- "<< setprecision (2) << ErrUnwEpsilonlAny*100.<<"%"<<endl;
+	 cout<<"Weighted Epsilon_l (any)    "<< setprecision (3) << Epsilon_l_Any*100.   <<" +/- "<< setprecision (2) << ErrEpsilonlAny*100.   <<"%"<<endl;   
+	 cout<<"Unweighted Epsilon_b (HE)   "<< setprecision (3) << UnwEpsilon_bHE*100. <<" +/- "<< setprecision (2) << ErrUnwEpsilonbHE*100.<<"%"<<endl;
+         cout<<"Weighted Epsilon_b (HE)     "<< setprecision (3) << Epsilon_bHE*100.    <<" +/- "<< setprecision (2) << ErrEpsilonbHE*100.   <<"%"<<endl;
+	 cout<<"Unweighted Epsilon_b (HP)   "<< setprecision (3) << UnwEpsilon_bHP*100. <<" +/- "<< setprecision (2) << ErrUnwEpsilonbHP*100.<<"%"<<endl;
+         cout<<"Weighted Epsilon_b (HP)     "<< setprecision (3) << Epsilon_bHP*100.    <<" +/- "<< setprecision (2) << ErrEpsilonbHP*100.   <<"%"<<endl; 
+	 cout<<"Unweighted Epsilon_b (CSVM) "<< setprecision (3) << UnwEpsilon_bCSVM*100. <<" +/- "<< setprecision (2) << ErrUnwEpsilonbCSVM*100.<<"%"<<endl;
+	 cout<<"Weighted Epsilon_b (CSVM)   "<< setprecision (3) << Epsilon_bCSVM*100.    <<" +/- "<< setprecision (2) << ErrEpsilonbCSVM*100.   <<"%"<<endl;
+	 cout<<"Unweighted Epsilon_b (CSVT) "<< setprecision (3) << UnwEpsilon_bCSVT*100. <<" +/- "<< setprecision (2) << ErrUnwEpsilonbCSVT*100.<<"%"<<endl;
+	 cout<<"Weighted Epsilon_b (CSVT)   "<< setprecision (3) << Epsilon_bCSVT*100.    <<" +/- "<< setprecision (2) << ErrEpsilonbCSVT*100.   <<"%"<<endl; 
 
   } else {
-         std::cout<<"================================================================="<<std::endl;
-         std::cout<<"Final acceptance (A_l) & parton correction factor (C_part) "<<std::endl;
-         std::cout<<"================================================================="<<std::endl;
-         std::cout<<"Unweighted A_l    :          "<< std::setprecision (3) << UnwAl*100.          <<" +/- "<< std::setprecision (2) << ErrUnwAl*100.  <<"%"<<std::endl;
-         std::cout<<"Weighted A_l      :          "<< std::setprecision (3) << Al*100.             <<" +/- "<< std::setprecision (2) << ErrAl*100.     <<"%"<<std::endl;
-         std::cout<<"Unweighted C_part :          "<< std::setprecision (3) << UnwCHad*100.        <<" +/- "<< std::setprecision (2) << ErrUnwCHad*100.<<"%"<<std::endl;
-         std::cout<<"Weighted C_part   :          "<< std::setprecision (3) << CHad*100.           <<" +/- "<< std::setprecision (2) << ErrCHad*100.   <<"%"<<std::endl;
-	 std::cout<<"Unweighted Epsilon_l :       "<< std::setprecision (3) << UnwEpsilon_l*100.   <<" +/- "<< std::setprecision (2) << ErrUnwEpsilonl*100.<<"%"<<std::endl;
-         std::cout<<"Weighted Epsilon_l   :       "<< std::setprecision (3) << Epsilon_l*100.      <<" +/- "<< std::setprecision (2) << ErrEpsilonl*100.   <<"%"<<std::endl;
-	 std::cout<<"Unweighted Epsilon_b (HE) :  "<< std::setprecision (3) << UnwEpsilon_bHE*100. <<" +/- "<< std::setprecision (2) << ErrUnwEpsilonbHE*100.<<"%"<<std::endl;
-         std::cout<<"Weighted Epsilon_b (HE)   :  "<< std::setprecision (3) << Epsilon_bHE*100.    <<" +/- "<< std::setprecision (2) << ErrEpsilonbHE*100.   <<"%"<<std::endl;
-	 std::cout<<"Unweighted Epsilon_b (HP) :  "<< std::setprecision (3) << UnwEpsilon_bHP*100. <<" +/- "<< std::setprecision (2) << ErrUnwEpsilonbHP*100.<<"%"<<std::endl;
-         std::cout<<"Weighted Epsilon_b (HP)   :  "<< std::setprecision (3) << Epsilon_bHP*100.    <<" +/- "<< std::setprecision (2) << ErrEpsilonbHP*100.   <<"%"<<std::endl; 
+         cout<<"================================================================="<<endl;
+         cout<<"Final acceptance (A_l) & parton correction factor (C_part) "<<endl;
+         cout<<"================================================================="<<endl;
+         cout<<"Unweighted A_l              "<< setprecision (3) << UnwAl*100.          <<" +/- "<< setprecision (2) << ErrUnwAl*100.  <<"%"<<endl;
+         cout<<"Weighted A_l                "<< setprecision (3) << Al*100.             <<" +/- "<< setprecision (2) << ErrAl*100.     <<"%"<<endl;
+         cout<<"Unweighted C_part           "<< setprecision (3) << UnwCHad*100.        <<" +/- "<< setprecision (2) << ErrUnwCHad*100.<<"%"<<endl;
+         cout<<"Weighted C_part             "<< setprecision (3) << CHad*100.           <<" +/- "<< setprecision (2) << ErrCHad*100.   <<"%"<<endl;
+	 cout<<"Unweighted C_part (any)     "<< setprecision (3) << UnwCHad_Any*100.    <<" +/- "<< setprecision (2) << ErrUnwCHad_Any*100.<<"%"<<endl;
+	 cout<<"Weighted C_part (any)       "<< setprecision (3) << CHad_Any*100.       <<" +/- "<< setprecision (2) << ErrCHad_Any*100.   <<"%"<<endl;
+	 cout<<"Unweighted Epsilon_l        "<< setprecision (3) << UnwEpsilon_l*100.   <<" +/- "<< setprecision (2) << ErrUnwEpsilonl*100.<<"%"<<endl;
+         cout<<"Weighted Epsilon_l          "<< setprecision (3) << Epsilon_l*100.      <<" +/- "<< setprecision (2) << ErrEpsilonl*100.   <<"%"<<endl;
+	 cout<<"Unweighted Epsilon_l (any)  "<< setprecision (3) << UnwEpsilon_l_Any*100.<<" +/- "<< setprecision (2) << ErrUnwEpsilonlAny*100.<<"%"<<endl;
+	 cout<<"Weighted Epsilon_l (any)    "<< setprecision (3) << Epsilon_l_Any*100.   <<" +/- "<< setprecision (2) << ErrEpsilonlAny*100.   <<"%"<<endl;   
+	 cout<<"Unweighted Epsilon_b (HE)   "<< setprecision (3) << UnwEpsilon_bHE*100. <<" +/- "<< setprecision (2) << ErrUnwEpsilonbHE*100.<<"%"<<endl;
+         cout<<"Weighted Epsilon_b (HE)     "<< setprecision (3) << Epsilon_bHE*100.    <<" +/- "<< setprecision (2) << ErrEpsilonbHE*100.   <<"%"<<endl;
+	 cout<<"Unweighted Epsilon_b (HP)   "<< setprecision (3) << UnwEpsilon_bHP*100. <<" +/- "<< setprecision (2) << ErrUnwEpsilonbHP*100.<<"%"<<endl;
+         cout<<"Weighted Epsilon_b (HP)     "<< setprecision (3) << Epsilon_bHP*100.    <<" +/- "<< setprecision (2) << ErrEpsilonbHP*100.   <<"%"<<endl; 
+	 cout<<"Unweighted Epsilon_b (CSVM) "<< setprecision (3) << UnwEpsilon_bCSVM*100. <<" +/- "<< setprecision (2) << ErrUnwEpsilonbCSVM*100.<<"%"<<endl;
+	 cout<<"Weighted Epsilon_b (CSVM)   "<< setprecision (3) << Epsilon_bCSVM*100.    <<" +/- "<< setprecision (2) << ErrEpsilonbCSVM*100.   <<"%"<<endl;
+	 cout<<"Unweighted Epsilon_b (CSVT) "<< setprecision (3) << UnwEpsilon_bCSVT*100. <<" +/- "<< setprecision (2) << ErrUnwEpsilonbCSVT*100.<<"%"<<endl;
+	 cout<<"Weighted Epsilon_b (CSVT)   "<< setprecision (3) << Epsilon_bCSVT*100.    <<" +/- "<< setprecision (2) << ErrEpsilonbCSVT*100.   <<"%"<<endl;  
   } 
-  std::cout<<"================================================================="<<std::endl;
+  cout<<"================================================================="<<endl;
  
 
   // ========================== write on the file ================================
 
-  outfile_<<"================================================================="<<std::endl;
+  outfile_<<"================================================================="<<endl;
   outfile_<<"Summary of selected events:  ";
   if( isZMM ) {
-    outfile_<<"| Selected Z->mm channel"<<std::endl;
+    outfile_<<"| Selected Z->mm channel"<<endl;
   } else if( isZEE ) {
-    outfile_<<"| Selected Z->ee channel"<<std::endl;
+    outfile_<<"| Selected Z->ee channel"<<endl;
   }
-  outfile_<<"---------------------------Selection cuts-----------------------"<<std::endl;
+  outfile_<<"---------------------------Selection cuts-----------------------"<<endl;
   if( isZEE ) {
     outfile_<<"ele pT<" << elePtCut_  <<" ele |eta|< " << eleEtaCut_;
   } else if ( isZMM ){
     outfile_<<"mu pT< " << muonPtCut_ <<" mu  |eta|< " << muonEtaCut_;
   }
-  outfile_<<" jet pT<"  << jetPtCut_  <<" jet |eta|< " << jetEtaCut_  <<std::endl;
-  outfile_<< minMassCut_ <<" < m(ll)< " << maxMassCut_<<" dR(l,l) <" << dRLeptons_ <<" dR(j,j) < "<< dRJets_ <<std::endl;
-  outfile_<<"================================================================="<<std::endl;
-  outfile_<<"N(Tot events):                "<<N_tot_events<<std::endl;	  
-  outfile_<<"SumW(Tot events):             "<<sumW_tot_events<<std::endl;	  
-  outfile_<<"SumW2(Tot events):            "<<sumW2_tot_events<<std::endl;
-  outfile_<<"================================================================="<<std::endl;
-  outfile_<<"N(Sel Flav):                  "<<N_right_flavour<<"\t | "<< (N_right_flavour/N_tot_events)*100.<<"% of total"<<std::endl;	  
-  outfile_<<"SumW(Sel Flav):               "<<sumW_right_flavour<<"\t | "<< (sumW_right_flavour/sumW_tot_events)*100.<<"% of total"<<std::endl;	   
-  outfile_<<"SumW2(Sel Flav):              "<<sumW2_right_flavour<<std::endl;
-  outfile_<<"================================================================="<<std::endl;  
-  outfile_<<"N(Gen Z):                     "<<N_gen_Z_yes<<" \t | "<< (N_gen_Z_yes/N_tot_events)*100.<<"% of total"<<" \t | "<< (N_gen_Z_yes/N_right_flavour)*100.<<"% of Sel Flav"<<std::endl;  
-  outfile_<<"SumW(Gen Z):                  "<<sumW_gen_Z_yes<<"\t | "<< (sumW_gen_Z_yes/sumW_tot_events)*100.<<"% of total"<<std::endl;
-  outfile_<<"SumW2(Gen Z):                 "<<sumW2_gen_Z_yes<<std::endl;	  
-  outfile_<<"================================================================="<<std::endl;
-  outfile_<<"N(Gen b):                     "<<N_gen_b_yes<<" \t | "<< (N_gen_b_yes/N_tot_events)*100.<<"% of total"<<" \t | "<< (N_gen_b_yes/N_right_flavour)*100.<<"% of Sel Flav"<<std::endl;
-  outfile_<<"SumW(Gen b):                  "<<sumW_gen_b_yes<<"\t | "<< (sumW_gen_b_yes/sumW_tot_events)*100.<<"% of total"<<std::endl;
-  outfile_<<"SumW2(Gen b):                 "<<sumW2_gen_b_yes<<std::endl;	  
-  outfile_<<"================================================================="<<std::endl;
-  outfile_<<"N(Gen Z kin):                 "<<N_gen_Zkin_yes<<" \t | "<< (N_gen_Zkin_yes/N_tot_events)*100.<<"% of total"<<" \t | "<< (N_gen_Zkin_yes/N_right_flavour)*100.<<"% of Sel Flav"<<std::endl;
-  outfile_<<"SumW(Gen Z kin):              "<<sumW_gen_Zkin_yes<<"\t | "<< (sumW_gen_Zkin_yes/sumW_tot_events)*100.<<"% of total"<<std::endl;	  
-  outfile_<<"SumW2(Gen Z kin):             "<<sumW2_gen_Zkin_yes<<std::endl;	  
-  outfile_<<"================================================================="<<std::endl;
-  outfile_<<"N(Gen Z kin && Gen b ):       "<<Al_Num<<" \t | "<< (Al_Num/N_tot_events)*100.<<"% of total"<<" \t | "<< (Al_Num/N_right_flavour)*100.<<"% of Sel Flav"<<std::endl;	  
-  outfile_<<"SumW(Gen Z kin && Gen b):     "<<sumW_Al_Num<<"\t | "<< (sumW_Al_Num/sumW_tot_events)*100.<<"% of total"<<std::endl;
-  outfile_<<"SumW2(Gen Z kin && Gen b):    "<<sumW2_Al_Num<<std::endl;	  
-  outfile_<<"================================================================="<<std::endl;
-  outfile_<<"N(Gen Z && Gen b):            "<<Al_Den<<" \t | "<< (Al_Den/N_tot_events)*100.<<"% of total"<<" \t | "<< (Al_Den/N_right_flavour)*100.<<"% of Sel Flav"<<std::endl;
-  outfile_<<"Sumw(Gen Z && Gen b):         "<<sumW_Al_Den<<"\t | "<< (sumW_Al_Den/sumW_tot_events)*100.<<"% of total"<<std::endl;
-  outfile_<<"Sumw2(Gen Z && Gen b):        "<<sumW2_Al_Den<<std::endl;
-  outfile_<<"================================================================="<<std::endl;
-  outfile_<<"N(Reco Z kin):                "<<N_rec_Zkin_yes<<" \t | "<< (N_rec_Zkin_yes/N_tot_events)*100.<<"% of total"<<" \t | "<< (N_rec_Zkin_yes/N_right_flavour)*100.<<"% of Sel Flav"<<std::endl;  	  
-  outfile_<<"Sumw(Reco Z kin):             "<<sumW_rec_Zkin_yes<<"\t | "<< (sumW_rec_Zkin_yes/sumW_tot_events)*100.<<"% of total"<<std::endl; 
-  outfile_<<"Sumw2(Reco Z kin):            "<<sumW2_rec_Zkin_yes<<std::endl;
-  outfile_<<"================================================================="<<std::endl;
-  outfile_<<"N(Reco b):                    "<<N_rec_b_yes<<" \t | "<< (N_rec_b_yes/N_tot_events)*100.<<"% of total"<<" \t | "<< (N_rec_b_yes/N_right_flavour)*100.<<"% of Sel Flav"<<std::endl;
-  outfile_<<"SumW(Reco b):                 "<<sumW_rec_b_yes<<"\t | "<< (sumW_rec_b_yes/sumW_tot_events)*100.<<"% of total"<<std::endl;
-  outfile_<<"SumW2(Reco b):                "<<sumW2_rec_b_yes<<std::endl;
-  outfile_<<"================================================================="<<std::endl;
-  outfile_<<"N(Reco Z kin && Reco b):      "<<CHad_Num<<" \t | "<< (CHad_Num/N_tot_events)*100.<<"% of total"<<" \t | "<< (CHad_Num/N_right_flavour)*100.<<"% of Sel Flav"<<std::endl;
-  outfile_<<"SumW(Reco Z kin && Reco b) :  "<<sumW_CHad_Num<<"\t | "<< (sumW_CHad_Num/sumW_tot_events)*100.<<"% of total"<<std::endl;
-  outfile_<<"SumW2(Reco Z kin && Reco b):  "<<sumW2_CHad_Num<<std::endl;
+  outfile_<<" jet pT<"  << jetPtCut_  <<" jet |eta|< " << jetEtaCut_  <<endl;
+  outfile_<< minMassCut_ <<" < m(ll)< " << maxMassCut_<<" dR(l,l) <" << dRLeptons_ <<" dR(j,j) < "<< dRJets_ <<endl;
+  outfile_<<"================================================================="<<endl;
+  outfile_<<"N(Tot events)                "<<N_tot_events<<endl;	  
+  outfile_<<"SumW(Tot events)             "<<sumW_tot_events<<endl;	  
+  outfile_<<"SumW2(Tot events)            "<<sumW2_tot_events<<endl;
+  outfile_<<"================================================================="<<endl;
+  outfile_<<"N(Sel Flav)                  "<<N_right_flavour<<"\t | "<< (N_right_flavour/N_tot_events)*100.<<"% of total"<<endl;	  
+  outfile_<<"SumW(Sel Flav)               "<<sumW_right_flavour<<"\t | "<< (sumW_right_flavour/sumW_tot_events)*100.<<"% of total"<<endl;	   
+  outfile_<<"SumW2(Sel Flav)              "<<sumW2_right_flavour<<endl;
+  outfile_<<"================================================================="<<endl;  
+  outfile_<<"N(Gen Z)                     "<<N_gen_Z_yes<<" \t | "<< (N_gen_Z_yes/N_tot_events)*100.<<"% of total"<<" \t | "<< (N_gen_Z_yes/N_right_flavour)*100.<<"% of Sel Flav"<<endl;  
+  outfile_<<"SumW(Gen Z)                  "<<sumW_gen_Z_yes<<"\t | "<< (sumW_gen_Z_yes/sumW_tot_events)*100.<<"% of total"<<endl;
+  outfile_<<"SumW2(Gen Z)                 "<<sumW2_gen_Z_yes<<endl;	  
+  outfile_<<"================================================================="<<endl;
+  outfile_<<"N(Gen b)                     "<<N_gen_b_yes<<" \t | "<< (N_gen_b_yes/N_tot_events)*100.<<"% of total"<<" \t | "<< (N_gen_b_yes/N_right_flavour)*100.<<"% of Sel Flav"<<endl;
+  outfile_<<"SumW(Gen b)                  "<<sumW_gen_b_yes<<"\t | "<< (sumW_gen_b_yes/sumW_tot_events)*100.<<"% of total"<<endl;
+  outfile_<<"SumW2(Gen b)                 "<<sumW2_gen_b_yes<<endl;	  
+  outfile_<<"================================================================="<<endl;
+  outfile_<<"N(Gen Z kin)                 "<<N_gen_Zkin_yes<<" \t | "<< (N_gen_Zkin_yes/N_tot_events)*100.<<"% of total"<<" \t | "<< (N_gen_Zkin_yes/N_right_flavour)*100.<<"% of Sel Flav"<<endl;
+  outfile_<<"SumW(Gen Z kin)              "<<sumW_gen_Zkin_yes<<"\t | "<< (sumW_gen_Zkin_yes/sumW_tot_events)*100.<<"% of total"<<endl;	  
+  outfile_<<"SumW2(Gen Z kin)             "<<sumW2_gen_Zkin_yes<<endl;	  
+  outfile_<<"================================================================="<<endl;
+  outfile_<<"N(Gen Z kin && Gen b )       "<<Al_Num<<" \t | "<< (Al_Num/N_tot_events)*100.<<"% of total"<<" \t | "<< (Al_Num/N_right_flavour)*100.<<"% of Sel Flav"<<endl;	  
+  outfile_<<"SumW(Gen Z kin && Gen b)     "<<sumW_Al_Num<<"\t | "<< (sumW_Al_Num/sumW_tot_events)*100.<<"% of total"<<endl;
+  outfile_<<"SumW2(Gen Z kin && Gen b)    "<<sumW2_Al_Num<<endl;	  
+  outfile_<<"================================================================="<<endl;
+  outfile_<<"N(Gen Z && Gen b)            "<<Al_Den<<" \t | "<< (Al_Den/N_tot_events)*100.<<"% of total"<<" \t | "<< (Al_Den/N_right_flavour)*100.<<"% of Sel Flav"<<endl;
+  outfile_<<"Sumw(Gen Z && Gen b)         "<<sumW_Al_Den<<"\t | "<< (sumW_Al_Den/sumW_tot_events)*100.<<"% of total"<<endl;
+  outfile_<<"Sumw2(Gen Z && Gen b)        "<<sumW2_Al_Den<<endl;
+  outfile_<<"================================================================="<<endl;
+  outfile_<<"N(Reco Z kin)                "<<N_rec_Zkin_yes<<" \t | "<< (N_rec_Zkin_yes/N_tot_events)*100.<<"% of total"<<" \t | "<< (N_rec_Zkin_yes/N_right_flavour)*100.<<"% of Sel Flav"<<endl;  	  
+  outfile_<<"Sumw(Reco Z kin)             "<<sumW_rec_Zkin_yes<<"\t | "<< (sumW_rec_Zkin_yes/sumW_tot_events)*100.<<"% of total"<<endl; 
+  outfile_<<"Sumw2(Reco Z kin)            "<<sumW2_rec_Zkin_yes<<endl;
+  outfile_<<"================================================================="<<endl;
+  outfile_<<"N(Reco b)                    "<<N_rec_b_yes<<" \t | "<< (N_rec_b_yes/N_tot_events)*100.<<"% of total"<<" \t | "<< (N_rec_b_yes/N_right_flavour)*100.<<"% of Sel Flav"<<endl;
+  outfile_<<"SumW(Reco b)                 "<<sumW_rec_b_yes<<"\t | "<< (sumW_rec_b_yes/sumW_tot_events)*100.<<"% of total"<<endl;
+  outfile_<<"SumW2(Reco b)                "<<sumW2_rec_b_yes<<endl;
+  outfile_<<"================================================================="<<endl;
+  outfile_<<"N(Reco Z kin && Reco b)      "<<CHad_Num<<" \t | "<< (CHad_Num/N_tot_events)*100.<<"% of total"<<" \t | "<< (CHad_Num/N_right_flavour)*100.<<"% of Sel Flav"<<endl;
+  outfile_<<"SumW(Reco Z kin && Reco b)   "<<sumW_CHad_Num<<"\t | "<< (sumW_CHad_Num/sumW_tot_events)*100.<<"% of total"<<endl;
+  outfile_<<"SumW2(Reco Z kin && Reco b)  "<<sumW2_CHad_Num<<endl;
   if ( !partonLevel_ ) {
-    outfile_<<"================================================================="<<std::endl;
-    outfile_<<"Final acceptance (A_l) & hadron correction factor (C_had) "<<std::endl;
-    outfile_<<"================================================================="<<std::endl;
-    outfile_<<"Unweighted A_l   :          "<< std::setprecision (3) << UnwAl*100.          <<" +/- "<< std::setprecision (2) << ErrUnwAl*100.  <<"%"<<std::endl;
-    outfile_<<"Weighted A_l     :          "<< std::setprecision (3) << Al*100.             <<" +/- "<< std::setprecision (2) << ErrAl*100.     <<"%"<<std::endl;
-    outfile_<<"Unweighted C_had :          "<< std::setprecision (3) << UnwCHad*100.        <<" +/- "<< std::setprecision (2) << ErrUnwCHad*100.<<"%"<<std::endl;
-    outfile_<<"Weighted C_had   :          "<< std::setprecision (3) << CHad*100.           <<" +/- "<< std::setprecision (2) << ErrCHad*100.   <<"%"<<std::endl;
-    outfile_<<"Unweighted Epsilon_l :      "<< std::setprecision (3) << UnwEpsilon_l*100.   <<" +/- "<< std::setprecision (2) << ErrUnwEpsilonl*100.<<"%"<<std::endl;
-    outfile_<<"Weighted Epsilon_l   :      "<< std::setprecision (3) << Epsilon_l*100.      <<" +/- "<< std::setprecision (2) << ErrEpsilonl*100.   <<"%"<<std::endl; 
-    outfile_<<"Unweighted Epsilon_b (HE) : "<< std::setprecision (3) << UnwEpsilon_bHE*100. <<" +/- "<< std::setprecision (2) << ErrUnwEpsilonbHE*100.<<"%"<<std::endl;
-    outfile_<<"Weighted Epsilon_b (HE)   : "<< std::setprecision (3) << Epsilon_bHE*100.    <<" +/- "<< std::setprecision (2) << ErrEpsilonbHE*100.   <<"%"<<std::endl;
-    outfile_<<"Unweighted Epsilon_b (HP) : "<< std::setprecision (3) << UnwEpsilon_bHP*100. <<" +/- "<< std::setprecision (2) << ErrUnwEpsilonbHP*100.<<"%"<<std::endl;
-    outfile_<<"Weighted Epsilon_b (HP)   : "<< std::setprecision (3) << Epsilon_bHP*100.    <<" +/- "<< std::setprecision (2) << ErrEpsilonbHP*100.   <<"%"<<std::endl; 
+    outfile_<<"================================================================="<<endl;
+    outfile_<<"Final acceptance (A_l) & hadron correction factor (C_had) "<<endl;
+    outfile_<<"================================================================="<<endl;
+    outfile_<<"Unweighted A_l              "<< setprecision (3) << UnwAl*100.          <<" +/- "<< setprecision (2) << ErrUnwAl*100.  <<"%"<<endl;
+    outfile_<<"Weighted A_l                "<< setprecision (3) << Al*100.             <<" +/- "<< setprecision (2) << ErrAl*100.     <<"%"<<endl;
+    outfile_<<"Unweighted C_had            "<< setprecision (3) << UnwCHad*100.        <<" +/- "<< setprecision (2) << ErrUnwCHad*100.<<"%"<<endl;
+    outfile_<<"Weighted C_had              "<< setprecision (3) << CHad*100.           <<" +/- "<< setprecision (2) << ErrCHad*100.   <<"%"<<endl;
+    outfile_<<"Unweighted C_had (any)      "<< setprecision (3) << UnwCHad_Any*100.    <<" +/- "<< setprecision (2) << ErrUnwCHad_Any*100.<<"%"<<endl;
+    outfile_<<"Weighted C_had (any)        "<< setprecision (3) << CHad_Any*100.       <<" +/- "<< setprecision (2) << ErrCHad_Any*100.   <<"%"<<endl;
+    outfile_<<"Unweighted Epsilon_l        "<< setprecision (3) << UnwEpsilon_l*100.   <<" +/- "<< setprecision (2) << ErrUnwEpsilonl*100.<<"%"<<endl;
+    outfile_<<"Weighted Epsilon_l          "<< setprecision (3) << Epsilon_l*100.      <<" +/- "<< setprecision (2) << ErrEpsilonl*100.   <<"%"<<endl;
+    outfile_<<"Unweighted Epsilon_l (any)  "<< setprecision (3) << UnwEpsilon_l_Any*100.<<" +/- "<< setprecision (2) << ErrUnwEpsilonlAny*100.<<"%"<<endl;
+    outfile_<<"Weighted Epsilon_l (any)    "<< setprecision (3) << Epsilon_l_Any*100.   <<" +/- "<< setprecision (2) << ErrEpsilonlAny*100.   <<"%"<<endl;   
+    outfile_<<"Unweighted Epsilon_b (HE)   "<< setprecision (3) << UnwEpsilon_bHE*100. <<" +/- "<< setprecision (2) << ErrUnwEpsilonbHE*100.<<"%"<<endl;
+    outfile_<<"Weighted Epsilon_b (HE)     "<< setprecision (3) << Epsilon_bHE*100.    <<" +/- "<< setprecision (2) << ErrEpsilonbHE*100.   <<"%"<<endl;
+    outfile_<<"Unweighted Epsilon_b (HP)   "<< setprecision (3) << UnwEpsilon_bHP*100. <<" +/- "<< setprecision (2) << ErrUnwEpsilonbHP*100.<<"%"<<endl;
+    outfile_<<"Weighted Epsilon_b (HP)     "<< setprecision (3) << Epsilon_bHP*100.    <<" +/- "<< setprecision (2) << ErrEpsilonbHP*100.   <<"%"<<endl; 
+    outfile_<<"Unweighted Epsilon_b (CSVM) "<< setprecision (3) << UnwEpsilon_bCSVM*100. <<" +/- "<< setprecision (2) << ErrUnwEpsilonbCSVM*100.<<"%"<<endl;
+    outfile_<<"Weighted Epsilon_b (CSVM)   "<< setprecision (3) << Epsilon_bCSVM*100.    <<" +/- "<< setprecision (2) << ErrEpsilonbCSVM*100.   <<"%"<<endl;
+    outfile_<<"Unweighted Epsilon_b (CSVT) "<< setprecision (3) << UnwEpsilon_bCSVT*100. <<" +/- "<< setprecision (2) << ErrUnwEpsilonbCSVT*100.<<"%"<<endl;
+    outfile_<<"Weighted Epsilon_b (CSVT)   "<< setprecision (3) << Epsilon_bCSVT*100.    <<" +/- "<< setprecision (2) << ErrEpsilonbCSVT*100.   <<"%"<<endl; 
   } else {
-    outfile_<<"================================================================="<<std::endl;
-    outfile_<<"Final acceptance (A_l) & parton correction factor (C_part) "<<std::endl;
-    outfile_<<"================================================================="<<std::endl;
-    outfile_<<"Unweighted A_l    :          "<< std::setprecision (3) << UnwAl*100.          <<" +/- "<< std::setprecision (2) << ErrUnwAl*100.  <<"%"<<std::endl;
-    outfile_<<"Weighted A_l      :          "<< std::setprecision (3) << Al*100.             <<" +/- "<< std::setprecision (2) << ErrAl*100.     <<"%"<<std::endl;
-    outfile_<<"Unweighted C_part :          "<< std::setprecision (3) << UnwCHad*100.        <<" +/- "<< std::setprecision (2) << ErrUnwCHad*100.<<"%"<<std::endl;
-    outfile_<<"Weighted C_part   :          "<< std::setprecision (3) << CHad*100.           <<" +/- "<< std::setprecision (2) << ErrCHad*100.   <<"%"<<std::endl;
-    outfile_<<"Unweighted Epsilon_l :       "<< std::setprecision (3) << UnwEpsilon_l*100.   <<" +/- "<< std::setprecision (2) << ErrUnwEpsilonl*100.<<"%"<<std::endl;
-    outfile_<<"Weighted Epsilon_l   :       "<< std::setprecision (3) << Epsilon_l*100.      <<" +/- "<< std::setprecision (2) << ErrEpsilonl*100.   <<"%"<<std::endl;
-    outfile_<<"Unweighted Epsilon_b (HE) :  "<< std::setprecision (3) << UnwEpsilon_bHE*100. <<" +/- "<< std::setprecision (2) << ErrUnwEpsilonbHE*100.<<"%"<<std::endl;
-    outfile_<<"Weighted Epsilon_b (HE)   :  "<< std::setprecision (3) << Epsilon_bHE*100.    <<" +/- "<< std::setprecision (2) << ErrEpsilonbHE*100.   <<"%"<<std::endl;
-    outfile_<<"Unweighted Epsilon_b (HP) :  "<< std::setprecision (3) << UnwEpsilon_bHP*100. <<" +/- "<< std::setprecision (2) << ErrUnwEpsilonbHP*100.<<"%"<<std::endl;
-    outfile_<<"Weighted Epsilon_b (HP)   :  "<< std::setprecision (3) << Epsilon_bHP*100.    <<" +/- "<< std::setprecision (2) << ErrEpsilonbHP*100.   <<"%"<<std::endl; 
+    outfile_<<"================================================================="<<endl;
+    outfile_<<"Final acceptance (A_l) & parton correction factor (C_part) "<<endl;
+    outfile_<<"================================================================="<<endl;
+    outfile_<<"Unweighted A_l              "<< setprecision (3) << UnwAl*100.          <<" +/- "<< setprecision (2) << ErrUnwAl*100.  <<"%"<<endl;
+    outfile_<<"Weighted A_l                "<< setprecision (3) << Al*100.             <<" +/- "<< setprecision (2) << ErrAl*100.     <<"%"<<endl;
+    outfile_<<"Unweighted C_part           "<< setprecision (3) << UnwCHad*100.        <<" +/- "<< setprecision (2) << ErrUnwCHad*100.<<"%"<<endl;
+    outfile_<<"Weighted C_part             "<< setprecision (3) << CHad*100.           <<" +/- "<< setprecision (2) << ErrCHad*100.   <<"%"<<endl;
+    outfile_<<"Unweighted C_part (any)     "<< setprecision (3) << UnwCHad_Any*100.    <<" +/- "<< setprecision (2) << ErrUnwCHad_Any*100.<<"%"<<endl;
+    outfile_<<"Weighted C_part (any)       "<< setprecision (3) << CHad_Any*100.       <<" +/- "<< setprecision (2) << ErrCHad_Any*100.   <<"%"<<endl;
+    outfile_<<"Unweighted Epsilon_l        "<< setprecision (3) << UnwEpsilon_l*100.   <<" +/- "<< setprecision (2) << ErrUnwEpsilonl*100.<<"%"<<endl;
+    outfile_<<"Weighted Epsilon_l          "<< setprecision (3) << Epsilon_l*100.      <<" +/- "<< setprecision (2) << ErrEpsilonl*100.   <<"%"<<endl;
+    outfile_<<"Unweighted Epsilon_l (any)  "<< setprecision (3) << UnwEpsilon_l_Any*100.<<" +/- "<< setprecision (2) << ErrUnwEpsilonlAny*100.<<"%"<<endl;
+    outfile_<<"Weighted Epsilon_l (any)    "<< setprecision (3) << Epsilon_l_Any*100.   <<" +/- "<< setprecision (2) << ErrEpsilonlAny*100.   <<"%"<<endl;   
+    outfile_<<"Unweighted Epsilon_b (HE)   "<< setprecision (3) << UnwEpsilon_bHE*100. <<" +/- "<< setprecision (2) << ErrUnwEpsilonbHE*100.<<"%"<<endl;
+    outfile_<<"Weighted Epsilon_b (HE)     "<< setprecision (3) << Epsilon_bHE*100.    <<" +/- "<< setprecision (2) << ErrEpsilonbHE*100.   <<"%"<<endl;
+    outfile_<<"Unweighted Epsilon_b (HP)   "<< setprecision (3) << UnwEpsilon_bHP*100. <<" +/- "<< setprecision (2) << ErrUnwEpsilonbHP*100.<<"%"<<endl;
+    outfile_<<"Weighted Epsilon_b (HP)     "<< setprecision (3) << Epsilon_bHP*100.    <<" +/- "<< setprecision (2) << ErrEpsilonbHP*100.   <<"%"<<endl; 
+    outfile_<<"Unweighted Epsilon_b (CSVM) "<< setprecision (3) << UnwEpsilon_bCSVM*100. <<" +/- "<< setprecision (2) << ErrUnwEpsilonbCSVM*100.<<"%"<<endl;
+    outfile_<<"Weighted Epsilon_b (CSVM)   "<< setprecision (3) << Epsilon_bCSVM*100.    <<" +/- "<< setprecision (2) << ErrEpsilonbCSVM*100.   <<"%"<<endl;
+    outfile_<<"Unweighted Epsilon_b (CSVT) "<< setprecision (3) << UnwEpsilon_bCSVT*100. <<" +/- "<< setprecision (2) << ErrUnwEpsilonbCSVT*100.<<"%"<<endl;
+    outfile_<<"Weighted Epsilon_b (CSVT)   "<< setprecision (3) << Epsilon_bCSVT*100.    <<" +/- "<< setprecision (2) << ErrEpsilonbCSVT*100.   <<"%"<<endl; 
   } 
 
   outfile_.close();
@@ -2150,6 +2373,16 @@ ZbbAcceptanceCalculator::hasCharm(const reco::Candidate &c)
   code2 = (int)( ( abs(c.pdgId() ) /1000)%10 );
   if ( code1 == 4 || code2 == 4) tmpHasCharm = true;
   return tmpHasCharm;
+}
+
+// ------------ method to tag c-hadrons ---------------------------------------------------
+bool 
+ZbbAcceptanceCalculator::isHadron(const reco::Candidate &c) 
+{
+  bool isHadron = false;
+  int code = (int)(abs(c.pdgId()));
+  if ( code > 100 ) isHadron = true;
+  return isHadron;
 }
 
 // --------------  sort leptons 4mom by pt ------------------------------------------------
@@ -2445,7 +2678,7 @@ Bool_t  ZbbAcceptanceCalculator::isTightZCandidate(reco::CompositeCandidate ZCan
 	 fabs(muon0->dB()) < 0.02 &&                                                                     
 	 ((muon0->trackIso() + muon0->caloIso()) <0.15*muon0->pt()) &&                                             
 	 muon0->numberOfMatches() > 1 && 
-	 abs(muon0->eta()) < lCuts.muEtaMax_ ) &&
+	 fabs(muon0->eta()) < lCuts.muEtaMax_ ) &&
        ( muon1->pt()>lCuts.muPtMin_ &&
 	 muon1->isGlobalMuon() && muon1->isTrackerMuon() && 
 	 muon1->globalTrack()->normalizedChi2() < 10 && 
@@ -2455,7 +2688,7 @@ Bool_t  ZbbAcceptanceCalculator::isTightZCandidate(reco::CompositeCandidate ZCan
 	 fabs(muon1->dB()) < 0.02 &&                                                                     
 	 ((muon1->trackIso() + muon1->caloIso()) <0.15*muon1->pt()) &&                                             
 	 muon1->numberOfMatches() > 1 && 
-	 abs(muon1->eta()) < lCuts.muEtaMax_ )
+	 fabs(muon1->eta()) < lCuts.muEtaMax_ )
        ){ 
       istightZcandidate=true;
     }
@@ -2463,11 +2696,11 @@ Bool_t  ZbbAcceptanceCalculator::isTightZCandidate(reco::CompositeCandidate ZCan
     const pat::Electron* ele0 = dynamic_cast<const pat::Electron*>(&(*lep0));
     const pat::Electron* ele1 = dynamic_cast<const pat::Electron*>(&(*lep1));
     if(
-       (fabs(ele0->gsfTrack()->dxy(beamSpot))<0.02 && ele0->pt() > lCuts.elePtMin_ && abs(ele0->eta()) < lCuts.eleEtaMax_ &&                         
+       (fabs(ele0->gsfTrack()->dxy(beamSpot))<0.02 && ele0->pt() > lCuts.elePtMin_ && fabs(ele0->eta()) < lCuts.eleEtaMax_ &&                         
 	(ele0->isEE() || ele0->isEB()) && !ele0->isEBEEGap() && 
 	(fabs(ele0->superCluster()->eta())<1.444 || fabs(ele0->superCluster()->eta())>1.566 ) &&
 	(ele0->electronID("eidVBTFRel85") == 7) ) &&    
-       (fabs(ele1->gsfTrack()->dxy(beamSpot))<0.02 && ele1->pt() > lCuts.elePtMin_ && abs(ele1->eta()) < lCuts.eleEtaMax_ &&                           
+       (fabs(ele1->gsfTrack()->dxy(beamSpot))<0.02 && ele1->pt() > lCuts.elePtMin_ && fabs(ele1->eta()) < lCuts.eleEtaMax_ &&                           
 	(ele1->isEE() || ele1->isEB()) && !ele1->isEBEEGap() &&    
 	(fabs(ele1->superCluster()->eta())<1.444 || fabs(ele1->superCluster()->eta())>1.566 ) &&
 	(ele1->electronID("eidVBTFRel85") == 7) )

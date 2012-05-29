@@ -43,7 +43,6 @@ class PatBJetTagAnalyzer : public edm::EDAnalyzer  {
         double btagSSVHP( const reco::SecondaryVertexTagInfo* svTagInfo );
         double btagNegativeSSVHE( const reco::SecondaryVertexTagInfo* svTagInfo );
         double btagNegativeSSVHP( const reco::SecondaryVertexTagInfo* svTagInfo );
-        double getDiscriminatorFromTags(const reco::JetTagCollection & bTags, const pat::Jet& jet); 
 
     private:
 	// configuration input parameters
@@ -54,6 +53,7 @@ class PatBJetTagAnalyzer : public edm::EDAnalyzer  {
 
        	// configuration cuts
         bool ismc_;
+        bool redoBTag_;
         std::string bTagAlgoWP_;
   	double jetPtCut_;		// minimum (uncorrected) jet energy
 	double jetEtaCut_;		// maximum |eta| for jet
@@ -86,6 +86,7 @@ PatBJetTagAnalyzer::PatBJetTagAnalyzer(const edm::ParameterSet &params) :
 	beamSpot_(params.getParameter<edm::InputTag>("beamSpot")),
 	primaryVertices_(params.getParameter<edm::InputTag>("primaryVertices")),	
 	ismc_(params.getParameter<bool>("isMC")),
+	redoBTag_(params.getParameter<bool>("redoBTag")),
 	bTagAlgoWP_(params.getParameter<std::string>("bTagAlgoWP")),
 	jetPtCut_(params.getParameter<double>("jetPtCut")),
 	jetEtaCut_(params.getParameter<double>("jetEtaCut")),
@@ -204,26 +205,68 @@ void PatBJetTagAnalyzer::analyze(const edm::Event &event, const edm::EventSetup 
   // extract the position of the (most probable) reconstructed vertex
   math::XYZPoint pv = (*pvHandle)[0].position();
 
-  // Get b tag information (TCHE)
-  edm::Handle<reco::JetTagCollection> bTagHandleTCHE;
-  event.getByLabel("MyTrackCountingHighEffBJetTags", bTagHandleTCHE);
-  const reco::JetTagCollection & bTagsTCHE = *(bTagHandleTCHE.product());
-  
-  // Get b tag information (TCHP)
-  edm::Handle<reco::JetTagCollection> bTagHandleTCHP;
-  event.getByLabel("MyTrackCountingHighPurBJetTags", bTagHandleTCHP);
-  const reco::JetTagCollection & bTagsTCHP = *(bTagHandleTCHP.product()); 
 
-  // Get b tag information (JP)
-  edm::Handle<reco::JetTagCollection> bTagHandleJP;
-  event.getByLabel("MyJetProbabilityBJetTags", bTagHandleJP);
-  const reco::JetTagCollection & bTagsJP = *(bTagHandleJP.product());
-   
+  if(redoBTag_){
+
+    // Get b tag information (TCHE)
+    edm::Handle<reco::JetTagCollection> bTagHandleTCHE;
+    event.getByLabel("MyTrackCountingHighEffBJetTags", bTagHandleTCHE);
+    const reco::JetTagCollection & bTagsTCHE = *(bTagHandleTCHE.product());
+    
+    for (unsigned int i = 0; i != bTagsTCHE.size(); ++i) {;
+      if (bTagsTCHE[i].first->pt() > jetPtCut_ && std::abs(bTagsTCHE[i].first->eta()) < jetEtaCut_ 
+	  // && ZbbUtils::isJetIdOk((bTagsJP[i].first),"loose")
+	  // && ZbbUtils::isBJet((bTagsTCHE[i].first),bTagAlgoWP_) 
+	  ){
+	plots_.discrTCHE_fromTags->Fill(bTagsTCHE[i].second);    
+      }
+    }
+    
+    // Get b tag information (TCHP)
+    edm::Handle<reco::JetTagCollection> bTagHandleTCHP;
+    event.getByLabel("MyTrackCountingHighPurBJetTags", bTagHandleTCHP);
+    const reco::JetTagCollection & bTagsTCHP = *(bTagHandleTCHP.product()); 
+    
+    for (unsigned int i = 0; i != bTagsTCHP.size(); ++i) {;
+      if (bTagsTCHP[i].first->pt() > jetPtCut_ && std::abs(bTagsTCHP[i].first->eta()) < jetEtaCut_ 
+	  // && ZbbUtils::isJetIdOk((bTagsJP[i].first),"loose")
+	  // && ZbbUtils::isBJet((bTagsTCHP[i].first),bTagAlgoWP_) 
+	  ){
+	plots_.discrTCHP_fromTags->Fill(bTagsTCHP[i].second);    
+      }
+    }
+    
+    // Get b tag information (JP)
+    edm::Handle<reco::JetTagCollection> bTagHandleJP;
+    event.getByLabel("MyJetProbabilityBJetTags", bTagHandleJP);
+    const reco::JetTagCollection & bTagsJP = *(bTagHandleJP.product());
+    
+    // Loop over jets and study b tag info.
+    for (unsigned int i = 0; i != bTagsJP.size(); ++i) {
+      if (bTagsJP[i].first->pt() > jetPtCut_ && std::abs(bTagsJP[i].first->eta()) < jetEtaCut_ 
+	  // && ZbbUtils::isJetIdOk((bTagsJP[i].first),"loose")
+	  // && ZbbUtils::isBJet((bTagsJP[i].first),bTagAlgoWP_) 
+	  ){
+	
+	//   std::cout<<" Jet "<< i 
+	// 	       <<" has b tag discriminator (jetProbabilityBJetTags) = "<<bTagsJP[i].second
+	// 	       << " and jet Pt = "<<bTagsJP[i].first->pt()<<std::endl;
+	
+	plots_.discrJP_fromTags->Fill(bTagsJP[i].second); 
+	plots_.jetPt_fromTags->Fill(bTagsJP[i].first->pt());   
+      }
+    }
+  }
+  
   // now go through all jets
   for(pat::JetCollection::const_iterator jet = jetsHandle->begin();jet != jetsHandle->end(); ++jet) {
     
     // only look at jets that pass the pt and eta cut
-    if (jet->pt() < jetPtCut_||  std::abs(jet->eta()) > jetEtaCut_ || !ZbbUtils::isJetIdOk((*jet),"loose") || !ZbbUtils::isBJet((*jet),bTagAlgoWP_) ) continue;
+    if (jet->pt() < jetPtCut_ ||  std::abs(jet->eta()) > jetEtaCut_
+	|| !ZbbUtils::isJetIdOk((*jet),"loose") 
+	|| !ZbbUtils::isBJet((*jet),bTagAlgoWP_) 
+	)
+      continue;
 
     plots_.jetPt->Fill(jet->pt());   
 
@@ -235,10 +278,6 @@ void PatBJetTagAnalyzer::analyze(const edm::Event &event, const edm::EventSetup 
     double discrCSV   = jet->bDiscriminator("combinedSecondaryVertexBJetTags");
     double discrJP    = jet->bDiscriminator("jetProbabilityBJetTags");
 
-    double discrJPfromTags   = getDiscriminatorFromTags(bTagsJP,(*jet));
-    double discrTCHEfromTags = getDiscriminatorFromTags(bTagsTCHE,(*jet));
-    double discrTCHPfromTags = getDiscriminatorFromTags(bTagsTCHP,(*jet));
-
     plots_.discrTCHE->Fill(discrTCHE);
     plots_.discrTCHP->Fill(discrTCHP);
     plots_.discrSSV->Fill(discrSSV);
@@ -246,10 +285,6 @@ void PatBJetTagAnalyzer::analyze(const edm::Event &event, const edm::EventSetup 
     plots_.discrSSVHE->Fill(discrSSVHE);
     plots_.discrCSV->Fill(discrCSV);
     plots_.discrJP->Fill(discrJP);
-
-    plots_.discrJP_fromTags->Fill(discrJPfromTags); 
-    plots_.discrTCHE_fromTags->Fill(discrTCHEfromTags); 
-    plots_.discrTCHP_fromTags->Fill(discrTCHPfromTags); 
 
     // this vector will contain IP value / error pairs
     std::vector<Measurement1D> ipValErr;
@@ -614,30 +649,6 @@ double PatBJetTagAnalyzer::btagNegativeSSVHP(  const reco::SecondaryVertexTagInf
     return -TMath::Log(1.+ (ip.ip3d.value()/ip.ip3d.error()));
   }
   return -1.;
-}
-
-double PatBJetTagAnalyzer::getDiscriminatorFromTags(const reco::JetTagCollection & bTags, const pat::Jet& jet){
-
-  std::pair<Int_t,Double_t> jetjetAssoc = std::make_pair(-1,9999.);
-  
-  // Loop over jets and study b tag info.
-  for (unsigned int i = 0; i != bTags.size(); ++i) {
-    
-    double dR_tmp= ROOT::Math::VectorUtil::DeltaR(bTags[i].first->momentum(),jet.momentum());
-    // std::cout<<"dR_tmp="<<dR_tmp<<std::endl;
-  
-    if(dR_tmp < 0.1){
-      if(dR_tmp < jetjetAssoc.second){
-	jetjetAssoc.first  = i;
-	jetjetAssoc.second = dR_tmp;
-      }
-    }
-  }
-  
-  //std::cout<<jetjetAssoc.first<<" jet has dR(min)="<<jetjetAssoc.second<<" deltaPt="<< fabs(bTags[jetjetAssoc.first].first->pt() - jet.pt())<<std::endl;
-  
-  return bTags[jetjetAssoc.first].second; 
-  
 }
 
 #include "FWCore/Framework/interface/MakerMacros.h"
