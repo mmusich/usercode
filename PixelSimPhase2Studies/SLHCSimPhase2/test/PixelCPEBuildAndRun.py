@@ -5,7 +5,7 @@ import os,sys
 import string, re
 import subprocess
 import ConfigParser
-from optparse import OptionParser
+from optparse import OptionParser,OptionGroup
 
 ##### method to parse the input file ################################
 
@@ -66,11 +66,12 @@ class Job:
     """Main class to create and submit PBS jobs"""
 ###########################################################################
 
-    def __init__(self, job_id, maxevents, ageing, pixelrocrows, pixelroccols, bpixthr, bpixl0thickness, myseed, islocal):
+    def __init__(self, job_id, maxevents, ageing, pixelrocrows, pixelroccols, bpixthr, bpixl0thickness, myseed, islocal, queue):
 ############################################################################################################################
         
         # store the job-ID (since it is created in a for loop)
         self.job_id=job_id
+        self.queue=queue
         
         # max event used in this job
         self.maxevents=maxevents
@@ -88,7 +89,7 @@ class Job:
         self.islocal=islocal
         self.launch_dir=LAUNCH_BASE
 
-        self.out_dir=os.path.join("/store/caf/user",USER,"SLHCSimPhase2/out","PixelROCRows_" +pixelrocrows+"_PixelROCCols_"+pixelroccols,"L0Thick_"+self.bpixl0thickness,"BPixThr_"+bpixthr)
+        self.out_dir=os.path.join("/store/caf/user",USER,"SLHCSimPhase2/out62X","PixelROCRows_" +pixelrocrows+"_PixelROCCols_"+pixelroccols,"L0Thick_"+self.bpixl0thickness,"BPixThr_"+bpixthr)
 
         if(self.job_id==1):
             mkdir_eos(self.out_dir)
@@ -125,8 +126,8 @@ class Job:
         fout.write("#BSUB -L /bin/sh \n")       
         fout.write("#BSUB -J "+self.job_basename+"\n")
 
-        fout.write("#BSUB -oo "+os.path.join(LOG_DIR,self.job_basename)+".log \n") # LXBATCH
-        fout.write("#BSUB -q cmscaf1nd \n")                                        # LXBATCH
+        fout.write("#BSUB -oo "+os.path.join(LOG_DIR,self.job_basename)+".log \n") # LXBATCH     
+        fout.write("#BSUB -q "+self.queue+" \n")                                   # LXBATCH
      
         fout.write("### Auto-Generated Script by PixelCPEBuildAndRun.py ### \n")
         fout.write("JobName="+self.job_basename+" \n")
@@ -196,7 +197,7 @@ class Job:
         
         fout.write("git clone -b 620_slhc10_phase1 git://github.com/emiglior/usercode.git \n")
         fout.write("mv usercode/AuxCode .\n")
-        # for the moment we ignore this
+        # for the moment we ignore this (to be used to change the matching window)
         #fout.write("mv usercode/SimTracker .\n")
         fout.write("rm -fr usercode \n")
         fout.write("git cms-checkdeps -a \n")
@@ -253,17 +254,30 @@ def main():
 ### MAIN LOOP ###
 
     desc="""This is a description of %prog."""
-    parser = OptionParser(description=desc,version='%prog version 0.1')
-    parser.add_option('-s','--submit',  help='job submitted', dest='submit', action='store_true', default=False)
-    parser.add_option('-l','--local', help='reads local branch',dest='localmode',action='store_true', default=False)
-    parser.add_option('-n','--numberofevents', help='number of events', dest='numberofevents', action='store', default='1')
-    parser.add_option('-N','--jobsInTask', help='number of jobs in this task', dest='jobsInTask', action='store',default='500')  
-    parser.add_option('-j','--jobname', help='task name', dest='jobname', action='store', default='myjob')
-    parser.add_option('-r','--ROCRows',help='ROC Rows (default 80 -> du=100 um)', dest='rocrows', action='store', default='80')
-    parser.add_option('-c','--ROCCols',help='ROC Cols (default 52 -> dv=150 um)', dest='roccols', action='store', default='52')
-    parser.add_option('-t','--Layer0Thick',help='BPix L0 sensor thickness', dest='layer0thick', action='store', default='0.285')
-    parser.add_option('-T','--BPixThr',help='BPix Threshold', dest='bpixthr', action='store', default='2000')
-    parser.add_option('-a','--ageing',help='set ageing',dest='ageing',action='store',default='NoAgeing')
+    parser = OptionParser(description=desc,version='%prog version 0.1',epilog="**** Use option -i for overring all parameters from config ****")
+    
+    group = OptionGroup(parser,"Job configuration options",
+                       "You can specify several parameters of the task"
+                       )
+    
+    group.add_option('-j','--jobname', help='task name', dest='jobname', action='store', default='myjob')
+    group.add_option('-s','--submit',  help='job submitted', dest='submit', action='store_true', default=False)
+    group.add_option('-q','--queue',help='lxbatch queue for submission', dest='queue',action='store',default='cmscaf1nd')
+    group.add_option('-l','--local', help='reads local branch',dest='localmode',action='store_true', default=False)
+    group.add_option('-n','--numberofevents', help='number of events', dest='numberofevents', action='store', default='1')
+    group.add_option('-N','--jobsInTask', help='number of jobs in this task', dest='jobsInTask', action='store',default='500')
+    parser.add_option_group(group)
+
+    group = OptionGroup(parser, "Pixel layout options",
+                        "You can specift several parameters of the pixel layout")
+    
+    group.add_option('-r','--ROCRows',help='ROC Rows (default 80 -> du=100 um)', dest='rocrows', action='store', default='80')
+    group.add_option('-c','--ROCCols',help='ROC Cols (default 52 -> dv=150 um)', dest='roccols', action='store', default='52')
+    group.add_option('-t','--Layer0Thick',help='BPix L0 sensor thickness', dest='layer0thick', action='store', default='0.285')
+    group.add_option('-T','--BPixThr',help='BPix Threshold', dest='bpixthr', action='store', default='2000')
+    group.add_option('-a','--ageing',help='set ageing',dest='ageing',action='store',default='NoAgeing')
+    parser.add_option_group(group)
+
     parser.add_option('-i','--input',help='set input configuration (overrides default)',dest='inputconfig',action='store',default=None)
     (opts, args) = parser.parse_args()
 
@@ -273,6 +287,7 @@ def main():
     mBPixthr = None
     mL0Thick = None
     mAgeing  = None
+    mQueue   = None
     mJobsInTask=None
  
     ConfigFile = opts.inputconfig
@@ -285,30 +300,32 @@ def main():
         config = ConfigParser.ConfigParser()
         config.read(ConfigFile)
         
-        mRocRows   = ConfigSectionMap(config,"PixelConfiguration")['rocrows']   
-        mRocCols   = ConfigSectionMap(config,"PixelConfiguration")['roccols']   
-        mL0Thick   = ConfigSectionMap(config,"PixelConfiguration")['layer0thickness']
-        mBPixThr   = ConfigSectionMap(config,"PixelConfiguration")['bpixthr']   
-        mAgeing    = ConfigSectionMap(config,"PixelConfiguration")['ageing']    
-        mNOfEvents = ConfigSectionMap(config,"JobConfiguration")['numberofevents']
-        mJobsInTask= opts.jobsInTask
-
+        mRocRows    = ConfigSectionMap(config,"PixelConfiguration")['rocrows']   
+        mRocCols    = ConfigSectionMap(config,"PixelConfiguration")['roccols']   
+        mL0Thick    = ConfigSectionMap(config,"PixelConfiguration")['layer0thickness']
+        mBPixThr    = ConfigSectionMap(config,"PixelConfiguration")['bpixthr']   
+        mAgeing     = ConfigSectionMap(config,"PixelConfiguration")['ageing']    
+        mNOfEvents  = ConfigSectionMap(config,"JobConfiguration")['numberofevents']
+        mJobsInTask = ConfigSectionMap(config,"JobConfiguration")['numberofjobs']
+        mQueue      = ConfigSectionMap(config,"JobConfiguration")['queue']
+    
     else :
 
         print "********************************************************"
         print "*             Parsing from command line                *"
         print "********************************************************"
         
-        mRocRows   = opts.rocrows
-        mRocCols   = opts.roccols
-        mL0Thick   = opts.layer0thick
-        mBPixThr   = opts.bpixthr
-        mAgeing    = opts.ageing
-        mNOfEvents = opts.numberofevents
-        mJobsInTask= opts.jobsInTask
+        mRocRows    = opts.rocrows
+        mRocCols    = opts.roccols
+        mL0Thick    = opts.layer0thick
+        mBPixThr    = opts.bpixthr
+        mAgeing     = opts.ageing
+        mNOfEvents  = opts.numberofevents
+        mJobsInTask = opts.jobsInTask
+        mQueue      = opts.queue
      
-# check that chosen pixel size matches what is currently available in the trackerStructureTopology
-# https://twiki.cern.ch/twiki/bin/view/CMS/ExamplePhaseI#Changing_the_Pixel_Size
+    # check that chosen pixel size matches what is currently available in the trackerStructureTopology
+    # https://twiki.cern.ch/twiki/bin/view/CMS/ExamplePhaseI#Changing_the_Pixel_Size
     if int(mRocRows) % 80:
         print 'illegal value for PixelROCRows' 
     exit
@@ -327,6 +344,8 @@ def main():
     print "- submitted                  : ",opts.submit
     print "- isLocal version            : ",opts.localmode
     print "- Jobs in Task               : ",mJobsInTask
+    print "- Events/Job                 : ",mNOfEvents
+    print "- Queue                      : ",mQueue
     print "- Jobname                    : ",opts.jobname
     print "- ROCRows                    : ",mRocRows
     print "- ROCCols                    : ",mRocCols
@@ -341,7 +360,7 @@ def main():
 
     for theseed in range(1,int(mJobsInTask)+1):
 
-        ajob=Job(theseed, nEvents, mAgeing, mRocRows, mRocCols, mBPixThr, mL0Thick, theseed, opts.localmode)
+        ajob=Job(theseed, nEvents, mAgeing, mRocRows, mRocCols, mBPixThr, mL0Thick, theseed, opts.localmode,mQueue)
         ajob.createThePBSFile()        
 
         out_dir = ajob.out_dir # save for later usage
