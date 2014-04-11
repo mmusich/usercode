@@ -352,7 +352,7 @@ def main():
     print "- L0 Thickness               : ",mL0Thick
     print "- Clusterizer Threshold      : ",mBPixThr
     print "- Ageing Scenario            : ",mAgeing
-    print "- Total events to run        : ",mNOfEvents     
+    print "- Total events to run        : ",int(mNOfEvents)*int(mJobsInTask)     
 
     nEvents=int(mNOfEvents)
     
