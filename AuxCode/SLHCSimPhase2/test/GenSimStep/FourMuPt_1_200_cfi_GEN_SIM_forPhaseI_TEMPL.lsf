@@ -1,0 +1,28 @@
+#!/bin/bash
+
+mySeed=$1
+nEvts=$2
+JobName=FourMuPt_1_200_cfi_GEN_SIM_${nEvts}_evts_seed_$mySeed
+
+echo  "Job started at " `date`
+
+CMSSW_DIR=${CMSSW_BASE}/src/MyTest/ExtendedPhaseIPixel
+LXBATCH_DIR=$PWD
+
+cd $CMSSW_DIR
+eval `scramv1 runtime -sh`
+cd $LXBATCH_DIR
+
+cp ${CMSSW_DIR}/FourMuPt_1_200_cfi_GEN_SIM_forPhaseI_TEMPL.py .
+echo "cmsRun ${CMSSW_DIR}/FourMuPt_1_200_cfi_GEN_SIM_forPhaseI_TEMPL.py"
+
+cmsRun FourMuPt_1_200_cfi_GEN_SIM_forPhaseI_TEMPL.py myseed=${mySeed} maxEvents=${nEvts} >& ${JobName}.out
+
+echo "Content of working directory is: " `ls -lrt`
+
+cmsStage step1_FourMuPartGun_${nEvts}_evts_seed_${mySeed}.root /store/caf/user/emiglior/SLHCSimPhase2/620_slhc11/ExtendedPhaseIPixel
+cp ${JobName}.out ${CMSSW_DIR}/outfiles
+
+echo  "Job ended at " `date`
+
+exit 0
