@@ -211,8 +211,8 @@ process.ReadLocalMeasurement = cms.EDAnalyzer("StdPixelHitNtuplizer",
    ### if using simple (non-iterative) or old (as in 1_8_4) tracking
    trackProducer = cms.InputTag("generalTracks"),
    OutputFile = cms.string(outntuplefile),
-   verbose = cms.bool(True),
-   picky   = cms.bool(False),                                           
+   #verbose = cms.untracked.bool(True),
+   #picky   = cms.untracked.bool(False),                                           
    ### for using track hit association
    associatePixel = cms.bool(True),
    associateStrip = cms.bool(False),
@@ -312,8 +312,8 @@ process.endjob_step = cms.EndPath(process.endOfProcess)
 process.FEVTDEBUGoutput_step = cms.EndPath(process.FEVTDEBUGoutput)
 
 ######################################################################################
-
 # Customization to leave out the global reconstruction
+######################################################################################
 from AuxCode.SLHCSimPhase2.TkLocalRecoCustoms import customise_localreco
 process = customise_localreco(process)
 
