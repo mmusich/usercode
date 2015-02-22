@@ -167,8 +167,8 @@ private:
 StdPixelHitNtuplizer::StdPixelHitNtuplizer(edm::ParameterSet const& conf) : 
   conf_(conf), 
   src_( conf.getParameter<edm::InputTag>( "src" ) ),
-  verbose_( conf.getParameter<bool>("verbose")),
-  picky_(conf.getParameter<bool>("picky")),
+  verbose_( conf.getUntrackedParameter<bool>("verbose",false)),
+  picky_(conf.getUntrackedParameter<bool>("picky",false)),
   pixeltree_(0),
   pixeltreeOnTrack_(0)
 {
