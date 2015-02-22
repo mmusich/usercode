@@ -1,0 +1,28 @@
+#!/bin/bash
+
+mySeed=$1
+nEvts=$2
+JobName=MinBias_TuneZ2star_14TeV_pythia6_cff_GEN_SIM_${nEvts}_evts_seed_$mySeed
+
+echo  "Job started at " `date`
+
+CMSSW_DIR=${CMSSW_BASE}/src/AuxCode/SLHCSimPhase2/test/GenSimStep
+LXBATCH_DIR=$PWD
+
+cd ${CMSSW_BASE}/src
+eval `scramv1 runtime -sh`
+cd $LXBATCH_DIR
+
+cp ${CMSSW_DIR}/MinBias_TuneZ2star_14TeV_pythia6_cff_py_GEN_SIM_forPhaseII_TEMPL.py .
+echo "cmsRun ${CMSSW_DIR}/MinBias_TuneZ2star_14TeV_pythia6_cff_py_GEN_SIM_forPhaseII_TEMPL.py"
+
+cmsRun MinBias_TuneZ2star_14TeV_pythia6_cff_py_GEN_SIM_forPhaseII_TEMPL.py myseed=${mySeed} maxEvents=${nEvts} >& ${JobName}.out
+
+echo "Content of working directory is: " `ls -lrt`
+
+cmsStage -f step1_MinBias_TuneZ2star_14TeV_pythia6_${nEvts}_evts_seed_${mySeed}.root /store/caf/user/emiglior/SLHCSimPhase2/620_slhc17_patch1/Extended2023Muon/Thick_L0L1_0.285
+cp ${JobName}.out ${CMSSW_DIR}/outfiles
+
+echo  "Job ended at " `date`
+
+exit 0

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE SampleList SYSTEM "sample.dtd">
+
+<SampleList>
+<!-- Generic drawing options -->
+  <DrawingOptions>
+    <Ymin>0.</Ymin>
+    <Ymax>30.</Ymax>
+    <Yndiv>506</Yndiv>
+    <X1legend>0.28</X1legend>
+    <X2legend>0.58</X2legend>
+    <Y1legend>0.72</Y1legend>
+    <Y2legend>0.92</Y2legend>
+  </DrawingOptions>
+
+<!--This is the sample list -->
+  <Sample ID="1" Coordinate="rz">
+	  <InputRootFile>phase1_25_100_100/BPixThr_1.5ke/4bitV3/rmsVsEta_rz.root</InputRootFile>
+	  <Label>t=100 #mum Thr 1500e 4bit 750e/ADC</Label>
+	  <Color>ROOT.kRed</Color>
+	  <MarkerStyle>ROOT.kOpenTriangleUp</MarkerStyle>
+  </Sample>
+  <Sample ID="2" Coordinate="rz">
+	  <InputRootFile>phase1_25_100_100/BPixThr_1.5ke/8bitV4/rmsVsEta_rz.root</InputRootFile>
+	  <Label>t=100 #mum Thr 1500e 8bit 45e/ADC</Label>
+	  <Color>ROOT.kRed</Color>
+	  <MarkerStyle>ROOT.kOpenTriangleDown</MarkerStyle>
+  </Sample>
+  <Sample ID="3" Coordinate="rz">
+	  <InputRootFile>phase1_25_100_100/BPixThr_1.5ke/1bitV4/rmsVsEta_rz.root</InputRootFile>
+	  <Label>t=100 #mum Thr 1500e 1bit 1000e/ADC</Label>
+	  <Color>ROOT.kRed</Color>
+	  <MarkerStyle>ROOT.kFullCircle</MarkerStyle>
+  </Sample>
+  <Sample ID="4" Coordinate="rz">
+	  <InputRootFile>phase1_25_100_150/BPixThr_1.5ke/4bitV3/rmsVsEta_rz.root</InputRootFile>
+	  <Label>t=150 #mum Thr 1500e 4bit 1125e/ADC</Label>
+	  <Color>ROOT.kBlue</Color>
+	  <MarkerStyle>ROOT.kOpenTriangleUp</MarkerStyle>
+  </Sample>
+  <Sample ID="5" Coordinate="rz">
+	  <InputRootFile>phase1_25_100_150/BPixThr_1.5ke/8bitV4/rmsVsEta_rz.root</InputRootFile>
+	  <Label>t=150 #mum Thr 1500e 8bit 70e/ADC</Label>
+	  <Color>ROOT.kBlue</Color>
+	  <MarkerStyle>ROOT.kOpenTriangleDown</MarkerStyle>
+  </Sample>
+  <Sample ID="6" Coordinate="rz">
+	  <InputRootFile>phase1_25_100_150/BPixThr_1.5ke/1bitV4/rmsVsEta_rz.root</InputRootFile>
+	  <Label>t=150 #mum Thr 1500e 1bit 1000e/ADC</Label>
+	  <Color>ROOT.kBlue</Color>
+	  <MarkerStyle>ROOT.kFullCircle</MarkerStyle>
+  </Sample>
+</SampleList>

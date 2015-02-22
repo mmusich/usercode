@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<!DOCTYPE SampleList[
+<!ELEMENT SampleList (DrawingOptions, Sample+) >
+
+<!ELEMENT DrawingOptions (Ymin,Ymax,Yndiv) >
+<!ELEMENT Ymin  (#PCDATA) >
+<!ELEMENT Ymax  (#PCDATA) >
+<!ELEMENT Yndiv (#PCDATA) >
+<!ELEMENT X1legend    (#PCDATA)>
+<!ELEMENT X2legend    (#PCDATA)>
+<!ELEMENT Y1legend    (#PCDATA)>
+<!ELEMENT Y2legend    (#PCDATA)>
+<!ELEMENT Sample (InputRootFile,Label,Color,MarkerStyle) >
+<!ATTLIST Sample ID CDATA #REQUIRED >
+<!ATTLIST Sample Coordinate (rphi|rz) "rphi" >
+<!ELEMENT InputRootFile (#PCDATA) >
+<!ELEMENT Label         (#PCDATA) >
+<!ELEMENT Color         (#PCDATA) >
+<!ELEMENT MarkerStyle   (#PCDATA) >
+
+]>
