@@ -1,4 +1,0 @@
-file1 rfio:/castor/cern.ch/user/e/emiglior/Alignment/bTag/CMSSW_42X/TTJets_Summer11-PU_S4/500k/standardPFNtuple_STARTUP2011_BS44_PF_NTPL.root 
-file2 rfio:/castor/cern.ch/user/e/emiglior/Alignment/bTag/CMSSW_42X/TTJets_Summer11-PU_S4/500k/standardPFNtuple_IDEAL_PF_NTPL.root 
-name1 Startup2011
-name2 Ideal
