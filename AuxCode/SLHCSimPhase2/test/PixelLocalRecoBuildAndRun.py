@@ -103,19 +103,20 @@ class Job:
         self.islocal=islocal
         self.launch_dir=LAUNCH_BASE
 
-#        self.out_dir=os.path.join("/store/caf/user",USER,"SLHCSimPhase2/phase2/out62XSLHC17patch1/32bit/TestBricked",\
-#        self.out_dir=os.path.join("/store/caf/user",USER,"SLHCSimPhase2/phase2/out62XSLHC17patch1nn/DataCompression",\
-        self.out_dir=os.path.join("/store/caf/user",USER,"SLHCSimPhase2/phase2/out62XSLHC17patch1/32bit/OccupancyStudy",\
+        #        self.out_dir=os.path.join("/store/caf/user",USER,"SLHCSimPhase2/phase2/out62XSLHC17patch1/32bit/TestBricked",\
+        #        self.out_dir=os.path.join("/store/caf/user",USER,"SLHCSimPhase2/phase2/out62XSLHC17patch1nn/DataCompression",\
+        self.out_dir=os.path.join(self.launch_dir,"src/results/SLHCSimPhase2/phase2/out62XSLHC17patch1/32bit/OccupancyStudy",\
                                       "PixelROCRows_"+pixelrocrows_l0l1+"_"+pixelrocrows_l2l3,\
                                       "PixelROCCols_"+pixelroccols_l0l1+"_"+pixelroccols_l2l3,\
                                       "BPIXThick_"+bpixl0l1thickness+"_"+bpixl2l3thickness,\
                                       "BPixThr_"+bpixthr,"eToADC_"+pixeleperadc,"MaxADC_"+pixmaxadc,\
                                       "ChanThr_"+chanthr,"SeedThr_"+seedthr,"ClusThr_"+clusthr,\
                                       "PU_"+self.pu)
-
+    
         if(self.job_id==1):
-            mkdir_eos(self.out_dir)
-
+            os.makedirs(self.out_dir)
+           
+            
         self.task_basename = self.task_name + "_pixelCPE_age" + self.ageing + "_pu" + self.pu + "_PixelROCRows" + self.pixelrocrows_l0l1 + "_" +  self.pixelrocrows_l2l3 +\
             "_PixelROCCols" + self.pixelroccols_l0l1 + "_" +  self.pixelroccols_l2l3 +\
             "_BPIXThick" + self.bpixl0l1thickness + "_" + self.bpixl2l3thickness +\
