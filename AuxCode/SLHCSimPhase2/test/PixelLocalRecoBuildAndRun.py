@@ -103,19 +103,53 @@ class Job:
         self.islocal=islocal
         self.launch_dir=LAUNCH_BASE
 
-        #        self.out_dir=os.path.join("/store/caf/user",USER,"SLHCSimPhase2/phase2/out62XSLHC17patch1/32bit/TestBricked",\
-        #        self.out_dir=os.path.join("/store/caf/user",USER,"SLHCSimPhase2/phase2/out62XSLHC17patch1nn/DataCompression",\
-        self.out_dir=os.path.join(self.launch_dir,"src/results/SLHCSimPhase2/phase2/out62XSLHC17patch1/32bit/OccupancyStudy",\
+        ### assignment of the output folder
+
+        local_out_dir=os.path.join(self.launch_dir,"src/results/SLHCSimPhase2/phase2/out62XSLHC17patch1/32bit/OccupancyStudy",\
                                       "PixelROCRows_"+pixelrocrows_l0l1+"_"+pixelrocrows_l2l3,\
                                       "PixelROCCols_"+pixelroccols_l0l1+"_"+pixelroccols_l2l3,\
                                       "BPIXThick_"+bpixl0l1thickness+"_"+bpixl2l3thickness,\
                                       "BPixThr_"+bpixthr,"eToADC_"+pixeleperadc,"MaxADC_"+pixmaxadc,\
                                       "ChanThr_"+chanthr,"SeedThr_"+seedthr,"ClusThr_"+clusthr,\
                                       "PU_"+self.pu)
-    
+        
+        # self.out_dir=os.path.join("/store/caf/user",USER,"SLHCSimPhase2/phase2/out62XSLHC17patch1/32bit/TestBricked",\
+        # self.out_dir=os.path.join("/store/caf/user",USER,"SLHCSimPhase2/phase2/out62XSLHC17patch1nn/DataCompression",\
+        eos_out_dir=os.path.join("/store/caf/user",USER,"SLHCSimPhase2/phase2/out62XSLHC17patch1/32bit/OccupancyStudy",\
+                                      "PixelROCRows_"+pixelrocrows_l0l1+"_"+pixelrocrows_l2l3,\
+                                      "PixelROCCols_"+pixelroccols_l0l1+"_"+pixelroccols_l2l3,\
+                                      "BPIXThick_"+bpixl0l1thickness+"_"+bpixl2l3thickness,\
+                                      "BPixThr_"+bpixthr,"eToADC_"+pixeleperadc,"MaxADC_"+pixmaxadc,\
+                                      "ChanThr_"+chanthr,"SeedThr_"+seedthr,"ClusThr_"+clusthr,\
+                                      "PU_"+self.pu)
+        
+        self.out_dir = local_out_dir
+        
         if(self.job_id==1):
-            os.makedirs(self.out_dir)
-           
+            
+            p = subprocess.Popen(["which","cmsLs"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            (out, err) = p.communicate()
+          
+            if("cmsLs" in out):
+               
+                p1 = subprocess.Popen(["cmsLs",os.path.join("/store/caf/user/",USER)], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                (out1, err1) = p1.communicate()
+                
+                if("No such file or directory" not in out1):
+                    print "=====> On lxplus and EOS folder exists! Creating EOS folder"
+                    self.out_dir=eos_out_dir
+                    mkdir_eos(self.out_dir)
+                else:
+                    print "=====>", out1
+                    print "On lxplus but EOS folder doesn't exist!"
+                    if(os.path.exists(self.out_dir)):
+                        print "Local folder already exists. Skipping"
+                    else:
+                        print "Local folder does not exist yet. Creating"
+                        os.makedirs(self.out_dir)
+            else:
+                print "=====> Not on lxplus! Creating local Folder"
+                os.makedirs(self.out_dir) 
             
         self.task_basename = self.task_name + "_pixelCPE_age" + self.ageing + "_pu" + self.pu + "_PixelROCRows" + self.pixelrocrows_l0l1 + "_" +  self.pixelrocrows_l2l3 +\
             "_PixelROCCols" + self.pixelroccols_l0l1 + "_" +  self.pixelroccols_l2l3 +\
@@ -468,8 +502,9 @@ def main():
             del ajob
 
         jobIndex+=1       
-            
-        print "- Output will be saved in   :",out_dir
+        
+        if (jobIndex==1):
+            print "- Output will be saved in   :",out_dir
     print "********************************************************"
 
     #############################################
