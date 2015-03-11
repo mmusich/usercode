@@ -115,13 +115,13 @@ class Job:
         
         # self.out_dir=os.path.join("/store/caf/user",USER,"SLHCSimPhase2/phase2/out62XSLHC17patch1/32bit/TestBricked",\
         # self.out_dir=os.path.join("/store/caf/user",USER,"SLHCSimPhase2/phase2/out62XSLHC17patch1nn/DataCompression",\
-        eos_out_dir=os.path.join("/store/caf/user",USER,"SLHCSimPhase2/phase2/out62XSLHC17patch1/32bit/OccupancyStudy",\
+        eos_out_dir=os.path.join("/store/user",USER,"SLHCSimPhase2/phase2/out62XSLHC17patch1/32bit/OccupancyStudy",\
                                       "PixelROCRows_"+pixelrocrows_l0l1+"_"+pixelrocrows_l2l3,\
                                       "PixelROCCols_"+pixelroccols_l0l1+"_"+pixelroccols_l2l3,\
                                       "BPIXThick_"+bpixl0l1thickness+"_"+bpixl2l3thickness,\
                                       "BPixThr_"+bpixthr,"eToADC_"+pixeleperadc,"MaxADC_"+pixmaxadc,\
                                       "ChanThr_"+chanthr,"SeedThr_"+seedthr,"ClusThr_"+clusthr,\
-                                      "PU_"+self.pu)
+                                      "PU_"+self.pu,"PUScan")
         
         self.out_dir = local_out_dir
         
@@ -132,7 +132,7 @@ class Job:
           
             if("cmsLs" in out):
                
-                p1 = subprocess.Popen(["cmsLs",os.path.join("/store/caf/user/",USER)], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                p1 = subprocess.Popen(["cmsLs",os.path.join("/store/user/",USER)], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 (out1, err1) = p1.communicate()
                 
                 if("No such file or directory" not in out1):
@@ -307,8 +307,8 @@ class Job:
         fout.write("# Run CMSSW for GEN-NTUPLE steps \n")
         fout.write("cd "+os.path.join("AuxCode","SLHCSimPhase2","test")+"\n")
 #        fout.write("edmConfigDump ${PKG_DIR}/OneNuM_GEN_TO_RECO_PixelLocalRecoStudy_cfg.py >> pset_dumped.py \n")
-#        fout.write("cmsRun ${PKG_DIR}/OneNuM_GEN_TO_RECO_PixelLocalRecoStudy_cfg.py  maxEvents=${maxevents} PixElePerADC=${pixeleperadc} PixMaxADC=${pixmaxadc} BPixThr=${bpixthr} PUScenario=${puscenario} AgeingScenario=${ageing} MySeed=${myseed} ChannelThreshold=${chanthr} SeedThreshold=${seedthr} ClusterThreshold=${clusthr} \n")
-        fout.write("cmsRun ${PKG_DIR}/TenMuE_0_200_GEN_TO_RECO_PixelLocalRecoStudy_cfg.py maxEvents=${maxevents} PixElePerADC=${pixeleperadc} PixMaxADC=${pixmaxadc} BPixThr=${bpixthr} PUScenario=${puscenario} AgeingScenario=${ageing} MySeed=${myseed} ChannelThreshold=${chanthr} SeedThreshold=${seedthr} ClusterThreshold=${clusthr} \n")
+        fout.write("cmsRun ${PKG_DIR}/OneNuM_GEN_TO_RECO_PixelLocalRecoStudy_cfg.py  maxEvents=${maxevents} PixElePerADC=${pixeleperadc} PixMaxADC=${pixmaxadc} BPixThr=${bpixthr} PUScenario=${puscenario} AgeingScenario=${ageing} MySeed=${myseed} ChannelThreshold=${chanthr} SeedThreshold=${seedthr} ClusterThreshold=${clusthr} \n")
+#        fout.write("cmsRun ${PKG_DIR}/TenMuE_0_200_GEN_TO_RECO_PixelLocalRecoStudy_cfg.py maxEvents=${maxevents} PixElePerADC=${pixeleperadc} PixMaxADC=${pixmaxadc} BPixThr=${bpixthr} PUScenario=${puscenario} AgeingScenario=${ageing} MySeed=${myseed} ChannelThreshold=${chanthr} SeedThreshold=${seedthr} ClusterThreshold=${clusthr} \n")
 
         fout.write("ls -lh . \n")
 #        fout.write("cmsStage -f pset_dumped.py ${OUT_DIR}/pset_dumped.py \n")
@@ -524,7 +524,7 @@ def main():
     fout.write("eval `scram r -sh` \n")
     fout.write("mkdir -p /tmp/$USER/"+link_name+" \n")
     fout.write("for inputfile in `cmsLs "+out_dir+" |grep seed | grep root`; do \n")
-    fout.write("   namebase=`echo $inputfile |awk '{split($0,b,\"/\"); print b[21]}'` \n")
+    fout.write("   namebase=`echo $inputfile |awk '{split($0,b,\"/\"); print b[22]}'` \n")
     fout.write("   cmsStage -f $OUT_DIR/$namebase /tmp/$USER/"+link_name+" \n")
     fout.write("# Uncomment next line to clean up EOS space \n")
     fout.write("#  cmsRm $OUT_DIR/$namebase \n")
