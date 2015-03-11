@@ -279,6 +279,7 @@ class Job:
         fout.write("# compile \n")
         if(self.islocal):
             fout.write("cp "+self.launch_dir+"/src/AuxCode/SLHCSimPhase2/plugins/StdPixelHitNtuplizer.cc ./AuxCode/SLHCSimPhase2/plugins/StdPixelHitNtuplizer.cc \n")
+            fout.write("cp "+self.launch_dir+"/src/AuxCode/SLHCSimPhase2/python/TkLocalRecoCustoms.py ./AuxCode/SLHCSimPhase2/python/TkLocalRecoCustoms.py \n")
  
         fout.write("scram b -j 8 USER_CXXFLAGS=\"-DPHASE2\" \n")
         fout.write("eval `scram r -sh` \n")
