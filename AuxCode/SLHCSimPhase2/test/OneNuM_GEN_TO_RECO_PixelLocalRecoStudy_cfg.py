@@ -95,41 +95,15 @@ if options.PUScenario!="NoPU":
     process.mix.minBunch = cms.int32(-12)
     process.mix.maxBunch = cms.int32(3)
 
-    if "140" in options.PUScenario:        
-        process.mix.input.nbPileupEvents.averageNumber = cms.double(140.000000)
-        print "PU = 140"
-    elif "10" in options.PUScenario:
-        process.mix.input.nbPileupEvents.averageNumber = cms.double(10.000000)
-    elif "20" in options.PUScenario:
-        process.mix.input.nbPileupEvents.averageNumber = cms.double(20.000000)  
-    elif "25" in options.PUScenario:
-        process.mix.input.nbPileupEvents.averageNumber = cms.double(25.000000)
-    elif "35" in options.PUScenario:
-        process.mix.input.nbPileupEvents.averageNumber = cms.double(35.000000)
-    elif "40" in options.PUScenario:
-        process.mix.input.nbPileupEvents.averageNumber = cms.double(40.000000)
-    elif "50" in options.PUScenario:
-        process.mix.input.nbPileupEvents.averageNumber = cms.double(50.000000)
-    elif "70" in options.PUScenario:
-        process.mix.input.nbPileupEvents.averageNumber = cms.double(70.000000)
-    elif "75" in options.PUScenario:
-        process.mix.input.nbPileupEvents.averageNumber = cms.double(75.000000)
-    elif "100" in options.PUScenario:
-        process.mix.input.nbPileupEvents.averageNumber = cms.double(100.000000)
-    elif "105" in options.PUScenario:
-        process.mix.input.nbPileupEvents.averageNumber = cms.double(105.000000)
-    elif "125" in options.PUScenario:
-        process.mix.input.nbPileupEvents.averageNumber = cms.double(125.000000)
-    elif "150" in options.PUScenario:
-        process.mix.input.nbPileupEvents.averageNumber = cms.double(150.000000)
-    elif "175" in options.PUScenario:
-        process.mix.input.nbPileupEvents.averageNumber = cms.double(175.000000)
-    elif "200" in options.PUScenario:
-        process.mix.input.nbPileupEvents.averageNumber = cms.double(200.000000)
-    else:
+    try:
+        float(options.PUScenario)
+        process.mix.input.nbPileupEvents.averageNumber = cms.double(float(options.PUScenario))
+        print "PU =",float(options.PUScenario)
+
+    except ValueError:
+        print options.PUScenario," not a float"
         print "Unrecognized PU scenario, using default (=NoPU)"
-        process.load('SimGeneral.MixingModule.mixNoPU_cfi')
-       
+        process.load('SimGeneral.MixingModule.mixNoPU_cfi')    
 else:
     process.load('SimGeneral.MixingModule.mixNoPU_cfi')
 
